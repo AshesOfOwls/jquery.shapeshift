@@ -43,13 +43,14 @@
     for(i=0;i<col_total;i++) {col_heights.push(0);}
 
     $objects.each(function(i) {
+      $this = $(this);
       var col = shortestCol(col_heights),
           child_width_span = Math.floor($(this).innerWidth() / options.colWidth);
           offsetX = col_width * col,
           offsetY = col_heights[col];
 
       // Add this child to the column heights
-      this_height = $(this).outerHeight(true) + options.gutterY;
+      this_height = $this.outerHeight(true) + options.gutterY;
       col_heights[col] += this_height;
 
       // If this is a double wide col, update the second col
@@ -63,11 +64,11 @@
         top: offsetY
       }
       if(options.rearrange) {
-        $(this).animate(attributes, { queue: false });
+        $this.animate(attributes, { queue: false });
       } else {
-        $(this).css(attributes);
+        $this.css(attributes);
       }
-      $(this).trigger("shapeshifted");
+      $this.trigger("shapeshifted");
 
       // Set the container height to match the tallest column
       col = tallestCol(col_heights);
@@ -112,11 +113,10 @@
 
   // Prevent against multiple instantiations
   $.fn[pluginName] = function ( options ) {
-    return this.each(function () {
-      //if (!$.data(this, 'plugin_' + pluginName)) {
-        $.data(this, 'plugin_' + pluginName, new Plugin( this, options ));
-      //}
-    });
+    var array = this.toArray();
+    for(i=0; i < this.length; i++) {
+      $.data(array[i], 'plugin_' + pluginName, new Plugin(this, options));
+    }
   }
 
 }(jQuery, window));
