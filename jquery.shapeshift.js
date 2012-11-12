@@ -1,92 +1,83 @@
 ;(function ( $, window, undefined ) {
   // Defaults
-  var pluginName = 'shapeshift';
-  var document = window.document;
-  var defaults = {
-        selector: "div",
-        colWidth: 300,
+  var pluginName = 'shapeshift',
+      document = window.document,
+      defaults = {
+        objWidth: 300,
         gutterX: 10,
         gutterY: 10,
-        rearrange: true
+        rearrange: true,
+        selector: "div",
+        adjustContainerHeight: true
       };
 
   function Plugin( element, options ) {
     this.element = element;
-
     this.options = $.extend( {}, defaults, options);
-
     this._defaults = defaults;
     this._name = pluginName;
-
     this.init();
   }
 
   Plugin.prototype.init = function () {
-    // console.time('test 1');
+    var options = this.options;
 
+    // Get our jQuery objects
     var $container = $(this.element),
-        $objects = $container.children(this.options.selector),
-        col_total = 0,
-        col_heights = [],
-        col_width = this.options.colWidth + this.options.gutterX,
-        adjust_container_height = $container.data("shapeshift_resize"),
-        options = this.options,
-        obj_pos = [];
+        $objects = $container.children(options.selector);
 
-    if ("undefined" === typeof adjust_container_height) {
-      adjust_container_height = true;
-    }
+    // Set up initial variables
+    var columns = 0,
+        colHeights = [],
+        colWidth = options.objWidth + options.gutterX,
+        objPositions = [];
 
-    // Determine how many columns are available
-    col_total = Math.floor($container.innerWidth() / col_width);
+    // Determine how many columns are currently active
+    columns = Math.floor($container.innerWidth() / colWidth);
 
-    // Create an array storing the height that each column has reached
-    for(var i=0;i<col_total;i++) {col_heights.push(0);}
+    // Create an array element for each column, which is then
+    // used to store that columns current height.
+    for(var i=0;i<columns;i++) {colHeights.push(0);}
 
-    for(var pos_i=0; pos_i < $objects.length; pos_i++) {
-      var $this = $($objects[pos_i]),
-          col = shortestCol(col_heights),
-          child_width_span = Math.floor($this.innerWidth() / options.colWidth);
-          offsetX = col_width * col,
-          offsetY = col_heights[col];
+    // Loop over each element and determine what column it fits into
+    for(var obj_i=0; obj_i < $objects.length; obj_i++) {
+      var $obj = $($objects[obj_i]);
 
-      // Add this child to the column heights
-      this_height = $this.outerHeight(true) + options.gutterY;
-      col_heights[col] += this_height;
+      // Determine the position of this object
+      var col = shortestCol(colHeights),
+          offsetX = colWidth * col,
+          offsetY = colHeights[col];
 
-      // If this is a double wide col, update the second col
-      if(child_width_span > 1) {
-        col_heights[col + 1] += this_height;
-      }
-
-      // Set the child coordiantes in the object position array
       attributes = {
         left: offsetX,
         top: offsetY
       };
 
-      obj_pos[pos_i] = attributes;
+      // Increase the calculated total height of the current column
+      colHeights[col] += $obj.outerHeight(true) + options.gutterY;
+
+      // Store the position to animate into place later
+      objPositions[obj_i] = attributes;
     }
 
-    // Move each object into position
-    for(var arrange_i=0; arrange_i < $objects.length; arrange_i++) {
-      var $this = $($objects[arrange_i]);
+    // Animate / Move each object into place
+    for(var obj_i=0; obj_i < $objects.length; obj_i++) {
+      var $object = $($objects[obj_i]),
+          attributes = objPositions[obj_i];
 
       if(options.rearrange) {
-        $this.animate(obj_pos[arrange_i], { queue: false });
+        $object.animate(attributes, { queue: false });
       } else {
-        $this.css(obj_pos[arrange_i]);
+        $object.css(attributes);
       }
     }
 
-    if (adjust_container_height) {
+    if (options.adjustContainerHeight) {
       // Set the container height to match the tallest column
-      col = tallestCol(col_heights);
-      height = col_heights[col]
+      var col = tallestCol(colHeights),
+          height = colHeights[col];
 
       $container.css("height", height);
-      $container.data("max-height", height);
-      $container.trigger("shapeshifted");
     }
 
     // Get the currently shortest column
@@ -116,21 +107,13 @@
       }
       return selected;
     }
-
-    // console.timeEnd('test 1');
   };
 
   // Prevent against multiple instantiations
   $.fn[pluginName] = function ( options ) {
     return this.each(function () {
-        //if (!$.data(this, 'plugin_' + pluginName)) {
-          $.data(this, 'plugin_' + pluginName, new Plugin( this, options ));
-        //}
-      });
-    // var array = this.toArray();
-    // for(i=0; i < this.length; i++) {
-    //   $.data(array[i], 'plugin_' + pluginName, new Plugin(this, options));
-    // }
+      $.data(this, 'plugin_' + pluginName, new Plugin( this, options ));
+    });
   }
 
 }(jQuery, window));

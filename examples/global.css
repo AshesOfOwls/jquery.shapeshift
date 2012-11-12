@@ -10,6 +10,7 @@
 
 #container div {
   background: #00AA00;
+  cursor: move;
   position: absolute;
   width: 300px;
 }

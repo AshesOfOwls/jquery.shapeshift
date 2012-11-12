@@ -153,15 +153,11 @@
       <div style="height:91px"></div>
     </div>
     <script>
-      $("#container").shapeshift({
-        colWidth: 300
-      });
+      $("#container").shapeshift();
 
       $(window).on("resize", function() {
         $('#container div').sort( function(){ return ( Math.round( Math.random() ) - 0.5 ) } );
-        $("#container").shapeshift({
-          colWidth: 300
-        });
+        $("#container").shapeshift();
       })
     </script>
   </body>
