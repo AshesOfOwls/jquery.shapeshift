@@ -3,12 +3,13 @@
   var pluginName = 'shapeshift',
       document = window.document,
       defaults = {
+        adjustContainerHeight: true,
+        draggable: true,
         objWidth: 300,
         gutterX: 10,
         gutterY: 10,
         rearrange: true,
-        selector: "div",
-        adjustContainerHeight: true
+        selector: "div"
       };
 
   function Plugin( element, options ) {
@@ -20,11 +21,16 @@
   }
 
   Plugin.prototype.init = function () {
+    this.shiftit();
+    if(this.options.draggable) { this.draggable(); }
+  };
+
+  Plugin.prototype.shiftit = function (not_object) {
     var options = this.options;
 
     // Get our jQuery objects
     var $container = $(this.element),
-        $objects = $container.children(options.selector);
+        $objects = $container.children(options.selector).not(not_object);
 
     // Set up initial variables
     var columns = 0,
@@ -107,7 +113,135 @@
       }
       return selected;
     }
-  };
+  }
+
+  Plugin.prototype.draggable = function () {
+    var options = this.options,
+        self = this;
+
+    // Get our jQuery objects
+    var $container = $(this.element),
+        $objects = $container.children(options.selector);
+
+    // Set some initial global variables
+    var $selected = false,
+        $hovered = false,
+        selectedX = null,
+        selectedY = null,
+        selectedHeight = null,
+        hoveredX = null,
+        hoveredY = null,
+        originalPositions = [],
+        offsetY = null;
+
+    // Set our html elements to be draggable
+    $objects.attr("draggable", true);
+    $objects.css("cursor", "move");
+
+    // Our dragging functions
+    $container.off().on("dragover drop", function(e) {
+      // Required preventDefault for drop effect
+      if(e.type === "dragover") { e.preventDefault(); }
+      if(e.type === "drop") { dropObject(); }
+    });
+
+    $objects.off().on("dragstart dragenter dragover", function(e) {
+      if(e.type === "dragstart") { startDragging($(this)); }
+      if(e.type === "dragenter") { dragOver($(this)); }
+    });
+
+    function startDragging($object) {
+      $selected = $object;
+      // Set the initial attributes for the selected item
+      selectedX = hoveredX = $selected.position().left;
+      selectedY = hoveredY = $selected.position().top;
+      selectedHeight = $selected.innerHeight() + options.gutterY;
+
+      $selected.css('opacity', '0.75');
+
+      setOriginalPositions();
+    }
+
+    function setOriginalPositions() {
+      originalPositions = [];
+      if(!$hovered) {
+        // Set an array of the original positions
+        $objects.each(function(i) {
+          $object = $(this);
+          attributes = {
+            left: $object.position().left,
+            top: $object.position().top
+          }
+          originalPositions[i] = attributes;
+        });
+      }
+    }
+
+    function dragOver($newHovered) {
+      var newHoveredX = $newHovered.position().left,
+          newHoveredY = $newHovered.position().top,
+          isSelected = ((newHoveredX === selectedX) && (newHoveredY === selectedY)),
+          isBelow = ((newHoveredX === selectedX) && (newHoveredY - selectedHeight === selectedY));
+
+      if(!isSelected && !isBelow) {
+        $hovered = $newHovered;
+        hoveredX = newHoveredX;
+        hoveredY = newHoveredY;
+
+        newPositions = originalPositions.slice(0)
+
+        // Move each item to its original position
+        // unless it is it the currently hovered object or below
+        $objects.each(function(i) {
+          $object = $(this);
+
+          isAfterHovered = $object.position().top >= hoveredY
+          isInSameColumn = $object.position().left === hoveredX
+
+          newPosition = originalPositions[i];
+
+          if(isAfterHovered && isInSameColumn) {
+            attributes = {
+              left: newPosition.left,
+              top: newPosition.top + selectedHeight
+            }
+          } else {
+            attributes = originalPositions[i]
+          }
+
+          $object.stop(true, true).animate(attributes, 325);
+        })
+      }
+    }
+
+    function dropObject() {
+      $selected.css('opacity', '1');
+
+      selectedAttributes = originalPositions[$hovered.index()]
+      $selected.stop(true, true).animate(selectedAttributes);
+
+      // Move the items in the old column back into place
+      $objects.each(function() {
+        $object = $(this);
+        objectX = $object.position().left;
+        objectY = $object.position().top;
+
+        if(objectX === selectedX) {
+          if(objectY > selectedY) {
+            objectY -= selectedHeight;
+
+            attributes = {
+              left: objectX,
+              top: objectY
+            }
+            $object.stop(true, true).animate(attributes)
+          }
+        }
+      })
+
+      $hovered = false;
+    }
+  }
 
   // Prevent against multiple instantiations
   $.fn[pluginName] = function ( options ) {
