@@ -218,6 +218,11 @@
       $selected.css('opacity', '1');
 
       selectedAttributes = originalPositions[$hovered.index()]
+      if(selectedAttributes.left === selectedX) {
+        if(selectedAttributes.top > selectedY) {
+          selectedAttributes.top -= selectedHeight;
+        }
+      }
       $selected.stop(true, true).animate(selectedAttributes);
 
       // Move the items in the old column back into place
