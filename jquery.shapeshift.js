@@ -146,26 +146,28 @@
     });
 
     $objects.off().on("dragstart dragenter dragover", function(e) {
-      if(e.type === "dragstart") { startDragging($(this)); }
-      if(e.type === "dragenter") { dragOver($(this)); }
+      if(e.type === "dragstart") { dragStart($(this), e); }
+      if(e.type === "dragenter") { dragEnter($(this)); }
     });
 
-    function startDragging($object) {
-      $selected = $object;
+    function dragStart($object, e) {
       // Set the initial attributes for the selected item
+      $selected = $object;
       selectedX = hoveredX = $selected.position().left;
       selectedY = hoveredY = $selected.position().top;
       selectedHeight = $selected.innerHeight() + options.gutterY;
 
-      $selected.css('opacity', '0.75');
+      // Add a class to the dragged element
+      $selected.addClass("moving")
 
       setOriginalPositions();
     }
 
     function setOriginalPositions() {
+      // Get an array of the current position attributes of each element,
+      // which we can then use to relatively position everything.
       originalPositions = [];
       if(!$hovered) {
-        // Set an array of the original positions
         $objects.each(function(i) {
           $object = $(this);
           attributes = {
@@ -177,28 +179,29 @@
       }
     }
 
-    function dragOver($newHovered) {
+    function dragEnter($newHovered) {
+      // When an object is being dragged over another object, that object
+      // will open up a gap for the dragged object to be placed into.
       var newHoveredX = $newHovered.position().left,
           newHoveredY = $newHovered.position().top,
-          isSelected = ((newHoveredX === selectedX) && (newHoveredY === selectedY)),
-          isBelow = ((newHoveredX === selectedX) && (newHoveredY - selectedHeight === selectedY));
+          isNotSelected = !((newHoveredX === selectedX) && (newHoveredY === selectedY)),
+          isNotBelow = !((newHoveredX === selectedX) && (newHoveredY - selectedHeight === selectedY));
 
-      if(!isSelected && !isBelow) {
+      if(isNotSelected && isNotBelow) {
+        // Only set the item as being hovered on if it is not the currently
+        // selected item, and it is also not the item directly below
+        // the selected item because this would open no new gap.
         $hovered = $newHovered;
         hoveredX = newHoveredX;
         hoveredY = newHoveredY;
 
-        newPositions = originalPositions.slice(0)
-
         // Move each item to its original position
         // unless it is it the currently hovered object or below
         $objects.each(function(i) {
-          $object = $(this);
-
-          isAfterHovered = $object.position().top >= hoveredY
-          isInSameColumn = $object.position().left === hoveredX
-
-          newPosition = originalPositions[i];
+          var $object = $(this),
+              isAfterHovered = $object.position().top >= hoveredY,
+              isInSameColumn = $object.position().left === hoveredX,
+              newPosition = originalPositions[i];
 
           if(isAfterHovered && isInSameColumn) {
             attributes = {
@@ -209,38 +212,63 @@
             attributes = originalPositions[i]
           }
 
-          $object.stop(true, true).animate(attributes, 325);
+          $object.stop(true, true).animate(attributes, 200);
         })
       }
     }
 
     function dropObject() {
-      $selected.css('opacity', '1');
+      // Remove the dragging style
+      $selected.removeClass("moving");
 
+      // Move the selected item into the currently hovered items
+      // original position
       selectedAttributes = originalPositions[$hovered.index()]
-      if(selectedAttributes.left === selectedX) {
-        if(selectedAttributes.top > selectedY) {
-          selectedAttributes.top -= selectedHeight;
-        }
-      }
-      $selected.stop(true, true).animate(selectedAttributes);
+      $selected.stop(true, true).css(selectedAttributes);
+
+      var movedIntoDifferentColumn = false;
+      if(selectedX != hoveredX) { movedIntoDifferentColumn = true; }
 
       // Move the items in the old column back into place
-      $objects.each(function() {
-        $object = $(this);
-        objectX = $object.position().left;
-        objectY = $object.position().top;
+      $objects.stop(true, true);
+      $objects.each(function(i) {
+        var $object = $(this),
+            objectX = $object.position().left;
 
         if(objectX === selectedX) {
-          if(objectY > selectedY) {
-            objectY -= selectedHeight;
+          // The object was in the selected items original row
+          // and therefore requires adjustment
+          var objectY = $object.position().top;
 
-            attributes = {
-              left: objectX,
-              top: objectY
+          if(movedIntoDifferentColumn) {
+            // We just need to move everything lower than the selected
+            // items original spot up the selected items height.
+            if(objectY > selectedY) {
+              objectY -= selectedHeight;
             }
-            $object.stop(true, true).animate(attributes)
+          } else {
+            // If we are moving into the same column...
+            if(selectedY > hoveredY) {
+              // If we are moving the selected item higher, then just shift
+              // everything up the selected items height
+              if(objectY > selectedY + selectedHeight) {
+                objectY -= selectedHeight;
+              }
+            } else {
+              // We are moving the element lower, therefore we need to shift
+              // everything up past the original position
+              if(objectY > selectedY) {
+                objectY -= selectedHeight;
+              }
+            }
           }
+
+          attributes = {
+            left: objectX,
+            top: objectY
+          }
+
+          $object.stop(true, true).animate(attributes, 200);
         }
       })
 

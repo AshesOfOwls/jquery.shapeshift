@@ -17,3 +17,6 @@
 #container div.over {
   outline: 2px dashed #333;
 }
+#container div.moving {
+  opacity: 0.25;
+}
