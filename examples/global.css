@@ -18,5 +18,10 @@
   outline: 2px dashed #333;
 }
 #container div.moving {
-  opacity: 0.25;
+  opacity: .5;
+  transform:rotate(3deg);
+  -ms-transform:rotate(3deg); /* IE 9 */
+  -moz-transform:rotate(3deg); /* Firefox */
+  -webkit-transform:rotate(3deg); /* Safari and Chrome */
+  -o-transform:rotate(3deg); /* Opera */
 }
