@@ -1,4 +1,4 @@
-;(function ( $, window, undefined ) {
+;(function($,window,undefined) {
   // Defaults
   var pluginName = 'shapeshift',
       document = window.document,
@@ -13,27 +13,28 @@
         selector: "div"
       };
 
-  function Plugin( element, options ) {
+  function Plugin(element, options) {
     this.element = element;
     this.options = $.extend( {}, defaults, options);
     this._defaults = defaults;
     this._name = pluginName;
     this.objPositions = [];
+    this.hoverObjPositions = [];
     this.init();
   }
 
-  Plugin.prototype.init = function () {
+  Plugin.prototype.init = function() {
     this.shiftit();
     if(this.options.draggable) { this.draggable(); }
     if(this.options.resizable) { this.resizable(); }
   };
 
-  Plugin.prototype.shiftit = function (not_object) {
+  Plugin.prototype.shiftit = function() {
     var options = this.options,
         ss = this;
 
     var $container = $(ss.element),
-        $objects = $container.children(options.selector).not(not_object),
+        $objects = $container.children(options.selector),
         columns = 0,
         colHeights = [],
         colWidth = options.objWidth + options.gutterX;
@@ -53,14 +54,12 @@
           offsetX = colWidth * col,
           offsetY = colHeights[col];
 
-      if(!$obj.hasClass("moving")) {
-        // Store the position to animate into place later
-        attributes = { left: offsetX, top: offsetY };
-        ss.objPositions[obj_i] = attributes;
+      // Store the position to animate into place later
+      attributes = { left: offsetX, top: offsetY };
+      ss.objPositions[obj_i] = attributes;
 
-        // Increase the calculated total height of the current column
-        colHeights[col] += height;
-      }
+      // Increase the calculated total height of the current column
+      colHeights[col] += height;
     }
 
     // Animate / Move each object into place
@@ -101,51 +100,100 @@
 
     $objects.draggable({
       start: function(e) { dragStart($(this), e) },
-      drag: function() { dragObject(); }
+      drag: function(e) { dragObject(e); }
     });
-    $objects.droppable({
-      over: function() { enterObject($(this)); },
-      out: function() { leaveObject(); }
-    });
+    $objects.droppable({ over: function() { enterObject($(this)); } });
     $container.droppable({ drop: function() { dropObject(); } });
 
     function dragStart($object, e) {
       // Set the selected object
       $selected = $object;
       $selected.addClass("moving");
-      ss.shiftit();
+      ss.setHoverObjPositions();
+      // ss.shiftit();
     }
 
     function dragObject(e) {
       if(!dragging) {
         dragging = true;
+        intendedIndex = ss.getIntendedIndex(e);
+        $intendedObj = $objects.not(".moving").get(intendedIndex);
+        $selected.insertBefore($intendedObj);
+        ss.shiftit();
         window.setTimeout(function() {
           dragging = false;
         }, 300);
       }
     }
 
-    function enterObject($hoveredObj) {
-      $hovered = $hoveredObj;
-      $objects.removeClass("over");
-      $hovered.addClass("over");
-    }
-
-    function leaveObject() {
-      $hovered.removeClass("over")
-    }
+    function enterObject($hoveredObj) { $hovered = $hoveredObj; }
 
     function dropObject() {
-      $objects.removeClass("over");
       $selected.removeClass("moving");
-      $selected.insertBefore($hovered);
       ss.shiftit();
     }
+  }
 
-    function getIntendedIndex(e) {
+  Plugin.prototype.getIntendedIndex = function(e) {
+    var ss = this;
 
+    var $container = $(ss.element),
+        containerX = $container.offset().left,
+        containerY = $container.offset().top,
+        mouseX = e.pageX - containerX,
+        mouseY = e.pageY - containerY,
+        shortestDistance = 9999,
+        chosenIndex = 0;
+
+    for(hov_i=0;hov_i<ss.hoverObjPositions.length;hov_i++) {
+      attributes = ss.hoverObjPositions[hov_i];
+      if(mouseX > attributes.left && mouseY > attributes.top) {
+        xDist = mouseX - attributes.left;
+        yDist = mouseY - attributes.top;
+        distance = Math.sqrt((xDist * xDist) + (yDist * yDist));
+        if(distance < shortestDistance) {
+          shortestDistance = distance;
+          chosenIndex = hov_i;
+        }
+      }
+    }
+    return chosenIndex;
+  }
+
+  Plugin.prototype.setHoverObjPositions = function() {
+    var options = this.options;
+        ss = this;
+
+    var $container = $(ss.element),
+        $objects = $container.children(options.selector+":not(.moving)"),
+        columns = 0,
+        colHeights = [],
+        colWidth = options.objWidth + options.gutterX;
+
+    // Determine how many columns are currently active
+    columns = Math.floor($container.innerWidth() / colWidth);
+
+    // Create an array element for each column, which is then
+    // used to store that columns current height.
+    for(var i=0;i<columns;i++) {colHeights.push(0);}
+
+    // Loop over each element and determine what column it fits into
+    for(var obj_i=0;obj_i<$objects.length;obj_i++) {
+      var $obj = $($objects[obj_i]),
+          col = ss.shortestCol(colHeights),
+          height = $obj.outerHeight(true) + options.gutterY,
+          offsetX = colWidth * col,
+          offsetY = colHeights[col];
+
+      // Store the position to animate into place later
+      attributes = { left: offsetX, top: offsetY };
+      ss.hoverObjPositions[obj_i] = attributes;
+
+      // Increase the calculated total height of the current column
+      colHeights[col] += height;
     }
   }
+
 
   Plugin.prototype.shortestCol = function (array) {
     return array.indexOf(Math.min.apply(window,array));
