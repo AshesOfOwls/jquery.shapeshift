@@ -1,0 +1,9 @@
+---
+ name: Shapeshift
+ description: A bare bones dynamic grid system with drag and drop.
+ authors:
+   - Scott Elwood
+ resources:
+   - http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js
+ normalize_css: no
+ ...

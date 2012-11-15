@@ -1,0 +1,29 @@
+#nav {
+  text-align: center;
+}
+
+#container {
+  margin: 50px auto 0 auto;
+  position: relative;
+  width: 100%;
+}
+
+#container div {
+  background: #00AA00;
+  position: absolute;
+  width: 300px;
+}
+
+#container div.over {
+  border-top: 4px solid red;
+}
+
+#container div.moving {
+  z-index: 9999;
+  opacity: .5;
+  transform:rotate(3deg);
+  -ms-transform:rotate(3deg); /* IE 9 */
+  -moz-transform:rotate(3deg); /* Firefox */
+  -webkit-transform:rotate(3deg); /* Safari and Chrome */
+  -o-transform:rotate(3deg); /* Opera */
+}
