@@ -100,7 +100,7 @@
 
     $objects.draggable({
       start: function(e) { dragStart($(this), e) },
-      drag: function(e) { dragObject(e); }
+      drag: function(e) { dragObject($(this), e); }
     });
     $objects.droppable({ over: function() { enterObject($(this)); } });
     $container.droppable({ drop: function() { dropObject(); } });
@@ -113,16 +113,16 @@
       // ss.shiftit();
     }
 
-    function dragObject(e) {
+    function dragObject($object) {
       if(!dragging) {
         dragging = true;
-        intendedIndex = ss.getIntendedIndex(e);
+        intendedIndex = ss.getIntendedIndex($object);
         $intendedObj = $objects.not(".moving").get(intendedIndex);
         $selected.insertBefore($intendedObj);
         ss.shiftit();
         window.setTimeout(function() {
           dragging = false;
-        }, 300);
+        }, 200);
       }
     }
 
@@ -134,22 +134,23 @@
     }
   }
 
-  Plugin.prototype.getIntendedIndex = function(e) {
-    var ss = this;
+  Plugin.prototype.getIntendedIndex = function($object) {
+    var options = this.options,
+        ss = this;
 
     var $container = $(ss.element),
         containerX = $container.offset().left,
         containerY = $container.offset().top,
-        mouseX = e.pageX - containerX,
-        mouseY = e.pageY - containerY,
+        objectX = $object.offset().left - containerX + options.gutterX + 10,
+        objectY = $object.offset().top - containerY + options.gutterY + 10,
         shortestDistance = 9999,
         chosenIndex = 0;
 
     for(hov_i=0;hov_i<ss.hoverObjPositions.length;hov_i++) {
       attributes = ss.hoverObjPositions[hov_i];
-      if(mouseX > attributes.left && mouseY > attributes.top) {
-        xDist = mouseX - attributes.left;
-        yDist = mouseY - attributes.top;
+      if(objectX > attributes.left && objectY > attributes.top) {
+        xDist = objectX - attributes.left;
+        yDist = objectY - attributes.top;
         distance = Math.sqrt((xDist * xDist) + (yDist * yDist));
         if(distance < shortestDistance) {
           shortestDistance = distance;
@@ -214,7 +215,7 @@
         setTimeout(function() {
           resizing = false;
           ss.shiftit();
-        }, 333);
+        }, 100);
       }
     });
   }
