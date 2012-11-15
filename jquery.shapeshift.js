@@ -115,9 +115,10 @@
 
     function dragObject($object, e) {
       if(!dragging) {
+        $objects = $container.children(options.selector);
         dragging = true;
         intendedIndex = ss.getIntendedIndex($object, e);
-        $intendedObj = $objects.not(".moving").get(intendedIndex);
+        $intendedObj = $($objects.not(".moving").get(intendedIndex));
         $selected.insertBefore($intendedObj);
         ss.shiftit();
         window.setTimeout(function() {
