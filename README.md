@@ -33,6 +33,8 @@ Objects that get shapeshifted will be absolutely positioned in their parent cont
 
 The direct children of the parent element are what gets rearranged into the grid system. As mentioned before, each child element will be absolutely positions and obviously must then have a position: absolute attached to them.
 
+NOTE: All child elements MUST be the same width. Heights can be dynamic, however.
+
 ```html
 <div id="container" style="position: relative;">
   <div class="child" style="position: absolute;">Child Element 1</div>
@@ -50,26 +52,52 @@ Now that we have our setup complete, simply call .shapeshift() on the parent ele
 $('#container').shapeshift();
 ```
 
-### Turning off Features
+### Shapeshift Options
 
-All features that shapeshift offers are turned on by default. It's easy to turn them off by just passing values to the options hash.
+There are several options that can be passed into the plugin through the objects hash, which also includes turning core features on or off. Here is an example of those options and then descriptions of each attribute.
+
+All of these attributes are the defaults.
 
 ```javascript
 $('#container').shapeshift({
-  animated: false,
-  draggable: false,
-  resizable: false
+  adjustContainerHeight: true,
+  animated: true,
+  draggable: true,
+  objWidth: 300,
+  gutterX: 10,
+  gutterY: 10,
+  resizable: true,
+  selector: ""
 });
 ```
+##### adjustContainerHeight : boolean
 
-##### Animated
+This will set the parent container height to match the tallest "column" of objects. This is to solve clearfix issues and under most circumstances should be left on.
 
-Turning off the Animated feature will position the elements by using .css instead of .animate.
+##### animated : boolean
 
-##### Draggable
+Objects will animate into their positions using the jquery .animate() function. When changed to false, all objects will then use the .css() function and be placed into position instantly.
+
+##### draggable : boolean
 
 Toggles the drag and drop functionality.
 
-##### Resizable
+##### objWidth : integer
+
+Manually set the width of the objects that will be rearranged. This number is used to determine the width of the columns, and depending on the width of the columns will determine how many columns will be able to fit in your container.
+
+##### gutterX : integer
+
+Sets the amount of padding horizontally between columns
+
+##### gutterX : integer
+
+Sets the amount of padding vertically between objects.
+
+##### resizable : integer
 
 Toggles whether the container should be shapeshifted when the window is resized.
+
+##### selector : string
+
+Shapeshift will by default try to rearrange all of the child elements within the parent element. Setting a selector will target only the children with the class, ID, or element name that the selector describes.
