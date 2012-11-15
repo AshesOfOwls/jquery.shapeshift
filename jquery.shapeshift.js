@@ -10,7 +10,7 @@
         gutterX: 10,
         gutterY: 10,
         resizable: true,
-        selector: "div"
+        selector: ""
       };
 
   function Plugin(element, options) {
