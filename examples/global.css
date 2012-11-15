@@ -19,6 +19,7 @@
 }
 
 #container div.moving {
+  z-index: 9999;
   opacity: .5;
   transform:rotate(3deg);
   -ms-transform:rotate(3deg); /* IE 9 */

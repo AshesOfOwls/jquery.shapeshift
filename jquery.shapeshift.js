@@ -69,7 +69,7 @@
 
       if(!$obj.hasClass("moving")) {
         if(options.animated) {
-          $obj.stop(true, false).animate(attributes);
+          $obj.stop(true, false).animate(attributes, 250);
         } else {
           $obj.css(attributes);
         }
@@ -110,13 +110,13 @@
       $selected = $object;
       $selected.addClass("moving");
       ss.setHoverObjPositions();
-      // ss.shiftit();
+      ss.shiftit();
     }
 
-    function dragObject($object) {
+    function dragObject($object, e) {
       if(!dragging) {
         dragging = true;
-        intendedIndex = ss.getIntendedIndex($object);
+        intendedIndex = ss.getIntendedIndex($object, e);
         $intendedObj = $objects.not(".moving").get(intendedIndex);
         $selected.insertBefore($intendedObj);
         ss.shiftit();
@@ -134,23 +134,27 @@
     }
   }
 
-  Plugin.prototype.getIntendedIndex = function($object) {
+  Plugin.prototype.getIntendedIndex = function($object, e) {
     var options = this.options,
         ss = this;
 
     var $container = $(ss.element),
         containerX = $container.offset().left,
         containerY = $container.offset().top,
-        objectX = $object.offset().left - containerX + options.gutterX + 10,
+        objectX = $object.offset().left,
         objectY = $object.offset().top - containerY + options.gutterY + 10,
+        mouseX = e.pageX,
+        mouseY = e.pageY,
+        intentionX = objectX + ((mouseX - objectX) / 2),
+        intentionY = objectY + ((mouseY - objectY) / 2),
         shortestDistance = 9999,
         chosenIndex = 0;
 
     for(hov_i=0;hov_i<ss.hoverObjPositions.length;hov_i++) {
       attributes = ss.hoverObjPositions[hov_i];
-      if(objectX > attributes.left && objectY > attributes.top) {
-        xDist = objectX - attributes.left;
-        yDist = objectY - attributes.top;
+      if(intentionX > attributes.left && intentionY > attributes.top) {
+        xDist = intentionX - attributes.left;
+        yDist = intentionY - attributes.top;
         distance = Math.sqrt((xDist * xDist) + (yDist * yDist));
         if(distance < shortestDistance) {
           shortestDistance = distance;
