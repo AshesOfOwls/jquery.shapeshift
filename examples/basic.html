@@ -15,16 +15,16 @@
       <div style="height:300px">1</div>
       <div style="height:180px; background: blue;">2</div>
       <div style="height:200px">3</div>
-      <div style="height:620px">4</div>
-      <div style="height:500px">5</div>
+      <div style="height:320px">4</div>
+      <div style="height:200px">5</div>
       <div style="height:100px">6</div>
       <div style="height:60px">7</div>
       <div style="height:200px">8</div>
       <div style="height:300px">9</div>
       <div style="height:357px">0</div>
       <div style="height:212px"></div>
-      <div style="height:401px"></div>
-      <div style="height:503px"></div>
+      <div style="height:301px"></div>
+      <div style="height:103px"></div>
       <div style="height:20px"></div>
       <div style="height:205px"></div>
       <div style="height:309px"></div>
@@ -155,11 +155,6 @@
     </div>
     <script>
       $("#container").shapeshift();
-
-      $(window).on("resize", function() {
-        $('#container div').sort( function(){ return ( Math.round( Math.random() ) - 0.5 ) } );
-        $("#container").shapeshift();
-      })
     </script>
   </body>
 </html>

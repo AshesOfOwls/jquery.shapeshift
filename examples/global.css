@@ -15,8 +15,9 @@
 }
 
 #container div.over {
-  outline: 2px dashed #333;
+  border-top: 4px solid red;
 }
+
 #container div.moving {
   opacity: .5;
   transform:rotate(3deg);
