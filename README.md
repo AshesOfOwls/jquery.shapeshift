@@ -17,6 +17,14 @@ Check out an example here: INSERT EXAMPLE LINK.
 
 Resizing the grid to accomodate for more or less space is automatically turned on in Shapeshift, so if your parent container has a 100% grid resizing the window will shapeshift the child objects around to accomodate for the new layout.
 
+## Credits
+
+A big thanks to all of our [contributors](https://github.com/McPants/jquery.shapeshift/graphs/contributors)!
+
+[logo]: http://wtmworldwide.com/wtm.png "We the Media, inc"
+
+Shapeshift is maintained by We The Media, inc.
+
 ## Getting Started
 
 ### Dependencies
