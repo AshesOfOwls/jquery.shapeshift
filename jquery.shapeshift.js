@@ -103,7 +103,6 @@
         dragging = false;
 
     $objects.draggable({
-      cursorAt: { top: 30, left: $(this).outerWidth() / 2 },
       start: function(e) { dragStart($(this), e) },
       drag: function(e) { dragObject($(this), e); }
     });
