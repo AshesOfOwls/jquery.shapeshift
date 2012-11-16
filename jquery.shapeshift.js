@@ -74,7 +74,6 @@
           $obj.css(attributes);
         }
       }
-      $obj.html(obj_i); // TEMPORARY to see objects current index
     }
 
     // Set the container height to match the tallest column
