@@ -11,8 +11,6 @@ Shapeshift is intended to be a very bare bones version of these grid systems, ho
 
 A unique functionality to Shapeshift is the ability to drag and drop items within the dynamic grid.
 
-Check out an example here: INSERT EXAMPLE LINK.
-
 ## Responsive Grid
 
 Resizing the grid to accomodate for more or less space is automatically turned on in Shapeshift, so if your parent container has a 100% grid resizing the window will shapeshift the child objects around to accomodate for the new layout.
