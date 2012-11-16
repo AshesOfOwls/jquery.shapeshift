@@ -109,6 +109,34 @@ Toggles whether the container should be shapeshifted when the window is resized.
 
 Shapeshift will by default try to rearrange all of the child elements within the parent element. Setting a selector will target only the children with the class, ID, or element name that the selector describes.
 
+### Styling the Dragged Element
+
+When an element is picked up it the ".ss-moving" class will be appended to it. Just target it in your own CSS file. For example,
+
+```css
+#container .ss-moving {
+  z-index: 9999;
+  opacity: .7;
+  transform:rotate(3deg);
+}
+```
+
+### Detecting Changes
+
+When an item is dropped it will trigger the event "shapeshifted" on the container element. You can then write some code to be fired off when that event occurs. For example,
+
+```javascript
+$("#container").on("shapeshifted", function() {
+  // Get the index position of each object
+  $objects = $(this).children();
+  $objects.each(function() {
+    index = $(this).index();
+    // You can then save the index as the
+    // position of the element in your database
+  })
+})
+```
+
 ## For contributors
 
 Feel like you've got an idea on how to optimize the code and want to share it? We are totally open to new changes, however this is one of the first publically available plugins that I am offering and therefore do not have an exact process on pull requests. Feel free to fork the project all you want, but be aware any pull requests that are made may take a while to get implemented (if at all).
