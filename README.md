@@ -21,9 +21,9 @@ Resizing the grid to accomodate for more or less space is automatically turned o
 
 A big thanks to all of our [contributors](https://github.com/McPants/jquery.shapeshift/graphs/contributors)!
 
-[logo]: http://wtmworldwide.com/wtm.png "We the Media, inc"
+![we the media](http://wtmworldwide.com/wtm.png)
 
-Shapeshift is maintained by We The Media, inc.
+Shapeshift is maintained by [We The Media, inc.](http://wtmworldwide.com/)
 
 ## Getting Started
 
