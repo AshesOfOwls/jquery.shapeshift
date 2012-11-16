@@ -64,6 +64,7 @@ All of these attributes are the defaults.
 $('#container').shapeshift({
   adjustContainerHeight: true,
   animated: true,
+  animatedOnDrag: true,
   draggable: true,
   objWidth: null,
   gutterX: 10,
@@ -79,6 +80,10 @@ This will set the parent container height to match the tallest "column" of objec
 ##### animated : boolean
 
 Objects will animate into their positions using the jquery .animate() function. When changed to false, all objects will then use the .css() function and be placed into position instantly.
+
+##### animatedOnDrag : boolean
+
+Turn off the object animations of other elements when dragging one around.
 
 ##### draggable : boolean
 
