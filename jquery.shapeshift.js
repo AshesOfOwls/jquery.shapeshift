@@ -206,11 +206,11 @@
 
 
   Plugin.prototype.shortestCol = function (array) {
-    return array.indexOf(Math.min.apply(window,array));
+    return $.inArray(Math.min.apply(window,array), array);
   }
 
   Plugin.prototype.tallestCol = function (array) {
-    return array.indexOf(Math.max.apply(window,array));
+    return $.inArray(Math.max.apply(window,array), array);
   }
 
   Plugin.prototype.resizable = function () {
