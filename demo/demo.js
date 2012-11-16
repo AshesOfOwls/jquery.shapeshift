@@ -12,7 +12,6 @@ for(i=0;i<45;i++) {
 }
 
 // And now we can shapeshift!
-
 $(".filter").on("click", function(e) {
   e.preventDefault();
 
