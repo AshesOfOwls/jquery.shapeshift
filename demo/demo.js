@@ -1,14 +1,26 @@
+function getRandomColor() {
+  var letters = 'ABCDEF'.split('');
+  var color = '#';
+  for (var i=0;i<6;i++) {
+    color += letters[Math.round(Math.random() * 5)];
+  }
+  return color;
+}
+
 // Lets generate some child divs
 var $container = $("#container");
 for(i=0;i<45;i++) {
   var $element = $("<div></div>"),
       height = Math.floor(Math.random() * 450) + 70,
-      color = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
+      width = 300,
+      color = getRandomColor(),
+      $img = $('<img src="http://placehold.it/'+width+'x'+Math.floor(height / 2)+'" />');
   $element.css({
     height: height,
     background: color
   });
   $container.append($element);
+  $element.append($img);
 }
 
 // And now we can shapeshift!

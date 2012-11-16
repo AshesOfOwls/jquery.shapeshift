@@ -1,3 +1,12 @@
+body {
+  background: #EFEFEF;
+  font-family: Helvetica, Arial;
+}
+
+h1 {
+  text-align: center;
+}
+
 #nav {
   text-align: center;
 }
@@ -9,10 +18,15 @@
 }
 
 #container > * {
-  background: #00AA00;
+  border: 1px solid #777;
   border-radius: 3px;
+  box-shadow: 0px 0px 4px 1px #ccc;
   position: absolute;
   width: 300px;
+}
+
+#container > * > img {
+  border-radius: 2px 2px 0 0;
 }
 
 #container > *.ss-moving {
