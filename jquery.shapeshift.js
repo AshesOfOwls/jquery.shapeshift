@@ -5,6 +5,7 @@
       defaults = {
         adjustContainerHeight: true,
         animated: true,
+        animatedOnDrag: true,
         draggable: true,
         objWidth: null,
         gutterX: 10,
@@ -24,12 +25,14 @@
   }
 
   Plugin.prototype.init = function() {
-    this.shiftit();
-    if(this.options.draggable) { this.draggable(); }
-    if(this.options.resizable) { this.resizable(); }
+    var ss = this,
+        options = ss.options;
+    ss.shiftit(options.animated);
+    if(options.draggable) { ss.draggable(); }
+    if(options.resizable) { ss.resizable(); }
   };
 
-  Plugin.prototype.shiftit = function() {
+  Plugin.prototype.shiftit = function(animated) {
     var options = this.options,
         ss = this,
         $container = $(ss.element),
@@ -37,6 +40,12 @@
         columns = 0,
         colHeights = [],
         colWidth = null;
+
+    if(!options.draggable) {
+      $container.droppable( "destroy" );
+      $objects.draggable( "destroy" );
+      $objects.droppable( "destroy" );
+    }
 
     if(!options.objWidth) {
       options.objWidth = $objects.first().outerWidth(true);
@@ -72,7 +81,7 @@
           attributes = ss.objPositions[obj_i];
 
       if(!$obj.hasClass("moving")) {
-        if(options.animated) {
+        if(animated) {
           $obj.stop(true, false).animate(attributes, 250);
         } else {
           $obj.css(attributes);
@@ -111,7 +120,7 @@
       $selected = $object;
       $selected.addClass("moving");
       ss.setHoverObjPositions();
-      ss.shiftit();
+      ss.shiftit(options.animatedOnDrag);
     }
 
     function dragObject($object, e) {
@@ -121,7 +130,7 @@
         intendedIndex = ss.getIntendedIndex($object, e);
         $intendedObj = $($objects.not(".moving").get(intendedIndex));
         $selected.insertBefore($intendedObj);
-        ss.shiftit();
+        ss.shiftit(options.animatedOnDrag);
         window.setTimeout(function() {
           dragging = false;
         }, 200);
@@ -132,7 +141,7 @@
 
     function dropObject() {
       $selected.removeClass("moving");
-      ss.shiftit();
+      ss.shiftit(options.animateOnDrag);
     }
   }
 
@@ -210,15 +219,16 @@
 
   Plugin.prototype.resizable = function () {
     var ss = this,
+        options = ss.options,
         resizing = false;
 
     $(window).on("resize", function() {
       if(!resizing) {
         resizing = true;
-        ss.shiftit();
+        ss.shiftit(options.animated);
         setTimeout(function() {
           resizing = false;
-          ss.shiftit();
+          ss.shiftit(options.animated);
         }, 100);
       }
     });
