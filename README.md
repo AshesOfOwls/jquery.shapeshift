@@ -65,7 +65,7 @@ $('#container').shapeshift({
   adjustContainerHeight: true,
   animated: true,
   draggable: true,
-  objWidth: 300,
+  objWidth: null,
   gutterX: 10,
   gutterY: 10,
   resizable: true,
