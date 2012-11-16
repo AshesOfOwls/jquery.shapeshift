@@ -15,13 +15,14 @@
       };
 
   function Plugin(element, options) {
-    this.element = element;
-    this.options = $.extend( {}, defaults, options);
-    this._defaults = defaults;
-    this._name = pluginName;
-    this.objPositions = [];
-    this.hoverObjPositions = [];
-    this.init();
+    var ss = this;
+    ss.element = element;
+    ss.options = $.extend( {}, defaults, options);
+    ss._defaults = defaults;
+    ss._name = pluginName;
+    ss.objPositions = [];
+    ss.hoverObjPositions = [];
+    ss.init();
   }
 
   Plugin.prototype.init = function() {
@@ -33,8 +34,8 @@
   };
 
   Plugin.prototype.shiftit = function(animated) {
-    var options = this.options,
-        ss = this,
+    var ss = this,
+        options = ss.options,
         $container = $(ss.element),
         $objects = $container.children(options.selector).filter(':visible'),
         columns = 0,
@@ -98,11 +99,9 @@
   }
 
   Plugin.prototype.draggable = function () {
-    var options = this.options,
-        ss = this;
-
-    // Get our jQuery objects
-    var $container = $(this.element),
+    var ss = this,
+        options = ss.options,
+        $container = $(ss.element),
         $objects = $container.children(options.selector).filter(':visible'),
         $selected = null,
         $hovered = null,
@@ -148,8 +147,8 @@
   }
 
   Plugin.prototype.getIntendedIndex = function($object, e) {
-    var options = this.options,
-        ss = this,
+    var ss = this,
+        options = ss.options,
         $container = $(ss.element),
         containerX = $container.offset().left,
         containerY = $container.offset().top,
@@ -178,8 +177,8 @@
   }
 
   Plugin.prototype.setHoverObjPositions = function() {
-    var options = this.options,
-        ss = this,
+    var ss = this,
+        options = ss.options,
         $container = $(ss.element),
         $objects = $container.children(options.selector).filter(':not(.moving):visible'),
         columns = 0,
