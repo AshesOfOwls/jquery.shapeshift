@@ -108,7 +108,7 @@
         dragging = false;
 
     $objects.draggable({
-      containment: 'window',
+      containment: 'document',
       cursor: 'move',
       start: function(e) { dragStart($(this), e) },
       drag: function(e) { dragObject($(this), e); }
