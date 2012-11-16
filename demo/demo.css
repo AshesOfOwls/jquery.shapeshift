@@ -14,9 +14,23 @@
   width: 300px;
 }
 
+#container img {
+  border-radius: 3px;
+}
+
 #container div.moving {
   z-index: 9999;
   opacity: .5;
+  transform:rotate(3deg);
+  -ms-transform:rotate(3deg); /* IE 9 */
+  -moz-transform:rotate(3deg); /* Firefox */
+  -webkit-transform:rotate(3deg); /* Safari and Chrome */
+  -o-transform:rotate(3deg); /* Opera */
+}
+
+#container img.moving {
+  z-index: 9999;
+  opacity: .7;
   transform:rotate(3deg);
   -ms-transform:rotate(3deg); /* IE 9 */
   -moz-transform:rotate(3deg); /* Firefox */

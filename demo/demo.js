@@ -1,8 +1,8 @@
 // Lets generate some child divs
 var $container = $("#container");
-for(i=0;i<100;i++) {
+for(i=0;i<45;i++) {
   var $element = $("<div></div>"),
-      height = Math.floor(Math.random() * 350) + 100,
+      height = Math.floor(Math.random() * 450) + 70,
       color = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
   $element.css({
     height: height,
@@ -36,6 +36,28 @@ $(".filter").on("click", function(e) {
         random = Math.round(Math.random()*3);
     $objects.eq(random).show();
     $("#container").shapeshift();
+  }
+  if($(this).hasClass("placekittens")) {
+    var $objects = $container.children().filter(":visible");
+    $objects.each(function(i) {
+      var width = $(this).outerWidth(),
+          height = $(this).outerHeight(),
+          $img = $('<img src="http://www.placekitten.com/'+width+"/"+height+'" width="'+width+'" height="'+height+'" />');
+
+      $img.css({
+        left: $(this).position().left,
+        top: $(this).position().top,
+        position: "absolute"
+      })
+      $(container).append($img);
+      $(this).remove();
+
+      if(i === $objects.length - 1) {
+        setTimeout(function() {
+          $("#container").shapeshift();
+        }, 300);
+      }
+    })
   }
 })
 $("#container").shapeshift();
