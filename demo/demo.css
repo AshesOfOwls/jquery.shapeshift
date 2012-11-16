@@ -18,7 +18,7 @@
   border-radius: 3px;
 }
 
-#container div.moving {
+#container div.ss-moving {
   z-index: 9999;
   opacity: .5;
   transform:rotate(3deg);
@@ -28,7 +28,7 @@
   -o-transform:rotate(3deg); /* Opera */
 }
 
-#container img.moving {
+#container img.ss-moving {
   z-index: 9999;
   opacity: .7;
   transform:rotate(3deg);
