@@ -81,7 +81,7 @@
       var $obj = $($objects[obj_i]),
           attributes = ss.objPositions[obj_i];
 
-      if(!$obj.hasClass("moving")) {
+      if(!$obj.hasClass("ss-moving")) {
         if(animated) {
           $obj.stop(true, false).animate(attributes, 250);
         } else {
@@ -119,7 +119,7 @@
     function dragStart($object, e) {
       // Set the selected object
       $selected = $object;
-      $selected.addClass("moving");
+      $selected.addClass("ss-moving");
       ss.setHoverObjPositions();
       ss.shiftit(options.animatedOnDrag);
     }
@@ -129,7 +129,7 @@
         $objects = $container.children(options.selector).filter(':visible');
         dragging = true;
         intendedIndex = ss.getIntendedIndex($object, e);
-        $intendedObj = $($objects.not(".moving").get(intendedIndex));
+        $intendedObj = $($objects.not(".ss-moving").get(intendedIndex));
         $selected.insertBefore($intendedObj);
         ss.shiftit(options.animatedOnDrag);
         window.setTimeout(function() {
@@ -141,7 +141,7 @@
     function enterObject($hoveredObj) { $hovered = $hoveredObj; }
 
     function dropObject() {
-      $selected.removeClass("moving");
+      $selected.removeClass("ss-moving");
       ss.shiftit(options.animateOnDrag);
     }
   }
@@ -180,7 +180,7 @@
     var ss = this,
         options = ss.options,
         $container = $(ss.element),
-        $objects = $container.children(options.selector).filter(':not(.moving):visible'),
+        $objects = $container.children(options.selector).filter(':not(.ss-moving):visible'),
         columns = 0,
         colHeights = [],
         colWidth = options.objWidth + options.gutterX;
