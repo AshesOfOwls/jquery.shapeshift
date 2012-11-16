@@ -34,7 +34,7 @@
         ss = this;
 
     var $container = $(ss.element),
-        $objects = $container.children(options.selector),
+        $objects = $container.children(options.selector).filter(':visible'),
         columns = 0,
         colHeights = [],
         colWidth = null;
@@ -95,7 +95,7 @@
 
     // Get our jQuery objects
     var $container = $(this.element),
-        $objects = $container.children(options.selector);
+        $objects = $container.children(options.selector).filter(':visible');
 
     // Set some initial global variables
     var $selected = null,
@@ -119,7 +119,7 @@
 
     function dragObject($object, e) {
       if(!dragging) {
-        $objects = $container.children(options.selector);
+        $objects = $container.children(options.selector).filter(':visible');
         dragging = true;
         intendedIndex = ss.getIntendedIndex($object, e);
         $intendedObj = $($objects.not(".moving").get(intendedIndex));
@@ -175,7 +175,7 @@
         ss = this;
 
     var $container = $(ss.element),
-        $objects = $container.children(options.selector+":not(.moving)"),
+        $objects = $container.children(options.selector).filter(':not(.moving):visible'),
         columns = 0,
         colHeights = [],
         colWidth = options.objWidth + options.gutterX;
