@@ -31,9 +31,8 @@
 
   Plugin.prototype.shiftit = function() {
     var options = this.options,
-        ss = this;
-
-    var $container = $(ss.element),
+        ss = this,
+        $container = $(ss.element),
         $objects = $container.children(options.selector).filter(':visible'),
         columns = 0,
         colHeights = [],
@@ -95,10 +94,8 @@
 
     // Get our jQuery objects
     var $container = $(this.element),
-        $objects = $container.children(options.selector).filter(':visible');
-
-    // Set some initial global variables
-    var $selected = null,
+        $objects = $container.children(options.selector).filter(':visible'),
+        $selected = null,
         $hovered = null,
         dragging = false;
 
@@ -141,9 +138,8 @@
 
   Plugin.prototype.getIntendedIndex = function($object, e) {
     var options = this.options,
-        ss = this;
-
-    var $container = $(ss.element),
+        ss = this,
+        $container = $(ss.element),
         containerX = $container.offset().left,
         containerY = $container.offset().top,
         objectX = $object.offset().left,
@@ -171,10 +167,9 @@
   }
 
   Plugin.prototype.setHoverObjPositions = function() {
-    var options = this.options;
-        ss = this;
-
-    var $container = $(ss.element),
+    var options = this.options,
+        ss = this,
+        $container = $(ss.element),
         $objects = $container.children(options.selector).filter(':not(.moving):visible'),
         columns = 0,
         colHeights = [],
