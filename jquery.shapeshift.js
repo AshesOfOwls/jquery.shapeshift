@@ -6,7 +6,7 @@
         adjustContainerHeight: true,
         animated: true,
         draggable: true,
-        objWidth: 300,
+        objWidth: null,
         gutterX: 10,
         gutterY: 10,
         resizable: true,
@@ -37,7 +37,12 @@
         $objects = $container.children(options.selector),
         columns = 0,
         colHeights = [],
-        colWidth = options.objWidth + options.gutterX;
+        colWidth = null;
+
+    if(!options.objWidth) {
+      options.objWidth = $objects.first().outerWidth(true);
+    }
+    colWidth = options.objWidth + options.gutterX;
 
     // Determine how many columns are currently active
     columns = Math.floor($container.innerWidth() / colWidth);
