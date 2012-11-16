@@ -21,7 +21,7 @@ Resizing the grid to accomodate for more or less space is automatically turned o
 
 ### Dependencies
 
-Shapeshift requires the latest version of jQuery, and the drag and drop functionality requires jQuery UI Draggable/Droppable libraries, of which is included.
+Shapeshift requires the latest version of jQuery, and the drag and drop functionality requires jQuery UI Draggable/Droppable libraries.
 
 ### Setting Up the Parent Container
 
