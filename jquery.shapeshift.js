@@ -40,7 +40,7 @@
         options = ss.options,
         $container = $(ss.element),
         $objects = $container.children(options.selector).filter(':visible'),
-        columns = 0,
+        columns = options.columns,
         colHeights = [],
         colWidth = null,
         gridOffset = 0;
@@ -189,12 +189,12 @@
         options = ss.options,
         $container = $(ss.element),
         $objects = $container.children(options.selector).filter(':not(.ss-moving):visible'),
-        columns = 0,
+        columns = options.columns,
         colHeights = [],
         colWidth = options.objWidth + options.gutterX;
 
     // Determine how many columns are currently active
-    columns = Math.floor($container.innerWidth() / colWidth);
+    columns ||= Math.floor($container.innerWidth() / colWidth);
 
     // Create an array element for each column, which is then
     // used to store that columns current height.
