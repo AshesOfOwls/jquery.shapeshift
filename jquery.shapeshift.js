@@ -7,6 +7,7 @@
         animated: true,
         animatedOnDrag: true,
         centerGrid: true,
+        columns: null,
         draggable: true,
         objWidth: null,
         gutterX: 10,
@@ -56,7 +57,7 @@
     colWidth = options.objWidth + options.gutterX;
 
     // Determine how many columns are currently active
-    columns = Math.floor($container.innerWidth() / colWidth);
+    columns ||= Math.floor($container.innerWidth() / colWidth);
 
     if(options.centerGrid) {
       gridOffset = Math.floor((($container.innerWidth() / colWidth) % 1 * colWidth) / 2);
@@ -216,6 +217,9 @@
     }
   }
 
+  Plugin.prototype.setObjectPositions = function () {
+
+  }
 
   Plugin.prototype.shortestCol = function (array) {
     return $.inArray(Math.min.apply(window,array), array);
