@@ -51,37 +51,7 @@
       $objects.droppable( "destroy" );
     }
 
-    if(!options.objWidth) {
-      options.objWidth = $objects.first().outerWidth(true);
-    }
-    colWidth = options.objWidth + options.gutterX;
-
-    // Determine how many columns are currently active
-    if(!columns) { columns = Math.floor($container.innerWidth() / colWidth); }
-
-    if(options.centerGrid) {
-      gridOffset = Math.floor((($container.innerWidth() / colWidth) % 1 * colWidth) / 2);
-    }
-
-    // Create an array element for each column, which is then
-    // used to store that columns current height.
-    for(var i=0;i<columns;i++) {colHeights.push(0);}
-
-    // Loop over each element and determine what column it fits into
-    for(var obj_i=0;obj_i<$objects.length;obj_i++) {
-      var $obj = $($objects[obj_i]),
-          col = ss.shortestCol(colHeights),
-          height = $obj.outerHeight(true) + options.gutterY,
-          offsetX = (colWidth * col) + gridOffset,
-          offsetY = colHeights[col];
-
-      // Store the position to animate into place later
-      attributes = { left: offsetX, top: offsetY };
-      ss.objPositions[obj_i] = attributes;
-
-      // Increase the calculated total height of the current column
-      colHeights[col] += height;
-    }
+    ss.objPositions = ss.getObjectPositions(':visible');
 
     // Animate / Move each object into place
     for(var obj_i=0; obj_i < $objects.length; obj_i++) {
@@ -100,7 +70,7 @@
     // Set the container height to match the tallest column
     if (options.adjustContainerHeight) {
       var col = ss.tallestCol(colHeights),
-          height = colHeights[col];
+          height = 3000;
       $container.css("height", height);
     }
   }
@@ -185,15 +155,34 @@
   }
 
   Plugin.prototype.setHoverObjPositions = function() {
+    var ss = this;
+    ss.hoverObjPositions = ss.getObjectPositions(':not(.ss-moving):visible');
+  }
+
+  Plugin.prototype.getObjectPositions = function (filter) {
     var ss = this,
         options = ss.options,
         $container = $(ss.element),
-        $objects = $container.children(options.selector).filter(':not(.ss-moving):visible'),
+        $objects = $container.children(options.selector).filter(filter),
         columns = options.columns,
         colHeights = [],
-        colWidth = options.objWidth + options.gutterX;
+        colWidth = null,
+        gridOffset = 0,
+        positions = [];
 
+    // Determine the width of each element.
+    if(!options.objWidth) { options.objWidth = $objects.first().outerWidth(true); }
+
+    // Determine the column width.
+    colWidth = options.objWidth + options.gutterX;
+
+    // Determine how many columns are currently active
     if(!columns) { columns = Math.floor($container.innerWidth() / colWidth); }
+
+    // Offset the grid to center it.
+    if(options.centerGrid) {
+      gridOffset = Math.floor((($container.innerWidth() / colWidth) % 1 * colWidth) / 2);
+    }
 
     // Create an array element for each column, which is then
     // used to store that columns current height.
@@ -204,20 +193,18 @@
       var $obj = $($objects[obj_i]),
           col = ss.shortestCol(colHeights),
           height = $obj.outerHeight(true) + options.gutterY,
-          offsetX = colWidth * col,
+          offsetX = (colWidth * col) + gridOffset,
           offsetY = colHeights[col];
 
       // Store the position to animate into place later
       attributes = { left: offsetX, top: offsetY };
-      ss.hoverObjPositions[obj_i] = attributes;
+      positions[obj_i] = attributes;
 
       // Increase the calculated total height of the current column
       colHeights[col] += height;
     }
-  }
 
-  Plugin.prototype.setObjectPositions = function () {
-
+    return positions;
   }
 
   Plugin.prototype.shortestCol = function (array) {
