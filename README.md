@@ -136,7 +136,7 @@ Shapeshift will by default try to rearrange all of the child elements within the
 When an element is picked up it the ".ss-moving" class will be appended to it. Just target it in your own CSS file. For example,
 
 ```css
-#container .ss-moving {
+.container .ss-moving {
   z-index: 9999;
   opacity: .7;
   transform: rotate(3deg);
