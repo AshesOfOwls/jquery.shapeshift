@@ -2,7 +2,7 @@ var $containers = $(".container");
 
 function renderChildren(placekitten) {
   // Lets generate some child divs
-  $containers.children().remove();
+  $containers.children().filter(":not(.credits)").remove();
   $containers.each(function() {
     for(i=0;i<15;i++) {
       var $element = $("<div></div>"),
