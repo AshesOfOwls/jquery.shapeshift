@@ -3,7 +3,6 @@
   var pluginName = 'shapeshift',
       document = window.document,
       defaults = {
-        adjustContainerHeight: true,
         animated: true,
         animatedOnDrag: true,
         centerGrid: true,
@@ -22,7 +21,7 @@
     ss.options = $.extend( {}, defaults, options);
     ss._defaults = defaults;
     ss._name = pluginName;
-    ss.objPositions = [];
+    ss.containerHeight = 100;
     ss.hoverObjPositions = [];
     ss.init();
   }
@@ -39,11 +38,7 @@
     var ss = this,
         options = ss.options,
         $container = $(ss.element),
-        $objects = $container.children(options.selector).filter(':visible'),
-        columns = options.columns,
-        colHeights = [],
-        colWidth = null,
-        gridOffset = 0;
+        $objects = $container.children(options.selector).filter(':visible');
 
     if(!options.draggable) {
       $container.droppable( "destroy" );
@@ -51,12 +46,13 @@
       $objects.droppable( "destroy" );
     }
 
-    ss.objPositions = ss.getObjectPositions(':visible');
+    // Calculate the positions for each element
+    positions = ss.getObjectPositions(':visible');
 
     // Animate / Move each object into place
     for(var obj_i=0; obj_i < $objects.length; obj_i++) {
       var $obj = $($objects[obj_i]),
-          attributes = ss.objPositions[obj_i];
+          attributes = positions[obj_i];
 
       if(!$obj.hasClass("ss-moving")) {
         if(animated) {
@@ -68,11 +64,7 @@
     }
 
     // Set the container height to match the tallest column
-    if (options.adjustContainerHeight) {
-      var col = ss.tallestCol(colHeights),
-          height = 3000;
-      $container.css("height", height);
-    }
+    $container.css("height", ss.containerHeight);
   }
 
   Plugin.prototype.draggable = function () {
@@ -203,12 +195,8 @@
       // Increase the calculated total height of the current column
       colHeights[col] += height;
     }
-
+    ss.containerHeight = Math.max.apply(Math,colHeights);
     return positions;
-  }
-
-  Plugin.prototype.tallestCol = function (array) {
-    return $.inArray(Math.max.apply(window,array), array);
   }
 
   Plugin.prototype.resizable = function () {
