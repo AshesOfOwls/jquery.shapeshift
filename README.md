@@ -11,6 +11,10 @@ Shapeshift is intended to be a very bare bones version of these grid systems, ho
 
 A unique functionality to Shapeshift is the ability to drag and drop items within the dynamic grid.
 
+## Works on Touch Devices
+
+To have the drag and drop functionality on touch devices you must include the "jquery.ui.touch-punch.min.js" file within the vendor folder. [jQuery touch punch](http://touchpunch.furf.com/) extends the jQuery UI Draggable library with touch support, so it must be included before shapeshift and after the jQuery ui library.
+
 ## Responsive Grid
 
 Resizing the grid to accomodate for more or less space is automatically turned on in Shapeshift, so if your parent container has a 100% grid resizing the window will shapeshift the child objects around to accomodate for the new layout.
