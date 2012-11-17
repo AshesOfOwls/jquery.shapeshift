@@ -10,7 +10,9 @@ h1 { text-align: center; }
 .forkme { position: absolute; top: 0; left: 0; border: 0; }
 
 .credits {
+  height: 160px;
   font-size: 13px;
+  padding: 20px 0 15px 0;
   position: absolute; top: 10px; right: 10px; border: 0;
   text-align: center;
 }
