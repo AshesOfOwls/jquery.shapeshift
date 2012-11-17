@@ -132,10 +132,10 @@
         containerY = $container.offset().top,
         objectX = $object.offset().left - containerX,
         objectY = $object.offset().top - containerY + options.gutterY + 10,
-        mouseX = e.pageX,
-        mouseY = e.pageY,
-        intentionX = objectX + ((mouseX - objectX) / 2),
-        intentionY = objectY + ((mouseY - objectY) / 2),
+        mouseX = e.pageX - containerX,
+        mouseY = e.pageY - containerY,
+        intentionX = objectX + (mouseX / 2),
+        intentionY = objectY + (mouseY / 2),
         shortestDistance = 9999,
         chosenIndex = 0;
 
@@ -191,7 +191,7 @@
     // Loop over each element and determine what column it fits into
     for(var obj_i=0;obj_i<$objects.length;obj_i++) {
       var $obj = $($objects[obj_i]),
-          col = ss.shortestCol(colHeights),
+          col = $.inArray(Math.min.apply(window,colHeights), colHeights),
           height = $obj.outerHeight(true) + options.gutterY,
           offsetX = (colWidth * col) + gridOffset,
           offsetY = colHeights[col];
@@ -205,10 +205,6 @@
     }
 
     return positions;
-  }
-
-  Plugin.prototype.shortestCol = function (array) {
-    return $.inArray(Math.min.apply(window,array), array);
   }
 
   Plugin.prototype.tallestCol = function (array) {
