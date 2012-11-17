@@ -81,7 +81,6 @@
       start: function(e) { dragStart($(this), e) },
       drag: function(e) { dragObject($(this), e); }
     });
-    $objects.droppable({ over: function() { enterObject($(this)); } });
     $container.droppable({ drop: function() { dropObject(); } });
 
     function dragStart($object, e) {
@@ -113,26 +112,22 @@
     }
   }
 
-  Plugin.prototype.getIntendedIndex = function($object, e) {
+  Plugin.prototype.getIntendedIndex = function($selected, e) {
     var ss = this,
         options = ss.options,
         $container = $(ss.element),
-        containerX = $container.offset().left,
-        containerY = $container.offset().top,
-        objectX = $object.offset().left - containerX,
-        objectY = $object.offset().top - containerY + options.gutterY + 10,
-        mouseX = e.pageX - containerX,
-        mouseY = e.pageY - containerY,
-        intentionX = objectX + (mouseX / 2),
-        intentionY = objectY + (mouseY / 2),
+        selectedX = $selected.position().left,
+        selectedY = $selected.position().top,
+        intendedX = selectedX + ((e.pageX - $selected.offset().left) / 2),
+        intendedY = selectedY + ((e.pageY - $selected.offset().top) / 2),
         shortestDistance = 9999,
         chosenIndex = 0;
 
     for(hov_i=0;hov_i<ss.hoverObjPositions.length;hov_i++) {
       attributes = ss.hoverObjPositions[hov_i];
-      if(intentionX > attributes.left && intentionY > attributes.top) {
-        xDist = intentionX - attributes.left;
-        yDist = intentionY - attributes.top;
+      if(intendedX > attributes.left && intendedY > attributes.top) {
+        xDist = intendedX - attributes.left;
+        yDist = intendedY - attributes.top;
         distance = Math.sqrt((xDist * xDist) + (yDist * yDist));
         if(distance < shortestDistance) {
           shortestDistance = distance;
