@@ -73,7 +73,6 @@
         $container = $(ss.element),
         $objects = $container.children(options.selector).filter(':visible'),
         $selected = null,
-        $hovered = null,
         dragging = false;
 
     $objects.draggable({
@@ -106,8 +105,6 @@
         }, 200);
       }
     }
-
-    function enterObject($hoveredObj) { $hovered = $hoveredObj; }
 
     function dropObject() {
       $selected.removeClass("ss-moving");
@@ -195,6 +192,7 @@
       // Increase the calculated total height of the current column
       colHeights[col] += height;
     }
+    // Store the height of the tallest column
     ss.containerHeight = Math.max.apply(Math,colHeights);
     return positions;
   }
