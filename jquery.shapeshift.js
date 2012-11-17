@@ -57,7 +57,7 @@
     colWidth = options.objWidth + options.gutterX;
 
     // Determine how many columns are currently active
-    columns ||= Math.floor($container.innerWidth() / colWidth);
+    if(!columns) { columns = Math.floor($container.innerWidth() / colWidth); }
 
     if(options.centerGrid) {
       gridOffset = Math.floor((($container.innerWidth() / colWidth) % 1 * colWidth) / 2);
@@ -193,8 +193,7 @@
         colHeights = [],
         colWidth = options.objWidth + options.gutterX;
 
-    // Determine how many columns are currently active
-    columns ||= Math.floor($container.innerWidth() / colWidth);
+    if(!columns) { columns = Math.floor($container.innerWidth() / colWidth); }
 
     // Create an array element for each column, which is then
     // used to store that columns current height.
