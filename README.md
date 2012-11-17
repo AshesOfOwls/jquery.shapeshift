@@ -76,6 +76,7 @@ $('#container').shapeshift({
   animated: true,
   animatedOnDrag: true,
   centerGrid: true,
+  columns: null,
   draggable: true,
   objWidth: null,
   gutterX: 10,
@@ -100,13 +101,13 @@ Turn off the object animations of other elements when dragging one around.
 
 Center the grid inside the container. This is mainly helpful for when using a responsive container width.
 
+##### columns : integer
+
+Manually specify the number of columns to render. It will automatically detect by default.
+
 ##### draggable : boolean
 
 Toggles the drag and drop functionality.
-
-##### objWidth : integer
-
-Manually set the width of the objects that will be rearranged. This number is used to determine the width of the columns, and depending on the width of the columns will determine how many columns will be able to fit in your container.
 
 ##### gutterX : integer
 
@@ -115,6 +116,10 @@ Sets the amount of padding horizontally between columns
 ##### gutterX : integer
 
 Sets the amount of padding vertically between objects.
+
+##### objWidth : integer
+
+Manually set the width of the objects that will be rearranged. This number is used to determine the width of the columns, and depending on the width of the columns will determine how many columns will be able to fit in your container.
 
 ##### resizable : integer
 
