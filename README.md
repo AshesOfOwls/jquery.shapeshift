@@ -38,30 +38,32 @@ Shapeshift requires the latest version of jQuery, and the drag and drop function
 Objects that get shapeshifted will be absolutely positioned in their parent container. Therefore the parent container must be set to position: relative for the objects to position themselves correctly.
 
 ```html
-<div id="container" style="position: relative;"></div>
+<div class="container" style="position: relative;"></div>
 ```
 
 ### Setting up the Child Elements
 
 The direct children of the parent element are what gets rearranged into the grid system. As mentioned before, each child element will be absolutely positions and obviously must then have a position: absolute attached to them.
 
-NOTE: All child elements MUST be the same width. Heights can be dynamic, however.
+**note**: All child elements **must** be the same width. Heights can be dynamic, however.
 
 ```html
-<div id="container" style="position: relative;">
-  <div class="child" style="position: absolute;">Child Element 1</div>
-  <div class="child" style="position: absolute;">Child Element 2</div>
-  <div class="child" style="position: absolute;">Child Element 3</div>
-  <div class="child" style="position: absolute;">Child Element 4</div>
+<div class="container" style="position: relative;">
+  <div style="position: absolute;">Child Element 1</div>
+  <div style="position: absolute;">Child Element 2</div>
+  <div style="position: absolute;">Child Element 3</div>
+  <div style="position: absolute;">Child Element 4</div>
 </div>
 ```
+
+The class name and type of elements you can use are completely changable. The only real requirement is the parent must be relative and the children absolute. You can even call shapeshift on multiple elements that have the same class name.
 
 ### Shapeshift Everything!
 
 Now that we have our setup complete, simply call .shapeshift() on the parent element. It will, by default, select all the children in the parent element to be rearranged.
 
 ```javascript
-$('#container').shapeshift();
+$('.container').shapeshift();
 ```
 
 ### Shapeshift Options
