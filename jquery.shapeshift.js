@@ -6,6 +6,7 @@
         adjustContainerHeight: true,
         animated: true,
         animatedOnDrag: true,
+        centerGrid: true,
         draggable: true,
         objWidth: null,
         gutterX: 10,
@@ -40,7 +41,8 @@
         $objects = $container.children(options.selector).filter(':visible'),
         columns = 0,
         colHeights = [],
-        colWidth = null;
+        colWidth = null,
+        gridOffset = 0;
 
     if(!options.draggable) {
       $container.droppable( "destroy" );
@@ -56,6 +58,10 @@
     // Determine how many columns are currently active
     columns = Math.floor($container.innerWidth() / colWidth);
 
+    if(options.centerGrid) {
+      gridOffset = Math.floor((($container.innerWidth() / colWidth) % 1 * colWidth) / 2);
+    }
+
     // Create an array element for each column, which is then
     // used to store that columns current height.
     for(var i=0;i<columns;i++) {colHeights.push(0);}
@@ -65,7 +71,7 @@
       var $obj = $($objects[obj_i]),
           col = ss.shortestCol(colHeights),
           height = $obj.outerHeight(true) + options.gutterY,
-          offsetX = colWidth * col,
+          offsetX = (colWidth * col) + gridOffset,
           offsetY = colHeights[col];
 
       // Store the position to animate into place later
