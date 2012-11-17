@@ -3,11 +3,12 @@ var $containers = $(".container");
 function renderChildren(placekitten) {
   // Lets generate some child divs
   $containers.children().filter(":not(.credits)").remove();
-  $containers.each(function() {
+  $containers.each(function(container_i) {
     for(i=0;i<15;i++) {
       var $element = $("<div></div>"),
           height = Math.floor(Math.random() * 200) + 100,
           width = 200;
+      if(container_i === 1) { height = 200; }
       if(placekitten) {
         var background = 'url("http://www.placekitten.com/'+width+'/'+height+'")';
       } else {
