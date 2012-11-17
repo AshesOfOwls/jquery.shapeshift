@@ -3,13 +3,21 @@ body {
   font-family: Helvetica, Arial;
 }
 
-h1 {
+a { text-decoration: none; }
+
+h1 { text-align: center; }
+
+.forkme { position: absolute; top: 0; left: 0; border: 0; }
+
+.credits {
+  font-size: 13px;
+  position: absolute; top: 10px; right: 10px; border: 0;
   text-align: center;
 }
 
-#nav {
-  text-align: center;
-}
+.credits img { padding: 4px; }
+
+#nav { text-align: center; }
 
 #container {
   margin: 50px auto 0 auto;
@@ -25,10 +33,6 @@ h1 {
   width: 300px;
 }
 
-#container > * > img {
-  border-radius: 2px 2px 0 0;
-}
-
 #container > *.ss-moving {
   z-index: 9999;
   opacity: .7;
@@ -38,3 +42,5 @@ h1 {
   -webkit-transform:rotate(3deg); /* Safari and Chrome */
   -o-transform:rotate(3deg); /* Opera */
 }
+
+#container > * > img { border-radius: 2px 2px 0 0; }
