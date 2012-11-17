@@ -159,7 +159,7 @@
         $container = $(ss.element),
         containerX = $container.offset().left,
         containerY = $container.offset().top,
-        objectX = $object.offset().left,
+        objectX = $object.offset().left - containerX,
         objectY = $object.offset().top - containerY + options.gutterY + 10,
         mouseX = e.pageX,
         mouseY = e.pageY,

@@ -10,6 +10,7 @@ h1 { text-align: center; }
 .forkme { position: absolute; top: 0; left: 0; border: 0; }
 
 .credits {
+  background: #DEDEDE;
   height: 160px;
   font-size: 13px;
   padding: 20px 0 15px 0;
@@ -21,21 +22,22 @@ h1 { text-align: center; }
 
 #nav { text-align: center; }
 
-#container {
+.container {
+  float: left;
   margin: 50px auto 0 auto;
   position: relative;
-  width: 100%;
+  width: 50%;
 }
 
-#container > * {
+.container > * {
   border: 1px solid #777;
   border-radius: 3px;
   box-shadow: 0px 0px 4px 1px #ccc;
   position: absolute;
-  width: 300px;
+  width: 200px;
 }
 
-#container > *.ss-moving {
+.container > *.ss-moving {
   z-index: 9999;
   opacity: .7;
   transform:rotate(3deg);
@@ -45,4 +47,4 @@ h1 { text-align: center; }
   -o-transform:rotate(3deg); /* Opera */
 }
 
-#container > * > img { border-radius: 2px 2px 0 0; }
+.container > * > img { border-radius: 2px 2px 0 0; }

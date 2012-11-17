@@ -8,11 +8,11 @@ function getRandomColor() {
 }
 
 // Lets generate some child divs
-var $container = $("#container");
+var $container = $(".container");
 for(i=0;i<45;i++) {
   var $element = $("<div></div>"),
       height = Math.floor(Math.random() * 450) + 70,
-      width = 300,
+      width = 200,
       color = getRandomColor(),
       $img = $('<img src="http://placehold.it/'+width+'x'+Math.floor(height / 2)+'" />');
   $element.css({
@@ -40,13 +40,13 @@ $(".filter").on("click", function(e) {
     var $objects = $container.children().filter(":visible"),
         random = Math.round(Math.random()*7);
     $objects.eq(random).hide();
-    $("#container").shapeshift();
+    $(".container").shapeshift();
   }
   if($(this).hasClass("show")) {
     var $objects = $container.children().filter(":hidden"),
         random = Math.round(Math.random()*3);
     $objects.eq(random).show();
-    $("#container").shapeshift();
+    $(".container").shapeshift();
   }
   if($(this).hasClass("placekittens")) {
     var $objects = $container.children().filter(":visible");
@@ -65,10 +65,10 @@ $(".filter").on("click", function(e) {
 
       if(i === $objects.length - 1) {
         setTimeout(function() {
-          $("#container").shapeshift();
+          $(".container").shapeshift();
         }, 300);
       }
     })
   }
 })
-$("#container").shapeshift();
+$(".container").shapeshift();
