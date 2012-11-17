@@ -71,6 +71,7 @@ $('#container').shapeshift({
   adjustContainerHeight: true,
   animated: true,
   animatedOnDrag: true,
+  centerGrid: true,
   draggable: true,
   objWidth: null,
   gutterX: 10,
@@ -90,6 +91,10 @@ Objects will animate into their positions using the jquery .animate() function. 
 ##### animatedOnDrag : boolean
 
 Turn off the object animations of other elements when dragging one around.
+
+##### centerGrid : boolean
+
+Center the grid inside the container. This is mainly helpful for when using a responsive container width.
 
 ##### draggable : boolean
 
