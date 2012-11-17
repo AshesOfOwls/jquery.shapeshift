@@ -73,7 +73,7 @@ There are several options that can be passed into the plugin through the objects
 All of these attributes are the defaults.
 
 ```javascript
-$('#container').shapeshift({
+$('.container').shapeshift({
   adjustContainerHeight: true,
   animated: true,
   animatedOnDrag: true,
@@ -148,7 +148,7 @@ When an element is picked up it the ".ss-moving" class will be appended to it. J
 When an item is dropped it will trigger the event "shapeshifted" on the container element. You can then write some code to be fired off when that event occurs. For example,
 
 ```javascript
-$("#container").on("shapeshifted", function() {
+$(".container").on("shapeshifted", function() {
   // Get the index position of each object
   $objects = $(this).children();
   $objects.each(function() {
