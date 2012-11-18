@@ -1,23 +1,23 @@
 [Shapeshift](http://mcpants.github.com/jquery.shapeshift/)
 ==========
 
-Inspired heavily by the jQuery Masonry plugin (http://masonry.desandro.com/), Shapeshift is a plugin which will dynamically arrange a collection of elements into a grid in their parent container. An example of this behaviour is what you can find at sites like http://www.pinterest.com.
+Inspired heavily by the jQuery Masonry plugin (http://masonry.desandro.com/), Shapeshift is a plugin which will dynamically arrange a collection of elements into a grid in their parent container. An example of this behavior is what you can find at sites like http://www.pinterest.com.
 
 Shapeshift is intended to be a very bare bones version of these grid systems, however the drag and drop is what sets it apart from the other similar plugins.
 
 [Check out a demo here.](http://mcpants.github.com/jquery.shapeshift/)
 
-## Drag and Drop
-
-A unique functionality to Shapeshift is the ability to drag and drop items within the dynamic grid.
-
-## Works on Touch Devices
-
-To have the drag and drop functionality on touch devices you must include the "jquery.ui.touch-punch.min.js" file within the vendor folder. [jQuery touch punch](http://touchpunch.furf.com/) extends the jQuery UI Draggable library with touch support, so it must be included before shapeshift and after the jQuery ui library.
-
 ## Responsive Grid
 
 Resizing the grid to accomodate for more or less space is automatically turned on in Shapeshift, so if your parent container has a 100% grid resizing the window will shapeshift the child objects around to accomodate for the new layout.
+
+## Drag and Drop
+
+Position any item within the grid by dragging and dropping them into place. Shapeshift will try to find a logical place for it and display that to you. Coming soon is the ability to drag and drop between multiple containers.
+
+## Works on Touch Devices
+
+To have the drag and drop functionality on touch devices you must include the "jquery.ui.touch-punch.min.js" file within the vendor folder. [jQuery touch punch](http://touchpunch.furf.com/) extends the jQuery UI Draggable library with touch support, so it must be included before Shapeshift and after the jQuery ui library.
 
 ## Credits
 
@@ -31,7 +31,7 @@ Shapeshift is maintained by [We The Media, inc.](http://wtmworldwide.com/)
 
 ### Dependencies
 
-Shapeshift requires the latest version of jQuery, and the drag and drop functionality requires jQuery UI Draggable/Droppable libraries.
+Shapeshift requires the latest version of jQuery, and the drag and drop functionality requires jQuery UI Draggable/Droppable libraries. It also requires [jQuery Touch Punch](http://touchpunch.furf.com/) to work on touch devices.
 
 ### Setting Up the Parent Container
 
@@ -145,18 +145,19 @@ When an element is picked up it the ".ss-moving" class will be appended to it. J
 
 ### Detecting Changes
 
-When an item is dropped it will trigger the event "shapeshifted" on the container element. You can then write some code to be fired off when that event occurs. For example,
+When an item is dropped it will trigger the event "shapeshifted" on the container element. You can then write some code to be fired off when that event occurs. The object that was just selected is also passed back to you. For example,
 
 ```javascript
-$(".container").on("shapeshifted", function() {
+$(".container").on("shapeshifted", function(e, $selected) {
+  // Get the new position for the dropped item
+  var position = $selected.index();
+
   // Get the index position of each object
   $objects = $(this).children();
-  $objects.each(function() {
-    index = $(this).index();
-    // You can then save the index as the
-    // position of the element in your database
-  })
-})
+  $objects.each(function(i) {
+    position[i] = $(this).index();
+  });
+});
 ```
 
 ## For contributors
