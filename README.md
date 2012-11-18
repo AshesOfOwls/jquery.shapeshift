@@ -74,7 +74,6 @@ All of these attributes are the defaults.
 
 ```javascript
 $('.container').shapeshift({
-  adjustContainerHeight: true,
   animated: true,
   animatedOnDrag: true,
   centerGrid: true,
@@ -87,9 +86,6 @@ $('.container').shapeshift({
   selector: ""
 });
 ```
-##### adjustContainerHeight : boolean
-
-This will set the parent container height to match the tallest "column" of objects. This is to solve clearfix issues and under most circumstances should be left on.
 
 ##### animated : boolean
 
