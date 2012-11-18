@@ -108,7 +108,7 @@
     function dropObject() {
       $selected.removeClass("ss-moving");
       ss.shiftit(options.animateOnDrag);
-      $container.trigger("shapeshifted");
+      $container.trigger("shapeshifted", $selected);
     }
   }
 
