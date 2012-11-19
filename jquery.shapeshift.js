@@ -229,7 +229,7 @@
         setTimeout(function() {
           resizing = false;
           ss.shiftit($container, options.animated);
-        }, 100);
+        }, 333);
       }
     });
   }
