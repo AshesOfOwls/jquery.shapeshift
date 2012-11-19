@@ -13,7 +13,7 @@ function renderChildren(placekitten) {
         var background = 'url("http://www.placekitten.com/'+width+'/'+height+'")';
       } else {
         var background = getRandomColor(),
-            $img = $('<img src="http://placehold.it/'+width+'x'+Math.floor(height / 2)+'" />');
+            $img = $('<img src="http://fpoimg.com/'+width+'x'+Math.floor(height / 2)+'" />');
         $element.append($img);
       }
       $element.css({ background: background, height: height, width: width });

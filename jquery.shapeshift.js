@@ -18,6 +18,7 @@
   function Plugin(element, options) {
     var ss = this;
     ss.element = element;
+    ss.container = ss.currentContainer = $(element);
     ss.options = $.extend( {}, defaults, options);
     ss._defaults = defaults;
     ss._name = pluginName;
@@ -28,26 +29,26 @@
 
   Plugin.prototype.init = function() {
     var ss = this,
-        options = ss.options;
-    ss.shiftit(options.animated);
+        options = ss.options,
+        $container = ss.container;
+    ss.shiftit($container, options.animated);
     if(options.draggable) { ss.draggable(); }
     if(options.resizable) { ss.resizable(); }
   };
 
-  Plugin.prototype.shiftit = function(animated) {
+  Plugin.prototype.shiftit = function($container, animated) {
     var ss = this,
         options = ss.options,
-        $container = $(ss.element),
         $objects = $container.children(options.selector).filter(':visible');
 
-    if(!options.draggable) {
-      $container.droppable( "destroy" );
-      $objects.draggable( "destroy" );
-      $objects.droppable( "destroy" );
-    }
+      if(!options.draggable) {
+        $container.droppable( "destroy" );
+        $objects.draggable( "destroy" );
+        $objects.droppable( "destroy" );
+      }
 
     // Calculate the positions for each element
-    positions = ss.getObjectPositions(':visible');
+    positions = ss.getObjectPositions($container, ':visible');
 
     // Animate / Move each object into place
     for(var obj_i=0; obj_i < $objects.length; obj_i++) {
@@ -70,7 +71,7 @@
   Plugin.prototype.draggable = function () {
     var ss = this,
         options = ss.options,
-        $container = $(ss.element),
+        $container = $currentContainer = ss.container,
         $objects = $container.children(options.selector).filter(':visible'),
         $selected = null,
         dragging = false;
@@ -79,26 +80,49 @@
       containment: 'document',
       cursor: 'move',
       start: function(e) { dragStart($(this), e) },
-      drag: function(e) { dragObject($(this), e); }
+      drag: function(e, ui) { dragObject(e, ui); }
     });
-    $container.droppable({ drop: function() { dropObject(); } });
+    $container.droppable({
+      drop: function() { dropObject(); },
+      over: function(e) { dragOver(e); },
+      out: function() {
+        window.setTimeout(function() {
+          ss.shiftit($container, options.animatedOnDrag);
+        }, 200);
+      }
+    });
 
     function dragStart($object, e) {
       // Set the selected object
       $selected = $object;
       $selected.addClass("ss-moving");
-      ss.setHoverObjPositions();
-      ss.shiftit(options.animatedOnDrag);
+      ss.setHoverObjPositions($selected.parent());
+      ss.shiftit($container, options.animatedOnDrag);
     }
 
-    function dragObject($object, e) {
+    function dragOver(e) {
+      $currentContainer = $(e.target);
+      ss.currentContainer = $currentContainer;
+      ss.setHoverObjPositions($currentContainer);
+    }
+
+    function dragObject(e, ui) {
+      // Manually override the elements position
+      var offsetX = e.pageX - $(e.target).parent().offset().left;
+      var offsetY = e.pageY - $(e.target).parent().offset().top;
+      ui.position.left = offsetX - (options.objWidth / 2);
+      ui.position.top = offsetY;
+
       if(!dragging) {
-        $objects = $container.children(options.selector).filter(':visible');
         dragging = true;
-        intendedIndex = ss.getIntendedIndex($object, e);
-        $intendedObj = $($objects.not(".ss-moving").get(intendedIndex));
+        $objects = $currentContainer.children(options.selector).filter(':visible');
+
+        var intendedIndex = ss.getIntendedIndex($selected, e),
+            $intendedObj = $($objects.not(".ss-moving").get(intendedIndex));
         $selected.insertBefore($intendedObj);
-        ss.shiftit(options.animatedOnDrag);
+        ss.shiftit($currentContainer, options.animatedOnDrag);
+
+        // Prevent it from firing too much
         window.setTimeout(function() {
           dragging = false;
         }, 200);
@@ -106,28 +130,28 @@
     }
 
     function dropObject() {
+      $selected = $(".ss-moving");
       $selected.removeClass("ss-moving");
-      ss.shiftit(options.animateOnDrag);
-      $container.trigger("shapeshifted", $selected);
+      ss.shiftit($currentContainer, options.animateOnDrag);
+      $currentContainer.trigger("shapeshifted", $selected);
     }
   }
 
   Plugin.prototype.getIntendedIndex = function($selected, e) {
     var ss = this,
         options = ss.options,
-        $container = $(ss.element),
-        selectedX = $selected.position().left,
-        selectedY = $selected.position().top,
-        intendedX = selectedX + ((e.pageX - $selected.offset().left) / 2),
-        intendedY = selectedY + ((e.pageY - $selected.offset().top) / 2),
+        $container = $selected.parent(),
+        selectedX = $selected.position().left + (options.objWidth / 2),
+        selectedY = $selected.position().top + 10,
         shortestDistance = 9999,
         chosenIndex = 0;
 
+    ss.setHoverObjPositions($container);
     for(hov_i=0;hov_i<ss.hoverObjPositions.length;hov_i++) {
       attributes = ss.hoverObjPositions[hov_i];
-      if(intendedX > attributes.left && intendedY > attributes.top) {
-        xDist = intendedX - attributes.left;
-        yDist = intendedY - attributes.top;
+      if(selectedX > attributes.left && selectedY > attributes.top) {
+        xDist = selectedX - attributes.left;
+        yDist = selectedY - attributes.top;
         distance = Math.sqrt((xDist * xDist) + (yDist * yDist));
         if(distance < shortestDistance) {
           shortestDistance = distance;
@@ -138,15 +162,14 @@
     return chosenIndex;
   }
 
-  Plugin.prototype.setHoverObjPositions = function() {
+  Plugin.prototype.setHoverObjPositions = function($container) {
     var ss = this;
-    ss.hoverObjPositions = ss.getObjectPositions(':not(.ss-moving):visible');
+    ss.hoverObjPositions = ss.getObjectPositions($container, ':not(.ss-moving):visible');
   }
 
-  Plugin.prototype.getObjectPositions = function (filter) {
+  Plugin.prototype.getObjectPositions = function ($container, filter) {
     var ss = this,
         options = ss.options,
-        $container = $(ss.element),
         $objects = $container.children(options.selector).filter(filter),
         columns = options.columns,
         colHeights = [],
@@ -195,15 +218,16 @@
   Plugin.prototype.resizable = function () {
     var ss = this,
         options = ss.options,
+        $container = ss.container,
         resizing = false;
 
     $(window).on("resize", function() {
       if(!resizing) {
         resizing = true;
-        ss.shiftit(options.animated);
+        ss.shiftit($container, options.animated);
         setTimeout(function() {
           resizing = false;
-          ss.shiftit(options.animated);
+          ss.shiftit($container, options.animated);
         }, 100);
       }
     });
