@@ -13,7 +13,7 @@ h1 { text-align: center; }
   background: #DEDEDE;
   height: 160px;
   font-size: 13px;
-  padding: 27px 0 13px 0;
+  padding: 20px 0 13px 0;
   position: absolute; top: 10px; right: 10px; border: 0;
   text-align: center;
 }
@@ -38,7 +38,7 @@ ul.description li { margin-bottom: 8px; }
   border-radius: 3px;
   box-shadow: 0px 0px 4px 1px #ccc;
   position: absolute;
-  width: 200px;
+  width: 140px;
 }
 
 .container > *.ss-moving {

@@ -89,7 +89,7 @@
       out: function() {
         window.setTimeout(function() {
           ss.shiftit($container, options.animatedOnDrag);
-        }, 200);
+        }, 300);
       }
     });
 
