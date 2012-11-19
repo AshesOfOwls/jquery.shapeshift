@@ -22,11 +22,15 @@ h1 { text-align: center; }
 
 #nav { text-align: center; }
 
+ul.description { list-style: none; }
+ul.description li { margin-bottom: 8px; }
+
 .container {
+  outline: 2px dashed #CCC;
   float: left;
-  margin: 50px auto 0 auto;
+  margin: 50px 0 0 1%;
   position: relative;
-  width: 50%;
+  width: 48%;
 }
 
 .container > * {
