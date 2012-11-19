@@ -110,7 +110,7 @@
     function dragObject(e, ui) {
       // Manually override the elements position
       var offsetX = e.pageX - $(e.target).parent().offset().left;
-      var offsetY = e.pageY - $(e.target).parent().offset().top;
+      var offsetY = e.pageY - $(e.target).parent().offset().top - ($selected.outerHeight() / 2);
       ui.position.left = offsetX - (options.objWidth / 2);
       ui.position.top = offsetY;
 
@@ -143,7 +143,7 @@
         options = ss.options,
         $container = $selected.parent(),
         selectedX = $selected.position().left + (options.objWidth / 2),
-        selectedY = $selected.position().top + 10,
+        selectedY = $selected.position().top + ($selected.outerHeight() / 2),
         shortestDistance = 9999,
         chosenIndex = 0;
 
