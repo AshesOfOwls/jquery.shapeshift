@@ -42,6 +42,7 @@ ul.description li { margin-bottom: 8px; }
 }
 
 .container > *.ss-moving {
+  cursor: move;
   z-index: 9999;
   opacity: .7;
   transform:rotate(3deg);

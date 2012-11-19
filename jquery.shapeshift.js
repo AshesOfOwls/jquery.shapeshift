@@ -70,35 +70,25 @@
     var ss = this,
         options = ss.options,
         $container = $currentContainer = ss.container,
-        $objects = $container.children(options.selector).filter(':visible'),
+        $objects = $container.children(options.selector),
         $selected = null,
         dragging = false;
 
     $objects.draggable({
       containment: 'document',
-      cursor: 'move',
-      start: function(e) { dragStart($(this), e) },
+      start: function() { dragStart($(this)); },
       drag: function(e, ui) { dragObject(e, ui); }
     });
     $container.droppable({
       drop: function() { dropObject(); },
       over: function(e) { dragOver(e); },
-      out: function() {
-        window.setTimeout(function() {
-          ss.shiftit($container, options.animatedOnDrag);
-        }, 300);
-      }
+      out: function() { dragOut(); }
     });
 
-    function dragStart($object, e) {
+    function dragStart($object) {
       // Set the selected object
       $selected = $object.addClass("ss-moving");
       ss.shiftit($container, options.animatedOnDrag);
-    }
-
-    function dragOver(e) {
-      $currentContainer = $(e.target);
-      ss.setHoverObjPositions($currentContainer);
     }
 
     function dragObject(e, ui) {
@@ -118,8 +108,8 @@
       }
 
       // Manually override the elements position
-      var offsetX = e.pageX - $(e.target).parent().offset().left - (options.objWidth / 2);
-      var offsetY = e.pageY - $(e.target).parent().offset().top - ($selected.outerHeight() / 2);
+      var offsetX = e.pageX - $(e.target).parent().offset().left - (options.objWidth / 2),
+          offsetY = e.pageY - $(e.target).parent().offset().top - ($selected.outerHeight() / 2);
       ui.position.left = offsetX;
       ui.position.top = offsetY;
     }
@@ -128,6 +118,17 @@
       $selected = $(".ss-moving").removeClass("ss-moving");
       ss.shiftit($currentContainer, options.animateOnDrag);
       $currentContainer.trigger("shapeshifted", $selected);
+    }
+
+    function dragOver(e) {
+      $currentContainer = $(e.target);
+      ss.setHoverObjPositions($currentContainer);
+    }
+
+    function dragOut(e) {
+      window.setTimeout(function() {
+        ss.shiftit($container, options.animatedOnDrag);
+      }, 333);
     }
   }
 
@@ -157,8 +158,7 @@
   }
 
   Plugin.prototype.setHoverObjPositions = function($container) {
-    var ss = this;
-    ss.hoverObjPositions = ss.getObjectPositions($container, ':not(.ss-moving):visible');
+    this.hoverObjPositions = this.getObjectPositions($container, ':not(.ss-moving):visible');
   }
 
   Plugin.prototype.getObjectPositions = function ($container, filter) {
