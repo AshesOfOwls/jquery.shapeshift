@@ -108,12 +108,6 @@
     }
 
     function dragObject(e, ui) {
-      // Manually override the elements position
-      var offsetX = e.pageX - $(e.target).parent().offset().left;
-      var offsetY = e.pageY - $(e.target).parent().offset().top - ($selected.outerHeight() / 2);
-      ui.position.left = offsetX - (options.objWidth / 2);
-      ui.position.top = offsetY;
-
       if(!dragging) {
         dragging = true;
         $objects = $currentContainer.children(options.selector).filter(':visible');
@@ -128,6 +122,12 @@
           dragging = false;
         }, 200);
       }
+
+      // Manually override the elements position
+      var offsetX = e.pageX - $(e.target).parent().offset().left;
+      var offsetY = e.pageY - $(e.target).parent().offset().top - ($selected.outerHeight() / 2);
+      ui.position.left = offsetX - (options.objWidth / 2);
+      ui.position.top = offsetY;
     }
 
     function dropObject() {
