@@ -80,6 +80,7 @@ $('.container').shapeshift({
   columns: null,
   draggable: true,
   objWidth: null,
+  paddingY: 0,
   gutterX: 10,
   gutterY: 10,
   resizable: true,
@@ -118,6 +119,10 @@ Sets the amount of padding vertically between objects.
 ##### objWidth : integer
 
 Manually set the width of the objects that will be rearranged. This number is used to determine the width of the columns, and depending on the width of the columns will determine how many columns will be able to fit in your container.
+
+##### paddingY : integer
+
+Offset the entire grid from the top of the container element with this attribute.
 
 ##### resizable : integer
 
