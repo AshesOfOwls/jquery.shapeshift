@@ -9,6 +9,7 @@
         columns: null,
         draggable: true,
         objWidth: null,
+        paddingY: 0,
         gutterX: 10,
         gutterY: 10,
         resizable: true,
@@ -193,7 +194,7 @@
 
     // Create an array element for each column, which is then
     // used to store that columns current height.
-    for(var i=0;i<columns;i++) {colHeights.push(0);}
+    for(var i=0;i<columns;i++) {colHeights.push(options.paddingY);}
 
     // Loop over each element and determine what column it fits into
     for(var obj_i=0;obj_i<$objects.length;obj_i++) {
