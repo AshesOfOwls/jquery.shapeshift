@@ -19,10 +19,8 @@
   function Plugin(element, options) {
     var ss = this;
     ss.element = element;
-    ss.container = ss.currentContainer = $(element);
-    ss.options = $.extend( {}, defaults, options);
-    ss._defaults = defaults;
-    ss._name = pluginName;
+    ss.container = $(element);
+    ss.options = $.extend({}, defaults, options);
     ss.containerHeight = 100;
     ss.hoverObjPositions = [];
     ss.init();
@@ -30,9 +28,8 @@
 
   Plugin.prototype.init = function() {
     var ss = this,
-        options = ss.options,
-        $container = ss.container;
-    ss.shiftit($container, options.animated);
+        options = ss.options;
+    ss.shiftit(ss.container, options.animated);
     if(options.draggable) { ss.draggable(); }
     if(options.resizable) { ss.resizable(); }
   };
@@ -95,15 +92,12 @@
 
     function dragStart($object, e) {
       // Set the selected object
-      $selected = $object;
-      $selected.addClass("ss-moving");
-      ss.setHoverObjPositions($selected.parent());
+      $selected = $object.addClass("ss-moving");
       ss.shiftit($container, options.animatedOnDrag);
     }
 
     function dragOver(e) {
       $currentContainer = $(e.target);
-      ss.currentContainer = $currentContainer;
       ss.setHoverObjPositions($currentContainer);
     }
 
@@ -124,15 +118,14 @@
       }
 
       // Manually override the elements position
-      var offsetX = e.pageX - $(e.target).parent().offset().left;
+      var offsetX = e.pageX - $(e.target).parent().offset().left - (options.objWidth / 2);
       var offsetY = e.pageY - $(e.target).parent().offset().top - ($selected.outerHeight() / 2);
-      ui.position.left = offsetX - (options.objWidth / 2);
+      ui.position.left = offsetX;
       ui.position.top = offsetY;
     }
 
     function dropObject() {
-      $selected = $(".ss-moving");
-      $selected.removeClass("ss-moving");
+      $selected = $(".ss-moving").removeClass("ss-moving");
       ss.shiftit($currentContainer, options.animateOnDrag);
       $currentContainer.trigger("shapeshifted", $selected);
     }
