@@ -3,12 +3,11 @@
   var pluginName = 'shapeshift',
       document = window.document,
       defaults = {
-        autoContainerHeight: true,
         animated: true,
         animatedOnDrag: true,
+        autoContainerHeight: true,
         centerGrid: true,
         columns: null,
-        containerHeight: 100,
         draggable: true,
         objWidth: null,
         paddingY: 0,

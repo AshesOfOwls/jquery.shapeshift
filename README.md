@@ -70,12 +70,13 @@ $('.container').shapeshift();
 
 There are several options that can be passed into the plugin through the objects hash, which also includes turning core features on or off. Here is an example of those options and then descriptions of each attribute.
 
-All of these attributes are the defaults.
+***All of these attributes are the defaults.***
 
 ```javascript
 $('.container').shapeshift({
   animated: true,
   animatedOnDrag: true,
+  autoContainerHeight: true,
   centerGrid: true,
   columns: null,
   draggable: true,
@@ -95,6 +96,10 @@ Objects will animate into their positions using the jquery .animate() function. 
 ##### animatedOnDrag : boolean
 
 Turn off the object animations of other elements when dragging one around.
+
+##### autoContainerHeight : boolean
+
+If this is set to true the parent container will have its height adjusted to match the tallest "column" within.
 
 ##### centerGrid : boolean
 
