@@ -3,10 +3,12 @@
   var pluginName = 'shapeshift',
       document = window.document,
       defaults = {
+        autoContainerHeight: true,
         animated: true,
         animatedOnDrag: true,
         centerGrid: true,
         columns: null,
+        containerHeight: 100,
         draggable: true,
         objWidth: null,
         paddingY: 0,
@@ -21,7 +23,6 @@
     ss.element = element;
     ss.container = $(element);
     ss.options = $.extend({}, defaults, options);
-    ss.containerHeight = 100;
     ss.hoverObjPositions = [];
     ss.init();
   }
@@ -40,9 +41,9 @@
         $objects = $container.children(options.selector).filter(':visible');
 
       if(!options.draggable) {
-        $container.droppable( "destroy" );
-        $objects.draggable( "destroy" );
-        $objects.droppable( "destroy" );
+        $container.droppable("destroy");
+        $objects.draggable("destroy");
+        $objects.droppable("destroy");
       }
 
     // Calculate the positions for each element
@@ -63,7 +64,7 @@
     }
 
     // Set the container height to match the tallest column
-    $container.css("height", ss.containerHeight);
+    $container.css("height", options.containerHeight);
   }
 
   Plugin.prototype.draggable = function () {
@@ -205,7 +206,9 @@
       colHeights[col] += height;
     }
     // Store the height of the tallest column
-    ss.containerHeight = Math.max.apply(Math,colHeights);
+    if(options.autoContainerHeight){
+      options.containerHeight = Math.max.apply(Math,colHeights);
+    }
     return positions;
   }
 
