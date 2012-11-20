@@ -40,11 +40,11 @@
         options = ss.options,
         $objects = $container.children(options.selector).filter(':visible');
 
-      if(!options.draggable) {
-        console.log(options.draggable)
-        $container.droppable("destroy");
-        $objects.draggable("destroy");
-      }
+    // Destroy draggable/droppable if needed
+    if(!options.draggable) {
+      $container.droppable("destroy");
+      $objects.draggable("destroy");
+    }
 
     // Calculate the positions for each element
     positions = ss.getObjectPositions($container, ':visible');
@@ -54,6 +54,7 @@
       var $obj = $($objects[obj_i]),
           attributes = positions[obj_i];
 
+      // Never animate the currently dragged item
       if(!$obj.hasClass("ss-moving")) {
         if(animated) {
           $obj.stop(true, false).animate(attributes, 250);
@@ -70,11 +71,12 @@
   Plugin.prototype.draggable = function () {
     var ss = this,
         options = ss.options,
-        $container = $currentContainer = ss.container,
+        $container = $currentContainer = $previousContainer = ss.container,
         $objects = $container.children(options.selector),
         $selected = null,
         dragging = false;
 
+    // Initialize the jQuery UI Draggable/Droppable
     $objects.draggable({
       containment: 'document',
       start: function() { dragStart($(this)); },
@@ -86,12 +88,13 @@
       out: function() { dragOut(); }
     });
 
+    // When an object is picked up
     function dragStart($object) {
-      // Set the selected object
       $selected = $object.addClass("ss-moving");
       ss.shiftit($container, options.animatedOnDrag);
     }
 
+    // When an object is dragged around
     function dragObject(e, ui) {
       if(!dragging) {
         dragging = true;
@@ -115,21 +118,26 @@
       ui.position.top = offsetY;
     }
 
+    // When an object is dropped
     function dropObject() {
       $selected = $(".ss-moving").removeClass("ss-moving");
       ss.shiftit($currentContainer, options.animateOnDrag);
       $currentContainer.trigger("shapeshifted", $selected);
     }
 
+    // When an object moves to a new container
     function dragOver(e) {
       $currentContainer = $(e.target);
       ss.setHoverObjPositions($currentContainer);
+      window.setTimeout(function() {
+        ss.shiftit($previousContainer, options.animatedOnDrag);
+      }, 300);
     }
 
+    // When an object moves out of its current container
     function dragOut(e) {
-      window.setTimeout(function() {
-        ss.shiftit($container, options.animatedOnDrag);
-      }, 333);
+      $previousContainer = $container;
+      ss.shiftit($container, options.animatedOnDrag);
     }
   }
 
