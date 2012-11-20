@@ -8,12 +8,13 @@
         autoContainerHeight: true,
         centerGrid: true,
         columns: null,
+        disableDragOn: "",
         draggable: true,
+        gutterX: 10,
+        gutterY: 10,
         objWidth: null,
         paddingY: 0,
         paddingX: 0,
-        gutterX: 10,
-        gutterY: 10,
         resizable: true,
         selector: ""
       };
@@ -77,7 +78,7 @@
         dragging = false;
 
     // Initialize the jQuery UI Draggable/Droppable
-    $objects.draggable({
+    $objects.filter(":not("+options.disableDragOn+")").draggable({
       containment: 'document',
       start: function() { dragStart($(this)); },
       drag: function(e, ui) { dragObject(e, ui); }
