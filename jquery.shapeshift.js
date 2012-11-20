@@ -11,6 +11,7 @@
         draggable: true,
         objWidth: null,
         paddingY: 0,
+        paddingX: 0,
         gutterX: 10,
         gutterY: 10,
         resizable: true,
@@ -167,7 +168,7 @@
         columns = options.columns,
         colHeights = [],
         colWidth = null,
-        gridOffset = 0,
+        gridOffset = options.paddingX,
         positions = [];
 
     // Determine the width of each element.
