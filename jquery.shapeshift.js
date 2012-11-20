@@ -41,9 +41,9 @@
         $objects = $container.children(options.selector).filter(':visible');
 
       if(!options.draggable) {
+        console.log(options.draggable)
         $container.droppable("destroy");
         $objects.draggable("destroy");
-        $objects.droppable("destroy");
       }
 
     // Calculate the positions for each element
