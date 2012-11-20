@@ -82,6 +82,7 @@ $('.container').shapeshift({
   draggable: true,
   objWidth: null,
   paddingY: 0,
+  paddingX: 0,
   gutterX: 10,
   gutterY: 10,
   resizable: true,
@@ -128,6 +129,10 @@ Manually set the width of the objects that will be rearranged. This number is us
 ##### paddingY : integer
 
 Offset the entire grid from the top of the container element with this attribute.
+
+##### paddingX : integer
+
+Offset the entire grid from the left side of the container element with this attribute.
 
 ##### resizable : integer
 
