@@ -85,8 +85,7 @@
     });
     $container.droppable({
       drop: function() { dropObject(); },
-      over: function(e) { dragOver(e); },
-      out: function() { dragOut(); }
+      over: function(e) { dragOver(e); }
     });
 
     // When an object is picked up
@@ -103,8 +102,12 @@
 
         var intendedIndex = ss.getIntendedIndex($selected, e),
             $intendedObj = $($objects.not(".ss-moving").get(intendedIndex));
+        $previousContainer = $selected.parent();
         $selected.insertBefore($intendedObj);
         ss.shiftit($currentContainer, options.animatedOnDrag);
+        if($currentContainer[0] != $previousContainer[0]) {
+          ss.shiftit($previousContainer, options.animatedOnDrag);
+        }
 
         // Prevent it from firing too much
         window.setTimeout(function() {
@@ -130,15 +133,6 @@
     function dragOver(e) {
       $currentContainer = $(e.target);
       ss.setHoverObjPositions($currentContainer);
-      window.setTimeout(function() {
-        ss.shiftit($previousContainer, options.animatedOnDrag);
-      }, 300);
-    }
-
-    // When an object moves out of its current container
-    function dragOut(e) {
-      $previousContainer = $container;
-      ss.shiftit($container, options.animatedOnDrag);
     }
   }
 
