@@ -79,12 +79,13 @@ $('.container').shapeshift({
   autoContainerHeight: true,
   centerGrid: true,
   columns: null,
+  disableDragOn: "",
   draggable: true,
+  gutterX: 10,
+  gutterY: 10,
   objWidth: null,
   paddingY: 0,
   paddingX: 0,
-  gutterX: 10,
-  gutterY: 10,
   resizable: true,
   selector: ""
 });
@@ -109,6 +110,10 @@ Center the grid inside the container. This is mainly helpful for when using a re
 ##### columns : integer
 
 Manually specify the number of columns to render. It will automatically detect by default.
+
+##### disableDragOn : string
+
+Specify the target elements that will not be draggable by id, class, or element name.
 
 ##### draggable : boolean
 
