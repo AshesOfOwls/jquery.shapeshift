@@ -162,8 +162,7 @@
   }
 
   Plugin.prototype.getObjectPositions = function ($container, filter) {
-    var ss = this,
-        options = ss.options,
+    var options = this.options,
         $objects = $container.children(options.selector).filter(filter),
         columns = options.columns,
         colHeights = [],
@@ -230,9 +229,9 @@
   }
 
   // Prevent against multiple instantiations
-  $.fn[pluginName] = function ( options ) {
+  $.fn[pluginName] = function (options) {
     return this.each(function () {
-      $.data(this, 'plugin_' + pluginName, new Plugin( this, options ));
+      $.data(this, 'plugin_' + pluginName, new Plugin(this, options));
     });
   }
 
