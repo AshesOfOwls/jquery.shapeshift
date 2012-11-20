@@ -1,6 +1,8 @@
 body {
   background: #EFEFEF;
   font-family: Helvetica, Arial;
+  padding: 0;
+  margin: 0;
 }
 
 a { text-decoration: none; }
@@ -25,12 +27,20 @@ h1 { text-align: center; }
 ul.description { list-style: none; }
 ul.description li { margin-bottom: 8px; }
 
+.hr {
+  background: #DDD;
+  border-bottom: 1px solid #FFF;
+  height: 1px;
+  margin: 25px 0;
+  width: 100%;
+}
+
 .container {
-  outline: 2px dashed #CCC;
+  outline: 1px dashed #CCC;
   float: left;
-  margin: 50px 0 0 1%;
+  margin: 50px 0 0 2%;
   position: relative;
-  width: 48%;
+  width: 47%;
 }
 
 .container > * {
