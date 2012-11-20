@@ -8,7 +8,7 @@
         autoContainerHeight: true,
         centerGrid: true,
         columns: null,
-        disableDragOn: "",
+        disableDragOn: null,
         draggable: true,
         gutterX: 10,
         gutterY: 10,
