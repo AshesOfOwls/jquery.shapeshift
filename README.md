@@ -79,13 +79,14 @@ $('.container').shapeshift({
   autoContainerHeight: true,
   centerGrid: true,
   columns: null,
-  disableDragOn: "",
+  disableDragOf: null,
   draggable: true,
+  enableDropOf: "*",
   gutterX: 10,
   gutterY: 10,
   objWidth: null,
-  paddingY: 0,
   paddingX: 0,
+  paddingY: 0,
   resizable: true,
   selector: ""
 });
@@ -111,19 +112,23 @@ Center the grid inside the container. This is mainly helpful for when using a re
 
 Manually specify the number of columns to render. It will automatically detect by default.
 
-##### disableDragOn : string
+##### disableDragOf : string
 
-Specify the target elements that will not be draggable by id, class, or element name.
+Specify the target elements within the container that cannot be dragged.
 
 ##### draggable : boolean
 
 Toggles the drag and drop functionality.
 
+##### enableDropOf : string
+
+Specify the target elements which are able to be dropped into the current container.
+
 ##### gutterX : integer
 
 Sets the amount of padding horizontally between columns
 
-##### gutterX : integer
+##### gutterY : integer
 
 Sets the amount of padding vertically between objects.
 
@@ -131,13 +136,13 @@ Sets the amount of padding vertically between objects.
 
 Manually set the width of the objects that will be rearranged. This number is used to determine the width of the columns, and depending on the width of the columns will determine how many columns will be able to fit in your container.
 
-##### paddingY : integer
-
-Offset the entire grid from the top of the container element with this attribute.
-
 ##### paddingX : integer
 
 Offset the entire grid from the left side of the container element with this attribute.
+
+##### paddingY : integer
+
+Offset the entire grid from the top of the container element with this attribute.
 
 ##### resizable : integer
 
