@@ -118,7 +118,11 @@
         $previousContainer = $selected.parent();
 
         // Insert the object into that index position
-        $selected.insertBefore($intendedObj);
+        if(intendedIndex == ($objects.not(".ss-moving").size() - 1) && e.pageY > ($intendedObj.offset().top + ($intendedObj.outerHeight() / 2))) {
+          $selected.insertAfter($intendedObj);
+        } else {
+          $selected.insertBefore($intendedObj);
+        }
 
         // Reshift the new container / old container
         ss.shiftit($currentContainer, options.enableDragAnimation);
