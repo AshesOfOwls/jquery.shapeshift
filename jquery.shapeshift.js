@@ -8,6 +8,7 @@
         enableAutoHeight: true,
         enableDrag: true,
         enableDragAnimation: true,
+        enableDrop: true,
         enableResize: true,
 
         // Options
@@ -39,7 +40,7 @@
     ss.shiftit(ss.container, options.enableAnimation);
 
     // Enable features
-    if(options.enableDrag) { ss.draggable(); }
+    if(options.enableDrag || options.enableDrop) { ss.draggable(); }
     if(options.enableResize) { ss.resizable(); }
   };
 
@@ -47,12 +48,6 @@
     var ss = this,
         options = ss.options,
         $objects = $container.children(options.selector).filter(':visible');
-
-    // Destroy draggable/droppable instances
-    if(!options.enableDrag) {
-      $container.droppable("destroy");
-      $objects.draggable("destroy");
-    }
 
     // Calculate the positions for each element
     positions = ss.getObjectPositions($container, ':visible');
@@ -84,19 +79,25 @@
         $selected = null,
         dragging = false;
 
-    // Initialize the jQuery UI Draggable/Droppable
-    $objects.filter(":not("+options.dragBlacklist+")").draggable({
-      addClasses: false,
-      containment: 'document',
-      zIndex: 9999,
-      start: function() { dragStart($(this)); },
-      drag: function(e, ui) { dragObject(e, ui); }
-    });
-    $container.droppable({
-      accept: options.dropWhitelist,
-      over: function(e) { dragOver(e); },
-      drop: function() { dropObject(); }
-    });
+    // Initialize the jQuery UI Draggable or destroy current instances
+    if(options.enableDrag) {
+      $objects.filter(options.dropWhitelist).filter(":not("+options.dragBlacklist+")").draggable({
+        addClasses: false,
+        containment: 'document',
+        zIndex: 9999,
+        start: function() { dragStart($(this)); },
+        drag: function(e, ui) { dragObject(e, ui); }
+      });
+    } else { $objects.draggable('destroy'); }
+
+    // Initialize the jQuery UI Droppable or destroy current instances
+    if(options.enableDrop) {
+      $container.droppable({
+        accept: options.dropWhitelist,
+        over: function(e) { dragOver(e); },
+        drop: function() { dropObject(); }
+      });
+    } else { $container.droppable('destroy'); }
 
     // When an object is picked up
     function dragStart($object) {
