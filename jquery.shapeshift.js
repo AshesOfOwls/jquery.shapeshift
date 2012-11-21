@@ -93,7 +93,7 @@
       drag: function(e, ui) { dragObject(e, ui); }
     });
     $container.droppable({
-      accept: options.dropWhiteList,
+      accept: options.dropWhitelist,
       over: function(e) { dragOver(e); },
       drop: function() { dropObject(); }
     });
