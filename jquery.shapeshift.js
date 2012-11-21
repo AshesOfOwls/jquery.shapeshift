@@ -108,7 +108,8 @@
 
     // When an object is dragged around
     function dragObject(e, ui) {
-      if(!dragging) {
+      notDroppable = ($container[0] == $currentContainer[0]) && !options.enableDrop;
+      if(!dragging && !notDroppable) {
         dragging = true;
         $objects = $currentContainer.children(options.selector).filter(':visible');
 
