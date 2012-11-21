@@ -1,23 +1,25 @@
 ;(function($,window,undefined) {
-  // Defaults
   var pluginName = 'shapeshift',
       document = window.document,
       defaults = {
-        animated: true,
-        animatedOnDrag: true,
-        autoContainerHeight: true,
+        // Features
         centerGrid: true,
+        enableAnimation: true,
+        enableAutoHeight: true,
+        enableDrag: true,
+        enableDragAnimation: true,
+        enableResize: true,
+
+        // Options
+        childWidth: null,
         columns: null,
-        disableDragOf: null,
-        draggable: true,
-        enableDropOf: "*",
+        dragBlacklist: null,
+        dropWhitelist: "*",
         gutterX: 10,
         gutterY: 10,
-        objWidth: null,
         paddingY: 0,
         paddingX: 0,
-        resizable: true,
-        selector: ""
+        selector: "",
       };
 
   function Plugin(element, options) {
@@ -32,9 +34,9 @@
   Plugin.prototype.init = function() {
     var ss = this,
         options = ss.options;
-    ss.shiftit(ss.container, options.animated);
-    if(options.draggable) { ss.draggable(); }
-    if(options.resizable) { ss.resizable(); }
+    ss.shiftit(ss.container, options.enableAnimation);
+    if(options.enableDrag) { ss.draggable(); }
+    if(options.enableResize) { ss.resizable(); }
   };
 
   Plugin.prototype.shiftit = function($container, animated) {
@@ -43,7 +45,7 @@
         $objects = $container.children(options.selector).filter(':visible');
 
     // Destroy draggable/droppable if needed
-    if(!options.draggable) {
+    if(!options.enableDrag) {
       $container.droppable("destroy");
       $objects.draggable("destroy");
     }
@@ -79,7 +81,7 @@
         dragging = false;
 
     // Initialize the jQuery UI Draggable/Droppable
-    $objects.filter(options.enableDropOf).filter(":not("+options.disableDragOf+")").draggable({
+    $objects.filter(options.dropWhitelist).filter(":not("+options.dragBlacklist+")").draggable({
       addClasses: false,
       containment: 'document',
       zIndex: 9999,
@@ -90,13 +92,13 @@
       drop: function() { dropObject(); },
       over: function(e) { dragOver(e); }
     }
-    if(options.enableDropOf) { dropSettings.accept = options.enableDropOf }
+    if(options.dropWhitelist) { dropSettings.accept = options.dropWhitelist }
     $container.droppable(dropSettings);
 
     // When an object is picked up
     function dragStart($object) {
       $selected = $object.addClass("ss-moving");
-      ss.shiftit($container, options.animatedOnDrag);
+      ss.shiftit($container, options.enableDragAnimation);
     }
 
     // When an object is dragged around
@@ -109,9 +111,9 @@
             $intendedObj = $($objects.not(".ss-moving").get(intendedIndex));
         $previousContainer = $selected.parent();
         $selected.insertBefore($intendedObj);
-        ss.shiftit($currentContainer, options.animatedOnDrag);
+        ss.shiftit($currentContainer, options.enableDragAnimation);
         if($currentContainer[0] != $previousContainer[0]) {
-          ss.shiftit($previousContainer, options.animatedOnDrag);
+          ss.shiftit($previousContainer, options.enableDragAnimation);
         }
 
         // Prevent it from firing too much
@@ -121,7 +123,7 @@
       }
 
       // Manually override the elements position
-      var offsetX = e.pageX - $(e.target).parent().offset().left - (options.objWidth / 2),
+      var offsetX = e.pageX - $(e.target).parent().offset().left - (options.childWidth / 2),
           offsetY = e.pageY - $(e.target).parent().offset().top - ($selected.outerHeight() / 2);
       ui.position.left = offsetX;
       ui.position.top = offsetY;
@@ -145,7 +147,7 @@
     var ss = this,
         options = ss.options,
         $container = $selected.parent(),
-        selectedX = $selected.position().left + (options.objWidth / 2),
+        selectedX = $selected.position().left + (options.childWidth / 2),
         selectedY = $selected.position().top + ($selected.outerHeight() / 2),
         shortestDistance = 9999,
         chosenIndex = 0;
@@ -180,10 +182,10 @@
         positions = [];
 
     // Determine the width of each element.
-    if(!options.objWidth) { options.objWidth = $objects.first().outerWidth(true); }
+    if(!options.childWidth) { options.childWidth = $objects.first().outerWidth(true); }
 
     // Determine the column width.
-    colWidth = options.objWidth + options.gutterX;
+    colWidth = options.childWidth + options.gutterX;
 
     // Determine how many columns are currently active
     if(!columns) { columns = Math.floor($container.innerWidth() / colWidth); }
@@ -213,7 +215,7 @@
       colHeights[col] += height;
     }
     // Store the height of the tallest column
-    if(options.autoContainerHeight){
+    if(options.enableAutoHeight){
       options.containerHeight = Math.max.apply(Math,colHeights);
     }
     return positions;
@@ -228,10 +230,10 @@
     $(window).on("resize", function() {
       if(!resizing) {
         resizing = true;
-        ss.shiftit($container, options.animated);
+        ss.shiftit($container, options.enableAnimation);
         setTimeout(function() {
           resizing = false;
-          ss.shiftit($container, options.animated);
+          ss.shiftit($container, options.enableAnimation);
         }, 333);
       }
     });
