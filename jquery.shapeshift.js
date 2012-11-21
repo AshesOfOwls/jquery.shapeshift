@@ -8,7 +8,8 @@
         autoContainerHeight: true,
         centerGrid: true,
         columns: null,
-        disableDragOn: null,
+        disableDragOf: null,
+        enableDropOf: "*",
         draggable: true,
         gutterX: 10,
         gutterY: 10,
@@ -78,15 +79,19 @@
         dragging = false;
 
     // Initialize the jQuery UI Draggable/Droppable
-    $objects.filter(":not("+options.disableDragOn+")").draggable({
+    $objects.filter(options.enableDropOf).filter(":not("+options.disableDragOf+")").draggable({
+      addClasses: false,
       containment: 'document',
+      zIndex: 9999,
       start: function() { dragStart($(this)); },
       drag: function(e, ui) { dragObject(e, ui); }
     });
-    $container.droppable({
+    dropSettings = {
       drop: function() { dropObject(); },
       over: function(e) { dragOver(e); }
-    });
+    }
+    if(options.enableDropOf) { dropSettings.accept = options.enableDropOf }
+    $container.droppable(dropSettings);
 
     // When an object is picked up
     function dragStart($object) {
