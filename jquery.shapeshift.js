@@ -84,7 +84,6 @@
       $objects.filter(options.dropWhitelist).filter(":not("+options.dragBlacklist+")").draggable({
         addClasses: false,
         containment: 'document',
-        revert: true,
         zIndex: 9999,
         start: function() { dragStart($(this)); },
         drag: function(e, ui) { dragObject(e, ui); }
