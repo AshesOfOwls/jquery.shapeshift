@@ -55,11 +55,11 @@ ul.description li { margin-bottom: 8px; }
   cursor: move;
   z-index: 9999;
   opacity: .7;
-  transform:rotate(3deg);
-  -ms-transform:rotate(3deg); /* IE 9 */
-  -moz-transform:rotate(3deg); /* Firefox */
-  -webkit-transform:rotate(3deg); /* Safari and Chrome */
-  -o-transform:rotate(3deg); /* Opera */
+  transform:rotate(2deg);
+  -ms-transform:rotate(2deg); /* IE 9 */
+  -moz-transform:rotate(2deg); /* Firefox */
+  -webkit-transform:rotate(2deg); /* Safari and Chrome */
+  -o-transform:rotate(2deg); /* Opera */
 }
 
 .container > * > img { border-radius: 2px 2px 0 0; }

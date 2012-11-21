@@ -29,13 +29,13 @@ $(".filter").on("click", function(e) {
 
   if($(this).hasClass("no-drag-animate")) {
     $containers.shapeshift({
-      animatedOnDrag: false,
+      enableDragAnimation: false,
       paddingY: 20
     });
   }
   if($(this).hasClass("no-drag")) {
     $containers.shapeshift({
-      draggable: false,
+      enableDrag: false,
       paddingY: 20
     });
   }
@@ -46,7 +46,7 @@ $(".filter").on("click", function(e) {
   }
   if($(this).hasClass("hide")) {
     var $objects = $containers.children().filter(":visible"),
-        random = Math.round(Math.random()*7);
+        random = Math.round(Math.random() * $objects.size());
     $objects.eq(random).hide();
     $containers.shapeshift({
       paddingY: 20
@@ -54,7 +54,7 @@ $(".filter").on("click", function(e) {
   }
   if($(this).hasClass("show")) {
     var $objects = $containers.children().filter(":hidden"),
-        random = Math.round(Math.random()*3);
+        random = Math.round(Math.random() * $objects.size());
     $objects.eq(random).show();
     $containers.shapeshift({
       paddingY: 20
