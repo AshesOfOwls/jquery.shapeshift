@@ -74,55 +74,66 @@ There are several options that can be passed into the plugin through the objects
 
 ```javascript
 $('.container').shapeshift({
-  animated: true,
-  animatedOnDrag: true,
-  autoContainerHeight: true,
+  // Features
   centerGrid: true,
+  enableAnimation: true,
+  enableAutoHeight: true,
+  enableDrag: true,
+  enableDragAnimation: true,
+  enableResize: true,
+
+  // Options
+  childWidth: null,
   columns: null,
-  disableDragOf: null,
-  draggable: true,
-  enableDropOf: "*",
+  dragBlacklist: null,
+  dropWhitelist: "*",
   gutterX: 10,
   gutterY: 10,
-  objWidth: null,
-  paddingX: 0,
   paddingY: 0,
-  resizable: true,
-  selector: ""
+  paddingX: 0,
+  selector: "",
 });
 ```
-
-##### animated : boolean
-
-Objects will animate into their positions using the jquery .animate() function. When changed to false, all objects will then use the .css() function and be placed into position instantly.
-
-##### animatedOnDrag : boolean
-
-Turn off the object animations of other elements when dragging one around.
-
-##### autoContainerHeight : boolean
-
-If this is set to true the parent container will have its height adjusted to match the tallest "column" within.
 
 ##### centerGrid : boolean
 
 Center the grid inside the container. This is mainly helpful for when using a responsive container width.
 
-##### columns : integer
+##### enableAnimation : boolean
 
-Manually specify the number of columns to render. It will automatically detect by default.
+Objects will animate into their new position when shapeshift() is initialized, or when the container is resized.
 
-##### disableDragOf : string
+##### enableAutoHeight : boolean
 
-Specify the target elements within the container that cannot be dragged.
+If this is set to true the parent containers height will be automatically be adjusted to compensate for all of the child elements.
 
-##### draggable : boolean
+##### enableDrag : boolean
 
 Toggles the drag and drop functionality.
 
-##### enableDropOf : string
+##### enableDragAnimation : boolean
 
-Specify the target elements which are able to be dropped into the current container.
+Turn off the object animations of other elements when an element is being dragged.
+
+##### enableResize : integer
+
+The elements will dynamically adjust to the width of their parent container.
+
+##### childWidth : integer
+
+The width of each item is automatically calculated by getting the first item and finding its width. If for any reason you need to manually set the width, use this attribute.
+
+##### columns : integer
+
+Manually specify the number of columns to render. It will automatically detect the maximum amount of columns by default.
+
+##### dragBlacklist : string
+
+Specify a string which contains the elements that ***cannot*** be dragged. This defaults to any element being draggable.
+
+##### dropWhitelist : string
+
+Specify a string which contains the elements that ***can*** be dropped into this container. This defaults to any element being droppable.
 
 ##### gutterX : integer
 
@@ -132,10 +143,6 @@ Sets the amount of padding horizontally between columns
 
 Sets the amount of padding vertically between objects.
 
-##### objWidth : integer
-
-Manually set the width of the objects that will be rearranged. This number is used to determine the width of the columns, and depending on the width of the columns will determine how many columns will be able to fit in your container.
-
 ##### paddingX : integer
 
 Offset the entire grid from the left side of the container element with this attribute.
@@ -143,10 +150,6 @@ Offset the entire grid from the left side of the container element with this att
 ##### paddingY : integer
 
 Offset the entire grid from the top of the container element with this attribute.
-
-##### resizable : integer
-
-Toggles whether the container should be shapeshifted when the window is resized.
 
 ##### selector : string
 
