@@ -82,6 +82,7 @@ $('.container').shapeshift({
   enableAutoHeight: true,
   enableDrag: true,
   enableDragAnimation: true,
+  enableDrop: true,
   enableResize: true,
 
   // Options
@@ -111,11 +112,15 @@ If this is set to true the parent containers height will be automatically be adj
 
 ##### enableDrag : boolean
 
-Toggles the drag and drop functionality.
+Enables objects in this container to be dragged.
 
 ##### enableDragAnimation : boolean
 
 Turn off the object animations of other elements when an element is being dragged.
+
+##### enableDrop : boolean
+
+Enables this container to be dropped on if true, removes the container from being a drop zone if false.
 
 ##### enableResize : integer
 
@@ -136,6 +141,8 @@ Specify a string which contains the elements that ***cannot*** be dragged. This 
 ##### dropWhitelist : string
 
 Specify a string which contains the elements that ***can*** be dropped into this container. This defaults to any element being droppable.
+
+***If a white list is set, only items listed with it can be draggable.***
 
 ##### gutterX : integer
 
