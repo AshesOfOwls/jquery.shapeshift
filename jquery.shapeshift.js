@@ -34,7 +34,11 @@
   Plugin.prototype.init = function() {
     var ss = this,
         options = ss.options;
+
+    // The initial shapeshift
     ss.shiftit(ss.container, options.enableAnimation);
+
+    // Enable features
     if(options.enableDrag) { ss.draggable(); }
     if(options.enableResize) { ss.resizable(); }
   };
@@ -44,7 +48,7 @@
         options = ss.options,
         $objects = $container.children(options.selector).filter(':visible');
 
-    // Destroy draggable/droppable if needed
+    // Destroy draggable/droppable instances
     if(!options.enableDrag) {
       $container.droppable("destroy");
       $objects.draggable("destroy");
@@ -81,19 +85,18 @@
         dragging = false;
 
     // Initialize the jQuery UI Draggable/Droppable
-    $objects.filter(options.dropWhitelist).filter(":not("+options.dragBlacklist+")").draggable({
+    $objects.filter(":not("+options.dragBlacklist+")").draggable({
       addClasses: false,
       containment: 'document',
       zIndex: 9999,
       start: function() { dragStart($(this)); },
       drag: function(e, ui) { dragObject(e, ui); }
     });
-    dropSettings = {
-      drop: function() { dropObject(); },
-      over: function(e) { dragOver(e); }
-    }
-    if(options.dropWhitelist) { dropSettings.accept = options.dropWhitelist }
-    $container.droppable(dropSettings);
+    $container.droppable({
+      accept: options.dropWhiteList,
+      over: function(e) { dragOver(e); },
+      drop: function() { dropObject(); }
+    });
 
     // When an object is picked up
     function dragStart($object) {
@@ -107,10 +110,15 @@
         dragging = true;
         $objects = $currentContainer.children(options.selector).filter(':visible');
 
+        // Determine where the intended index position of the object is
         var intendedIndex = ss.getIntendedIndex($selected, e),
             $intendedObj = $($objects.not(".ss-moving").get(intendedIndex));
         $previousContainer = $selected.parent();
+
+        // Insert the object into that index position
         $selected.insertBefore($intendedObj);
+
+        // Reshift the new container / old container
         ss.shiftit($currentContainer, options.enableDragAnimation);
         if($currentContainer[0] != $previousContainer[0]) {
           ss.shiftit($previousContainer, options.enableDragAnimation);
@@ -123,10 +131,8 @@
       }
 
       // Manually override the elements position
-      var offsetX = e.pageX - $(e.target).parent().offset().left - (options.childWidth / 2),
-          offsetY = e.pageY - $(e.target).parent().offset().top - ($selected.outerHeight() / 2);
-      ui.position.left = offsetX;
-      ui.position.top = offsetY;
+      ui.position.left = e.pageX - $(e.target).parent().offset().left - (options.childWidth / 2);
+      ui.position.top = e.pageY - $(e.target).parent().offset().top - ($selected.outerHeight() / 2);
     }
 
     // When an object is dropped
@@ -152,7 +158,12 @@
         shortestDistance = 9999,
         chosenIndex = 0;
 
+    // Get the grid based on all the elements except
+    // the currently dragged element
     ss.setHoverObjPositions($container);
+
+    // Go over all of those positions and figure out
+    // which is the closest to the cursor.
     for(hov_i=0;hov_i<ss.hoverObjPositions.length;hov_i++) {
       attributes = ss.hoverObjPositions[hov_i];
       if(selectedX > attributes.left && selectedY > attributes.top) {
