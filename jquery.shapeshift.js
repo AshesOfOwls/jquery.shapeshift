@@ -19,7 +19,7 @@
         gutterY: 10,
         paddingY: 0,
         paddingX: 0,
-        selector: "",
+        selector: ""
       };
 
   function Plugin(element, options) {

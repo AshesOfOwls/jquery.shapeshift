@@ -77,24 +77,23 @@ There are several options that can be passed into the plugin through the objects
 ```javascript
 $('.container').shapeshift({
   // Features
-  centerGrid: true,
-  enableAnimation: true,
-  enableAutoHeight: true,
-  enableDrag: true,
-  enableDragAnimation: true,
-  enableDrop: true,
-  enableResize: true,
+        centerGrid: true,
+        enableAnimation: true,
+        enableAutoHeight: true,
+        enableDrag: true,
+        enableDragAnimation: true,
+        enableResize: true,
 
-  // Options
-  childWidth: null,
-  columns: null,
-  dragBlacklist: null,
-  dropWhitelist: "*",
-  gutterX: 10,
-  gutterY: 10,
-  paddingY: 0,
-  paddingX: 0,
-  selector: "",
+        // Options
+        childWidth: null,
+        columns: null,
+        dragBlacklist: null,
+        dropWhitelist: "*",
+        gutterX: 10,
+        gutterY: 10,
+        paddingY: 0,
+        paddingX: 0,
+        selector: ""
 });
 ```
 
@@ -112,15 +111,11 @@ If this is set to true the parent containers height will be automatically be adj
 
 ##### enableDrag : boolean
 
-Enables objects in this container to be dragged.
+Enables objects in this container to be drag and dropped.
 
 ##### enableDragAnimation : boolean
 
 Turn off the object animations of other elements when an element is being dragged.
-
-##### enableDrop : boolean
-
-Enables this container to be dropped on if true, removes the container from being a drop zone if false.
 
 ##### enableResize : integer
 
