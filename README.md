@@ -1,7 +1,7 @@
 [Shapeshift](http://mcpants.github.com/jquery.shapeshift/)
 ==========
 
-***11/20/2012: Breaking changes have been made to option names***
+***11/23/2012: Breaking changes have been made to option and event names***
 
 Inspired heavily by the jQuery Masonry plugin (http://masonry.desandro.com/), Shapeshift is a plugin which will dynamically arrange a collection of elements into a grid in their parent container. An example of this behavior is what you can find at sites like http://www.pinterest.com.
 
@@ -173,10 +173,10 @@ When an element is picked up it the ".ss-moving" class will be appended to it. J
 
 ### Detecting Changes
 
-When an item is dropped it will trigger the event "shapeshifted" on the container element. You can then write some code to be fired off when that event occurs. The object that was just selected is also passed back to you. For example,
+When an item is dropped it will trigger the event "ss-event-dropped" on the container element. You can then write some code to be fired off when that event occurs. The object that was just selected is also passed back to you. For example,
 
 ```javascript
-$(".container").on("shapeshifted", function(e, $selected) {
+$(".container").on("ss-event-dropped", function(e, $selected) {
   // Get the new position for the dropped item
   var position = $selected.index();
 
