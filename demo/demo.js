@@ -1,10 +1,5 @@
 var $containers = $(".container");
 
-// Initial Shapeshift
-$containers.shapeshift({
-  paddingY: 20
-});
-
 // This just renders us some random temporary children
 function renderChildren(placekitten) {
   $containers.children().filter(":not(.credits)").remove();
@@ -36,6 +31,11 @@ function getRandomColor() {
   }
   return color;
 }
+
+// Initial Shapeshift
+$containers.shapeshift({
+  paddingY: 20
+});
 
 // When our buttons are clicked.
 $(".filter").on("click", function(e) {
