@@ -91,7 +91,7 @@
   Plugin.prototype.drag = function () {
     var ss = this,
         options = ss.options,
-        $container = $curContainer = $prevContainer = $(ss.element),
+        $container = $curContainer = $(ss.element),
         $objects = $container.children(options.selector),
         $selected = null,
         dragging = false;
@@ -123,7 +123,7 @@
         }
 
         $curContainer.trigger("ss-event-arrange");
-        $prevContainer.trigger("ss-event-arrange");
+        $(".ss-prev-container").trigger("ss-event-arrange");
 
         window.setTimeout(function() {
           dragging = false;
@@ -147,8 +147,8 @@
     }
 
     function over(e) {
-      $prevContainer = $curContainer;
-      $curContainer = $(e.target);
+      $curContainer.addClass("ss-prev-container");
+      $curContainer = $(e.target).removeClass("ss-prev-container");
     }
   }
 
