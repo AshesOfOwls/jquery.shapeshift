@@ -15,6 +15,7 @@
         childWidth: null,
         columns: null,
         dragBlacklist: null,
+        dropCutoff: 0,
         dropWhitelist: "*",
         gutterX: 10,
         gutterY: 10,
@@ -212,32 +213,32 @@
         options = ss.options,
         $selected = $(".ss-moving"),
         $container = $selected.parent(),
+        chosenIndex = 0,
         selectedX = $selected.position().left + (options.childWidth / 2),
         selectedY = $selected.position().top + ($selected.outerHeight() / 2),
         shortestDistance = 9999,
-        chosenIndex = 0;
-
-    // Get the grid based on all the elements except
-    // the currently dragged element
-    positions = ss.getPositions($container, true);
+        positions = ss.getPositions($container, true),
+        endCap = positions.length - options.dropCutoff;
 
     // Go over all of those positions and figure out
     // which is the closest to the cursor.
     for(hov_i=0;hov_i<positions.length;hov_i++) {
-      attributes = positions[hov_i];
-      if(selectedX > attributes.left && selectedY > attributes.top) {
-        xDist = selectedX - attributes.left;
-        yDist = selectedY - attributes.top;
+      if(hov_i < endCap) {
+        attributes = positions[hov_i];
+        if(selectedX > attributes.left && selectedY > attributes.top) {
+          xDist = selectedX - attributes.left;
+          yDist = selectedY - attributes.top;
 
-        distance = Math.sqrt((xDist * xDist) + (yDist * yDist));
-        if(distance < shortestDistance) {
-          shortestDistance = distance;
-          chosenIndex = hov_i;
+          distance = Math.sqrt((xDist * xDist) + (yDist * yDist));
+          if(distance < shortestDistance) {
+            shortestDistance = distance;
+            chosenIndex = hov_i;
 
-          if(hov_i === positions.length - 1) {
-            $object = $container.children().not(".ss-moving");
-            if(yDist > ($object.outerHeight() * .9) || xDist > options.childWidth * .9) {
-              chosenIndex++;
+            if(hov_i === positions.length - 1) {
+              $object = $container.children().not(".ss-moving");
+              if(yDist > ($object.outerHeight() * .9) || xDist > options.childWidth * .9) {
+                chosenIndex++;
+              }
             }
           }
         }

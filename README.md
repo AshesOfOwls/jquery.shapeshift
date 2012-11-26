@@ -89,6 +89,7 @@ $('.container').shapeshift({
         childWidth: null,
         columns: null,
         dragBlacklist: null,
+        dropCutoff: 0,
         dropWhitelist: "*",
         gutterX: 10,
         gutterY: 10,
@@ -137,6 +138,10 @@ Manually specify the number of columns to render. It will automatically detect t
 ##### dragBlacklist : string
 
 Specify a string which contains the elements that ***cannot*** be dragged. This defaults to any element being draggable.
+
+##### dropCutoff : string
+
+Prevents a user from dropping an item X amount from the end of the objects list. For example, if you have 20 items in your container, and you set the dropCutoff to be 3, then you would not be able to drop after the 17th item.
 
 ##### dropWhitelist : string
 
