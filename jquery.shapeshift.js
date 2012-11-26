@@ -15,6 +15,7 @@
         childWidth: null,
         columns: null,
         dragBlacklist: null,
+        dragClone: false,
         dropCutoff: 0,
         dropWhitelist: "*",
         gutterX: 10,
@@ -49,6 +50,12 @@
         $container = $(ss.element);
 
     $container.off("ss-event-arrange").on("ss-event-arrange", function() { ss.arrange(); });
+    $container.off("ss-event-dragreset").on("ss-event-dragreset", function() {
+      $container.droppable().droppable('destroy');
+      $container.children().draggable().draggable('destroy');
+      console.log("reset", $container.children()[0])
+      ss.drag();
+    });
 
     $container.droppable().droppable('destroy');
     $container.children().draggable().draggable('destroy');
@@ -108,7 +115,11 @@
     });
 
     function start(e, ui) {
-      $selected = $(e.target).addClass("ss-moving");
+      $selected = $(e.target);
+      if(options.dragClone) {
+        $clone = $selected.clone().insertBefore($selected).addClass("ss-clone");
+      }
+      $selected.addClass("ss-moving");
     }
 
     function drag(e, ui) {
@@ -145,7 +156,19 @@
 
     function drop(e) {
       $selected = $(".ss-moving").removeClass("ss-moving");
-      $curContainer.trigger("ss-event-arrange").trigger("ss-event-dropped", $selected);
+      $selectedContainer = $selected.parent();
+      $clone = $(".ss-clone");
+      if($clone[0]) {
+        $cloneContainer = $clone.parent();
+        if($cloneContainer[0] === $selectedContainer[0]) {
+          $clone.remove();
+        } else {
+          $clone.removeClass("ss-clone");
+          $cloneContainer.trigger("ss-event-dragreset");
+          $selected.parent().trigger("ss-event-dragreset");
+        }
+      }
+      $selectedContainer.trigger("ss-event-arrange").trigger("ss-event-dropped", $selected);
     }
 
     function over(e) {
