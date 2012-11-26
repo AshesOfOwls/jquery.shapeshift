@@ -11,7 +11,7 @@
         enableResize: true,
 
         // Options
-        animateSpeed: 100,
+        animateSpeed: 150,
         childWidth: null,
         columns: null,
         dragBlacklist: null,
