@@ -110,7 +110,8 @@
       containment: 'document',
       zIndex: 9999,
       drag: function(e, ui) { drag(e, ui); },
-      start: function(e, ui) { start(e, ui); }
+      start: function(e, ui) { start(e, ui); },
+      stop: function(e, ui) { stop(e); }
     });
 
     function start(e, ui) {
@@ -119,6 +120,13 @@
         $clone = $selected.clone().insertBefore($selected).addClass("ss-clone");
       }
       $selected.addClass("ss-moving");
+    }
+
+    function stop(e) {
+      $selected = $(e.target).removeClass("ss-moving");
+      if($selected[0]) {
+        $selected.parent().trigger("ss-event-arrange");
+      }
     }
 
     function drag(e, ui) {
