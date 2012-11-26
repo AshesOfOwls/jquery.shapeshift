@@ -11,6 +11,7 @@
         enableResize: true,
 
         // Options
+        animateSpeed: 100,
         childWidth: null,
         columns: null,
         dragBlacklist: null,
@@ -77,7 +78,7 @@
       // Never animate the currently dragged item
       if(!$obj.hasClass("ss-moving")) {
         if(animated) {
-          $obj.stop(true, false).animate(attributes, 250);
+          $obj.stop(true, false).animate(attributes, options.animateSpeed);
         } else {
           $obj.css(attributes);
         }
@@ -127,7 +128,7 @@
 
         window.setTimeout(function() {
           dragging = false;
-        }, 180)
+        }, options.animateSpeed / 3)
       }
       // Manually override the elements position
       ui.position.left = e.pageX - $(e.target).parent().offset().left - (options.childWidth / 2);

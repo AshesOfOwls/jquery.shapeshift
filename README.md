@@ -85,6 +85,7 @@ $('.container').shapeshift({
         enableResize: true,
 
         // Options
+        animateSpeed: 100,
         childWidth: null,
         columns: null,
         dragBlacklist: null,
@@ -120,6 +121,10 @@ Turn off the object animations of other elements when an element is being dragge
 ##### enableResize : integer
 
 The elements will dynamically adjust to the width of their parent container.
+
+##### animateSpeed : integer
+
+The speed in milliseconds that the animations will transition using. This currently will also determine how often the drag function gets called, which is the animation speed divided by three (i.e. for the default speed, 100, the drag function will run every 33.3 milliseconds).
 
 ##### childWidth : integer
 
