@@ -89,6 +89,7 @@ $('.container').shapeshift({
         childWidth: null,
         columns: null,
         dragBlacklist: null,
+        dragClone: false,
         dropCutoff: 0,
         dropWhitelist: "*",
         gutterX: 10,
@@ -138,6 +139,10 @@ Manually specify the number of columns to render. It will automatically detect t
 ##### dragBlacklist : string
 
 Specify a string which contains the elements that ***cannot*** be dragged. This defaults to any element being draggable.
+
+##### dragClone : boolean
+
+If set to true, the item that is dragged will be a clone and therefore will not remove the item from the original container upon drop. This would be analogous to "copy and paste", instead of the default "cut and paste".
 
 ##### dropCutoff : string
 
