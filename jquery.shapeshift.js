@@ -53,7 +53,6 @@
     $container.off("ss-event-dragreset").on("ss-event-dragreset", function() {
       $container.droppable().droppable('destroy');
       $container.children().draggable().draggable('destroy');
-      console.log("reset", $container.children()[0])
       ss.drag();
     });
 
