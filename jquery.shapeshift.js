@@ -34,14 +34,9 @@
   }
 
   Plugin.prototype.init = function() {
-    var ss = this,
-        $container = $(ss.element);
-
-    // Create the trigger events
+    var ss = this;
     ss.eventSetup();
-
-    // The initial shapeshift arrangement
-    $container.trigger("ss-event-arrange");
+    $(ss.element).trigger("ss-event-arrange");
   };
 
   Plugin.prototype.eventSetup = function() {
@@ -50,16 +45,11 @@
         $container = $(ss.element);
 
     $container.off("ss-event-arrange").on("ss-event-arrange", function() { ss.arrange(); });
-    $container.off("ss-event-dragreset").on("ss-event-dragreset", function() {
-      $container.droppable().droppable('destroy');
-      $container.children().draggable().draggable('destroy');
-      ss.drag();
-    });
+    $container.off("ss-event-dragreset").on("ss-event-dragreset", function() { ss.dragClear(); ss.drag(); });
 
-    $container.droppable().droppable('destroy');
-    $container.children().draggable().draggable('destroy');
+    ss.dragClear();
     if(options.enableDrag) { ss.drag(); }
-    if(options.enableResize) { ss.resize(); };
+    if(options.enableResize) { ss.resize(); }
   }
 
   Plugin.prototype.arrange = function() {
@@ -80,14 +70,13 @@
 
     // Animate / Move each object into place
     for(var obj_i=0; obj_i < $objects.length; obj_i++) {
-      var $obj = $($objects[obj_i]),
-          attributes = positions[obj_i];
+      var $obj = $($objects[obj_i]);
       // Never animate the currently dragged item
       if(!$obj.hasClass("ss-moving")) {
         if(animated) {
-          $obj.stop(true, false).animate(attributes, options.animateSpeed);
+          $obj.stop(true, false).animate(positions[obj_i], options.animateSpeed);
         } else {
-          $obj.css(attributes);
+          $obj.css(positions[obj_i]);
         }
       }
     }
@@ -184,6 +173,13 @@
     }
   }
 
+  Plugin.prototype.dragClear = function() {
+    var ss = this,
+        $container = $(ss.container);
+    $container.droppable().droppable('destroy');
+    $container.children().draggable().draggable('destroy');
+  }
+
   Plugin.prototype.getPositions = function($container, ignoreSelected) {
     var ss = this,
         options = ss.options,
@@ -194,9 +190,9 @@
         gridOffset = options.paddingX,
         positions = [];
 
-    if(ignoreSelected) {
-      $objects = $objects.not(".ss-moving");
-    }
+    // If we want to get the positions for all items excluding the
+    // one currently being dragged.
+    if(ignoreSelected) { $objects = $objects.not(".ss-moving"); }
 
     // Determine the width of each element.
     if(!options.childWidth) { options.childWidth = $objects.first().outerWidth(true); }
@@ -253,19 +249,27 @@
     // Go over all of those positions and figure out
     // which is the closest to the cursor.
     for(hov_i=0;hov_i<positions.length;hov_i++) {
+
+      // If we are able to insert at this index position
       if(hov_i < endCap) {
         attributes = positions[hov_i];
+
+        // If the current item is to the bottom right of the current object position
         if(selectedX > attributes.left && selectedY > attributes.top) {
-          xDist = selectedX - attributes.left;
-          yDist = selectedY - attributes.top;
+          var xDist = selectedX - attributes.left,
+              yDist = selectedY - attributes.top;
 
           distance = Math.sqrt((xDist * xDist) + (yDist * yDist));
+
+          // If this is the shortest distance so far
           if(distance < shortestDistance) {
             shortestDistance = distance;
             chosenIndex = hov_i;
 
+            // If this is the last item, and we are below it or to the right,
+            // then we may want to insert it as the last item.
             if(hov_i === positions.length - 1) {
-              $object = $container.children().not(".ss-moving");
+              var $object = $container.children().not(".ss-moving").last();
               if(yDist > ($object.outerHeight() * .9) || xDist > options.childWidth * .9) {
                 chosenIndex++;
               }
@@ -274,18 +278,18 @@
         }
       }
     }
+    // Return the intended index position
     return chosenIndex;
   }
 
   Plugin.prototype.resize = function () {
     var ss = this,
-        $container = $(ss.element),
         resizing = false;
 
     $(window).on("resize", function() {
       if(!resizing) {
         resizing = true;
-        $container.trigger("ss-event-arrange");
+        $(ss.element).trigger("ss-event-arrange");
         setTimeout(function() {
           resizing = false;
         }, 200);
