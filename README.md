@@ -85,11 +85,12 @@ $('.container').shapeshift({
         enableResize: true,
 
         // Options
-        animateSpeed: 100,
+        animateSpeed: 150,
         childWidth: null,
         columns: null,
         dragBlacklist: null,
         dragClone: false,
+        dragRate: 100,
         dropCutoff: 0,
         dropWhitelist: "*",
         gutterX: 10,
@@ -143,6 +144,10 @@ Specify a string which contains the elements that ***cannot*** be dragged. This 
 ##### dragClone : boolean
 
 If set to true, the item that is dragged will be a clone and therefore will not remove the item from the original container upon drop. This would be analogous to "copy and paste", instead of the default "cut and paste".
+
+##### dragRate : boolean
+
+Determines how often the program will detect a position for the currently dragged item to be dropped, in milliseconds. The faster the speed then the more the computer will have to process, but the slower the speed the less responsive it is to items being dragged around.
 
 ##### dropCutoff : string
 
