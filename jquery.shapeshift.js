@@ -16,6 +16,7 @@
         columns: null,
         dragBlacklist: null,
         dragClone: false,
+        dragRate: 100,
         dropCutoff: 0,
         dropWhitelist: "*",
         gutterX: 10,
@@ -136,7 +137,7 @@
 
         window.setTimeout(function() {
           dragging = false;
-        }, options.animateSpeed / 3)
+        }, options.dragRate)
       }
       // Manually override the elements position
       ui.position.left = e.pageX - $(e.target).parent().offset().left - (options.childWidth / 2);
