@@ -58,7 +58,8 @@
         $container = $(ss.element),
         $objects = $container.children(options.selector).filter(':visible'),
         positions = ss.getPositions($container, false),
-        obj_i = positions.length,
+        positionsLength = positions.length - 1,
+        obj_i = positionsLength,
         animated = true;
 
     if($objects.filter(".ss-moving")[0]) {
@@ -69,13 +70,15 @@
 
     // Animate / Move each object into place
     do {
-      var $obj = $($objects[obj_i]);
+      var reverse_i = positionsLength - obj_i,
+          $obj = $($objects[reverse_i]);
+
       // Never animate the currently dragged item
       if(!$obj.hasClass("ss-moving")) {
         if(animated) {
-          $obj.stop(true, false).animate(positions[obj_i], options.animateSpeed);
+          $obj.stop(true, false).animate(positions[reverse_i], options.animateSpeed);
         } else {
-          $obj.css(positions[obj_i]);
+          $obj.css(positions[reverse_i]);
         }
       }
     } while(obj_i--);
