@@ -57,6 +57,8 @@
         options = ss.options,
         $container = $(ss.element),
         $objects = $container.children(options.selector).filter(':visible'),
+        positions = ss.getPositions($container, false),
+        obj_i = positions.length,
         animated = true;
 
     if($objects.filter(".ss-moving")[0]) {
@@ -65,11 +67,8 @@
       animated = options.enableAnimation;
     }
 
-    // Calculate the positions for each element
-    positions = ss.getPositions($container, false);
-
     // Animate / Move each object into place
-    for(var obj_i=0; obj_i < $objects.length; obj_i++) {
+    do {
       var $obj = $($objects[obj_i]);
       // Never animate the currently dragged item
       if(!$obj.hasClass("ss-moving")) {
@@ -79,7 +78,7 @@
           $obj.css(positions[obj_i]);
         }
       }
-    }
+    } while(obj_i--);
 
     // Set the container height to match the tallest column
     $container.css("height", options.containerHeight);
