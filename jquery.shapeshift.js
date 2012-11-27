@@ -91,6 +91,7 @@
         $container = $curContainer = $(ss.element),
         $objects = $container.children(options.selector),
         $selected = null,
+        position = null,
         dragging = false;
 
     // Dragging
@@ -112,10 +113,7 @@
     }
 
     function stop(e) {
-      $selected = $(e.target).removeClass("ss-moving");
-      if($selected[0]) {
-        $selected.parent().trigger("ss-event-arrange");
-      }
+      $(e.target).removeClass("ss-moving").parent().trigger("ss-event-arrange");
     }
 
     function drag(e, ui) {
@@ -174,8 +172,7 @@
   }
 
   Plugin.prototype.dragClear = function() {
-    var ss = this,
-        $container = $(ss.container);
+    var $container = $(this.container);
     $container.droppable().droppable('destroy');
     $container.children().draggable().draggable('destroy');
   }
