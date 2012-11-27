@@ -106,35 +106,52 @@ $('.container').shapeshift({
     <th>Feature</th>
     <th>Description</th>
     <th>Type</th>
+    <th>Default</th>
     <th>Example</th>
   </tr>
   <tr>
     <td>centerGrid</td>
     <td>Center the grid inside the container. This is mainly helpful for when using a responsive container width.</td>
     <td>Boolean</td>
-    <td>centerGrid: true</td>
+    <td>true</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>enableAnimation</td>
+    <td>Objects will animate into their new position when shapeshift() is initialized, or when the container is resized.</td>
+    <td>Boolean</td>
+    <td>true</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>enableAutoHeight</td>
+    <td>If this is set to true the parent containers height will be automatically be adjusted to compensate for all of the child elements.</td>
+    <td>Boolean</td>
+    <td>true</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>enableDrag</td>
+    <td>Enables objects in this container to be drag and dropped.</td>
+    <td>Boolean</td>
+    <td>true</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>enableDragAnimation</td>
+    <td>Turn off the object animations of other elements when an element is being dragged.</td>
+    <td>Boolean</td>
+    <td>true</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>enableResize</td>
+    <td>The elements will dynamically adjust to the width of their parent container.</td>
+    <td>Boolean</td>
+    <td>true</td>
+    <td>false</td>
   </tr>
 </table>
-
-##### enableAnimation : boolean
-
-Objects will animate into their new position when shapeshift() is initialized, or when the container is resized.
-
-##### enableAutoHeight : boolean
-
-If this is set to true the parent containers height will be automatically be adjusted to compensate for all of the child elements.
-
-##### enableDrag : boolean
-
-Enables objects in this container to be drag and dropped.
-
-##### enableDragAnimation : boolean
-
-Turn off the object animations of other elements when an element is being dragged.
-
-##### enableResize : integer
-
-The elements will dynamically adjust to the width of their parent container.
 
 ##### animateSpeed : integer
 
