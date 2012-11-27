@@ -151,9 +151,6 @@ $('.container').shapeshift({
     <td>true</td>
     <td>false</td>
   </tr>
-</table>
-
-<table>
   <tr>
     <th>Option</th>
     <th>Description</th>
