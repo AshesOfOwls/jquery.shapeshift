@@ -101,9 +101,20 @@ $('.container').shapeshift({
 });
 ```
 
-##### centerGrid : boolean
-
-Center the grid inside the container. This is mainly helpful for when using a responsive container width.
+<table>
+  <tr>
+    <th>Feature</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Example</th>
+  </tr>
+  <tr>
+    <td>centerGrid</td>
+    <td>Center the grid inside the container. This is mainly helpful for when using a responsive container width.</td>
+    <td>Boolean</td>
+    <td>centerGrid: true</td>
+  </tr>
+</table>
 
 ##### enableAnimation : boolean
 
