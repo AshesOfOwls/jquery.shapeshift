@@ -241,12 +241,12 @@
         selectedY = $selected.position().top + ($selected.outerHeight() / 2),
         shortestDistance = 9999,
         positions = ss.getPositions($container, true),
-        endCap = positions.length - options.dropCutoff;
+        endCap = positions.length - options.dropCutoff,
+        hov_i = positions.length;
 
     // Go over all of those positions and figure out
     // which is the closest to the cursor.
-    for(hov_i=0;hov_i<positions.length;hov_i++) {
-
+    do {
       // If we are able to insert at this index position
       if(hov_i < endCap) {
         attributes = positions[hov_i];
@@ -274,7 +274,7 @@
           }
         }
       }
-    }
+    } while(hov_i--);
     // Return the intended index position
     return chosenIndex;
   }
