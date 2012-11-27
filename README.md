@@ -77,27 +77,27 @@ There are several options that can be passed into the plugin through the objects
 ```javascript
 $('.container').shapeshift({
   // Features
-        centerGrid: true,
-        enableAnimation: true,
-        enableAutoHeight: true,
-        enableDrag: true,
-        enableDragAnimation: true,
-        enableResize: true,
+  centerGrid: true,
+  enableAnimation: true,
+  enableAutoHeight: true,
+  enableDrag: true,
+  enableDragAnimation: true,
+  enableResize: true,
 
-        // Options
-        animateSpeed: 150,
-        childWidth: null,
-        columns: null,
-        dragBlacklist: null,
-        dragClone: false,
-        dragRate: 100,
-        dropCutoff: 0,
-        dropWhitelist: "*",
-        gutterX: 10,
-        gutterY: 10,
-        paddingY: 0,
-        paddingX: 0,
-        selector: ""
+  // Options
+  animateSpeed: 150,
+  childWidth: null,
+  columns: null,
+  dragBlacklist: null,
+  dragClone: false,
+  dragRate: 100,
+  dropCutoff: 0,
+  dropWhitelist: "*",
+  gutterX: 10,
+  gutterY: 10,
+  paddingY: 0,
+  paddingX: 0,
+  selector: ""
 });
 ```
 
@@ -153,59 +153,109 @@ $('.container').shapeshift({
   </tr>
 </table>
 
-##### animateSpeed : integer
+<table>
+  <tr>
+    <th>Option</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+    <th>Example</th>
+  </tr>
+  <tr>
+    <td>animateSpeed</td>
+    <td>The speed in milliseconds that the animations will transition using. This currently will also determine how often the drag function gets called, which is the animation speed divided by three (i.e. for the default speed, 100, the drag function will run every 33.3 milliseconds).</td>
+    <td>Integer</td>
+    <td>150</td>
+    <td>276</td>
+  </tr>
+  <tr>
+    <td>childWidth</td>
+    <td>The width of each item is automatically calculated by getting the first item and finding its width. If for any reason you need to manually set the width, use this attribute.</td>
+    <td>Integer</td>
+    <td>null (Auto)</td>
+    <td>300</td>
+  </tr>
+  <tr>
+    <td>columns</td>
+    <td>Manually specify the number of columns to render. It will automatically detect the maximum amount of columns by default.</td>
+    <td>Integer</td>
+    <td>null (Auto)</td>
+    <td>5</td>
+  </tr>
+  <tr>
+    <td>dragBlacklist</td>
+    <td>Specify a string which contains the elements that ***cannot*** be dragged. This defaults to any element being draggable.</td>
+    <td>String</td>
+    <td>null</td>
+    <td>".comment, .post, div, #taco"</td>
+  </tr>
+  <tr>
+    <td>dragClone</td>
+    <td>If set to true, the item that is dragged will be a clone and therefore will not remove the item from the original container upon drop. This would be analogous to "copy and paste", instead of the default "cut and paste".</td>
+    <td>Boolean</td>
+    <td>false</td>
+    <td>true</td>
+  </tr>
+  <tr>
+    <td>dragRate</td>
+    <td>Determines how often the program will detect a position for the currently dragged item to be dropped, in milliseconds. The faster the speed then the more the computer will have to process, but the slower the speed the less responsive it is to items being dragged around.</td>
+    <td>Integer</td>
+    <td>100</td>
+    <td>55</td>
+  </tr>
+  <tr>
+    <td>dropCutoff</td>
+    <td>Prevents a user from dropping an item X amount from the end of the objects list. For example, if you have 20 items in your container, and you set the dropCutoff to be 3, then you would not be able to drop after the 17th item.</td>
+    <td>Integer</td>
+    <td>0</td>
+    <td>3</td>
+  </tr>
+  <tr>
+    <td>dropWhitelist</td>
+    <td>Specify a string which contains the elements that ***can*** be dropped into this container. This defaults to any element being droppable.
 
-The speed in milliseconds that the animations will transition using. This currently will also determine how often the drag function gets called, which is the animation speed divided by three (i.e. for the default speed, 100, the drag function will run every 33.3 milliseconds).
-
-##### childWidth : integer
-
-The width of each item is automatically calculated by getting the first item and finding its width. If for any reason you need to manually set the width, use this attribute.
-
-##### columns : integer
-
-Manually specify the number of columns to render. It will automatically detect the maximum amount of columns by default.
-
-##### dragBlacklist : string
-
-Specify a string which contains the elements that ***cannot*** be dragged. This defaults to any element being draggable.
-
-##### dragClone : boolean
-
-If set to true, the item that is dragged will be a clone and therefore will not remove the item from the original container upon drop. This would be analogous to "copy and paste", instead of the default "cut and paste".
-
-##### dragRate : boolean
-
-Determines how often the program will detect a position for the currently dragged item to be dropped, in milliseconds. The faster the speed then the more the computer will have to process, but the slower the speed the less responsive it is to items being dragged around.
-
-##### dropCutoff : string
-
-Prevents a user from dropping an item X amount from the end of the objects list. For example, if you have 20 items in your container, and you set the dropCutoff to be 3, then you would not be able to drop after the 17th item.
-
-##### dropWhitelist : string
-
-Specify a string which contains the elements that ***can*** be dropped into this container. This defaults to any element being droppable.
-
-***If a white list is set, only items listed with it can be draggable.***
-
-##### gutterX : integer
-
-Sets the amount of padding horizontally between columns
-
-##### gutterY : integer
-
-Sets the amount of padding vertically between objects.
-
-##### paddingX : integer
-
-Offset the entire grid from the left side of the container element with this attribute.
-
-##### paddingY : integer
-
-Offset the entire grid from the top of the container element with this attribute.
-
-##### selector : string
-
-Shapeshift will by default try to rearrange all of the child elements within the parent element. Setting a selector will target only the children with the class, ID, or element name that the selector describes.
+    ***If a white list is set, only items listed with it can be draggable.***</td>
+    <td>String</td>
+    <td>"*"</td>
+    <td>".comment, .post, div, #taco"</td>
+  </tr>
+  <tr>
+    <td>gutterX</td>
+    <td>Sets the amount of padding horizontally between columns.</td>
+    <td>Integer</td>
+    <td>10</td>
+    <td>25</td>
+  </tr>
+  <tr>
+    <td>gutterY</td>
+    <td>Sets the amount of padding vertically between objects.</td>
+    <td>Integer</td>
+    <td>10</td>
+    <td>25</td>
+  </tr>
+  <tr>
+    <td>paddingX</td>
+    <td>Offset the entire grid from the left side of the container element with this attribute.</td>
+    <td>Integer</td>
+    <td>0</td>
+    <td>42</td>
+  </tr>
+  <tr>
+    <td>paddingY</td>
+    <td>Offset the entire grid from the top of the container element with this attribute.</td>
+    <td>Integer</td>
+    <td>0</td>
+    <td>42</td>
+  </tr>
+  <tr>
+    <td>selector</td>
+    <td>Shapeshift will by default try to rearrange all of the child elements within the parent element. Setting a selector will target only the children with the class, ID, or element name that the selector describes.
+</td>
+    <td>String</td>
+    <td>""</td>
+    <td>".gallery_image"</td>
+  </tr>
+</table>
 
 ### Styling the Dragged Element
 
