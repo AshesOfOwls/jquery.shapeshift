@@ -164,20 +164,8 @@
     });
 
     function drop(e) {
-      console.log("Dropped")
       $selected = $(".ss-moving").removeClass("ss-moving");
       $selectedContainer = $selected.parent();
-      $clone = $(".ss-clone");
-      if($clone[0]) {
-        $cloneContainer = $clone.parent();
-        if($cloneContainer[0] === $selectedContainer[0]) {
-          $clone.remove();
-        } else {
-          $clone.removeClass("ss-clone");
-          $cloneContainer.trigger("ss-event-dragreset");
-          $selected.parent().trigger("ss-event-dragreset");
-        }
-      }
       $selectedContainer.trigger("ss-event-arrange").trigger("ss-event-dropped", $selected);
     }
 
