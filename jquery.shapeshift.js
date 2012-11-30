@@ -22,6 +22,7 @@
         dropWhitelist: "*",
         gutterX: 10,
         gutterY: 10,
+        minHeight: 100,
         paddingY: 0,
         paddingX: 0,
         selector: ""
@@ -229,7 +230,9 @@
     }
     // Store the height of the tallest column
     if(options.enableAutoHeight){
-      options.containerHeight = Math.max.apply(Math,colHeights);
+      height = Math.max.apply(Math,colHeights);
+      if(height < options.minHeight) { height = options.minHeight; }
+      options.containerHeight = height;
     }
     return positions;
   }

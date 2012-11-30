@@ -96,6 +96,7 @@ $('.container').shapeshift({
   dropWhitelist: "*",
   gutterX: 10,
   gutterY: 10,
+  minHeight: 100,
   paddingY: 0,
   paddingX: 0,
   selector: ""
@@ -237,6 +238,13 @@ $('.container').shapeshift({
     <td>Integer</td>
     <td>10</td>
     <td>25</td>
+  </tr>
+  <tr>
+    <td>minHeight</td>
+    <td>Set a minimum height that the container element will be. ***This is only helpful if you have enableAutoHeight turned on.***</td>
+    <td>Integer</td>
+    <td>100</td>
+    <td>550</td>
   </tr>
   <tr>
     <td>paddingX</td>
