@@ -107,6 +107,7 @@
 
     function start(e, ui) {
       $selected = $(e.target);
+      $curContainer = $selected.parent();
       if(options.dragClone) {
         $clone = $selected.clone().insertBefore($selected).addClass("ss-clone");
       }
