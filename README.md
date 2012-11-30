@@ -82,6 +82,7 @@ $('.container').shapeshift({
   enableAutoHeight: true,
   enableDrag: true,
   enableDragAnimation: true,
+  enableRearrange: true,
   enableResize: true,
 
   // Options
@@ -140,6 +141,13 @@ $('.container').shapeshift({
   <tr>
     <td>enableDragAnimation</td>
     <td>Turn off the object animations of other elements when an element is being dragged.</td>
+    <td>Boolean</td>
+    <td>true</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>enableRearrange</td>
+    <td>Setting this to false will disable any rearrangement via drag & drop in the current container.</td>
     <td>Boolean</td>
     <td>true</td>
     <td>false</td>
