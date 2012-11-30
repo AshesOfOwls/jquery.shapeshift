@@ -88,9 +88,9 @@ $('.container').shapeshift({
   animateSpeed: 150,
   childWidth: null,
   columns: null,
-  dragBlacklist: null,
   dragClone: false,
   dragRate: 100,
+  dragWhitelist: "*",
   dropCutoff: 0,
   dropWhitelist: "*",
   gutterX: 10,
@@ -180,13 +180,6 @@ $('.container').shapeshift({
     <td>5</td>
   </tr>
   <tr>
-    <td>dragBlacklist</td>
-    <td>Specify a string which contains the elements that ***cannot*** be dragged. This defaults to any element being draggable.</td>
-    <td>String</td>
-    <td>null</td>
-    <td>".comment, .post, div, #taco"</td>
-  </tr>
-  <tr>
     <td>dragClone</td>
     <td>If set to true, the item that is dragged will be a clone and therefore will not remove the item from the original container upon drop. This would be analogous to "copy and paste", instead of the default "cut and paste".</td>
     <td>Boolean</td>
@@ -199,6 +192,13 @@ $('.container').shapeshift({
     <td>Integer</td>
     <td>100</td>
     <td>55</td>
+  </tr>
+  <tr>
+    <td>dragWhitelist</td>
+    <td>Specify a string which contains the elements that ***can*** be dropped into this container. This defaults to any element being draggable.</td>
+    <td>String</td>
+    <td>"*"</td>
+    <td>".comment, .post, div, #taco"</td>
   </tr>
   <tr>
     <td>dropCutoff</td>
