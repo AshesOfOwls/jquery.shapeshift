@@ -141,6 +141,8 @@
           $selected.insertAfter($target);
         }
 
+        if(!$target) { $selected.appendTo($curContainer); }
+
         $curContainer.trigger("ss-event-arrange");
         $(".ss-prev-container").trigger("ss-event-arrange");
 
