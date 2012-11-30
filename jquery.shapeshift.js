@@ -121,7 +121,6 @@
     }
 
     function drag(e, ui) {
-      console.log($curContainer)
       if(!dragging && $curContainer.data("ss-rearrangeable")) {
         dragging = true;
         position = ss.getIntendedPosition(e);
