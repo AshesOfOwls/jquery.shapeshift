@@ -33,8 +33,12 @@ function getRandomColor() {
 }
 
 // Initial Shapeshift
-$containers.shapeshift({
-  paddingY: 20
+
+$containers.last().shapeshift({
+  paddingY: 20,
+  enableRearrange: false,
+  dragClone: true,
+  dropWhitelist: "asd"
 });
 
 // When our buttons are clicked.

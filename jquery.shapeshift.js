@@ -14,7 +14,7 @@
         animateSpeed: 150,
         childWidth: null,
         columns: null,
-        dragBlacklist: null,
+        dragWhitelist: "*",
         dragClone: false,
         dragRate: 100,
         dropCutoff: 0,
@@ -98,7 +98,7 @@
         dragging = false;
 
     // Dragging
-    $objects.filter(options.dropWhitelist).filter(":not("+options.dragBlacklist+")").draggable({
+    $objects.filter(options.dragWhitelist).draggable({
       addClasses: false,
       containment: 'document',
       zIndex: 9999,
