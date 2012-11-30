@@ -8,6 +8,7 @@
         enableAutoHeight: true,
         enableDrag: true,
         enableDragAnimation: true,
+        enableRearrange: true,
         enableResize: true,
 
         // Options
@@ -43,6 +44,7 @@
     var ss = this,
         options = ss.options;
 
+    ss.container.attr("data-ss-rearrangeable", options.enableRearrange)
     ss.container.off("ss-event-arrange").on("ss-event-arrange", function() { ss.arrange(); });
     ss.container.off("ss-event-dragreset").on("ss-event-dragreset", function() { ss.dragClear(); ss.drag(); });
 
@@ -89,7 +91,7 @@
     var ss = this,
         options = ss.options;
 
-    ss.curContainer = ss.container;
+    $curContainer = ss.container;
 
     var $objects = ss.container.children(options.selector),
         $selected = null,
@@ -119,10 +121,11 @@
     }
 
     function drag(e, ui) {
-      if(!dragging) {
+      console.log($curContainer)
+      if(!dragging && $curContainer.data("ss-rearrangeable")) {
         dragging = true;
         position = ss.getIntendedPosition(e);
-        $objects = ss.curContainer.children(":not(.ss-moving):visible");
+        $objects = $curContainer.children(":not(.ss-moving):visible");
         if(position != $objects.size()) {
           $target = $objects.get(position);
           $selected.insertBefore($target);
@@ -131,7 +134,7 @@
           $selected.insertAfter($target);
         }
 
-        ss.curContainer.trigger("ss-event-arrange");
+        $curContainer.trigger("ss-event-arrange");
         $(".ss-prev-container").trigger("ss-event-arrange");
 
         window.setTimeout(function() {
@@ -168,8 +171,8 @@
     }
 
     function over(e) {
-      ss.curContainer.addClass("ss-prev-container");
-      ss.curContainer = $(e.target).removeClass("ss-prev-container");
+      $curContainer.addClass("ss-prev-container");
+      $curContainer = $(e.target).removeClass("ss-prev-container");
     }
   }
 
