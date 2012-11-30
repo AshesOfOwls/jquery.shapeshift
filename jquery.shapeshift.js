@@ -58,8 +58,6 @@
         options = ss.options,
         $objects = ss.container.children(options.selector).filter(':visible'),
         positions = ss.getPositions(ss.container, false),
-        positionsLength = positions.length - 1,
-        obj_i = positionsLength,
         animated = true;
 
     if($objects.filter(".ss-moving")[0]) {
@@ -69,19 +67,18 @@
     }
 
     // Animate / Move each object into place
-    do {
-      var reverse_i = positionsLength - obj_i,
-          $obj = $($objects[reverse_i]);
+    for(var obj_i=0;obj_i<positions.length;obj_i++) {
+      var $obj = $($objects[obj_i]);
 
       // Never animate the currently dragged item
       if(!$obj.hasClass("ss-moving")) {
         if(animated) {
-          $obj.stop(true, false).animate(positions[reverse_i], options.animateSpeed);
+          $obj.stop(true, false).animate(positions[obj_i], options.animateSpeed);
         } else {
-          $obj.css(positions[reverse_i]);
+          $obj.css(positions[obj_i]);
         }
       }
-    } while(obj_i--);
+    }
 
     // Set the container height to match the tallest column
     ss.container.css("height", options.containerHeight);
@@ -244,12 +241,11 @@
         selectedY = $selected.position().top + ($selected.outerHeight() / 2),
         shortestDistance = 9999,
         positions = ss.getPositions($container, true),
-        endCap = positions.length - options.dropCutoff,
-        hov_i = positions.length;
+        endCap = positions.length - options.dropCutoff;
 
     // Go over all of those positions and figure out
     // which is the closest to the cursor.
-    do {
+    for(var hov_i=0;hov_i<positions.length;hov_i++) {
       // If we are able to insert at this index position
       if(hov_i < endCap) {
         attributes = positions[hov_i];
@@ -277,7 +273,7 @@
           }
         }
       }
-    } while(hov_i--);
+    }
     // Return the intended index position
     return chosenIndex;
   }
