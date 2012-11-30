@@ -28,7 +28,6 @@
 
   function Plugin(element, options) {
     var ss = this;
-    ss.element = element;
     ss.container = $(element);
     ss.options = $.extend({}, defaults, options);
     ss.init();
@@ -37,16 +36,15 @@
   Plugin.prototype.init = function() {
     var ss = this;
     ss.eventSetup();
-    $(ss.element).trigger("ss-event-arrange");
+    ss.container.trigger("ss-event-arrange");
   };
 
   Plugin.prototype.eventSetup = function() {
     var ss = this,
-        options = ss.options,
-        $container = $(ss.element);
+        options = ss.options;
 
-    $container.off("ss-event-arrange").on("ss-event-arrange", function() { ss.arrange(); });
-    $container.off("ss-event-dragreset").on("ss-event-dragreset", function() { ss.dragClear(); ss.drag(); });
+    ss.container.off("ss-event-arrange").on("ss-event-arrange", function() { ss.arrange(); });
+    ss.container.off("ss-event-dragreset").on("ss-event-dragreset", function() { ss.dragClear(); ss.drag(); });
 
     ss.dragClear();
     if(options.enableDrag) { ss.drag(); }
@@ -56,9 +54,8 @@
   Plugin.prototype.arrange = function() {
     var ss = this,
         options = ss.options,
-        $container = $(ss.element),
-        $objects = $container.children(options.selector).filter(':visible'),
-        positions = ss.getPositions($container, false),
+        $objects = ss.container.children(options.selector).filter(':visible'),
+        positions = ss.getPositions(ss.container, false),
         positionsLength = positions.length - 1,
         obj_i = positionsLength,
         animated = true;
@@ -85,14 +82,16 @@
     } while(obj_i--);
 
     // Set the container height to match the tallest column
-    $container.css("height", options.containerHeight);
+    ss.container.css("height", options.containerHeight);
   }
 
   Plugin.prototype.drag = function () {
     var ss = this,
-        options = ss.options,
-        $container = $curContainer = $(ss.element),
-        $objects = $container.children(options.selector),
+        options = ss.options;
+
+    ss.curContainer = ss.container;
+
+    var $objects = ss.container.children(options.selector),
         $selected = null,
         position = null,
         dragging = false;
@@ -123,7 +122,7 @@
       if(!dragging) {
         dragging = true;
         position = ss.getIntendedPosition(e);
-        $objects = $curContainer.children(":not(.ss-moving):visible");
+        $objects = ss.curContainer.children(":not(.ss-moving):visible");
         if(position != $objects.size()) {
           $target = $objects.get(position);
           $selected.insertBefore($target);
@@ -132,7 +131,7 @@
           $selected.insertAfter($target);
         }
 
-        $curContainer.trigger("ss-event-arrange");
+        ss.curContainer.trigger("ss-event-arrange");
         $(".ss-prev-container").trigger("ss-event-arrange");
 
         window.setTimeout(function() {
@@ -145,7 +144,7 @@
     }
 
     // Dropping
-    $container.droppable({
+    ss.container.droppable({
       accept: options.dropWhitelist,
       drop: function(e) { drop(e); },
       over: function(e) { over(e); }
@@ -169,15 +168,14 @@
     }
 
     function over(e) {
-      $curContainer.addClass("ss-prev-container");
-      $curContainer = $(e.target).removeClass("ss-prev-container");
+      ss.curContainer.addClass("ss-prev-container");
+      ss.curContainer = $(e.target).removeClass("ss-prev-container");
     }
   }
 
   Plugin.prototype.dragClear = function() {
-    var $container = $(this.container);
-    $container.droppable().droppable('destroy');
-    $container.children().draggable().draggable('destroy');
+    this.container.droppable().droppable('destroy');
+    this.container.children().draggable().draggable('destroy');
   }
 
   Plugin.prototype.getPositions = function($container, ignoreSelected) {
@@ -289,7 +287,7 @@
     $(window).on("resize", function() {
       if(!resizing) {
         resizing = true;
-        $(ss.element).trigger("ss-event-arrange");
+        ss.container.trigger("ss-event-arrange");
         setTimeout(function() {
           resizing = false;
         }, 200);
