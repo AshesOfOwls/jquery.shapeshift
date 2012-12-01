@@ -276,7 +276,6 @@ When an element is picked up it the ".ss-moving" class will be appended to it. J
 
 ```css
 .container .ss-moving {
-  z-index: 9999;
   opacity: .7;
   transform: rotate(3deg);
 }
