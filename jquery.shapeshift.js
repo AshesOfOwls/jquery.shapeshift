@@ -294,7 +294,8 @@
         ss.container.trigger("ss-event-arrange");
         setTimeout(function() {
           resizing = false;
-        }, 200);
+          ss.container.trigger("ss-event-arrange");
+        }, 300);
       }
     });
   }
