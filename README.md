@@ -286,14 +286,14 @@ When an element is picked up it the ".ss-moving" class will be appended to it. J
 When an item is dropped it will trigger the event "ss-event-dropped" on the container element. You can then write some code to be fired off when that event occurs. The object that was just selected is also passed back to you. For example,
 
 ```javascript
-$(".container").on("ss-event-dropped", function(e, $selected) {
+$containers.on("ss-event-dropped", function(e, selected) {
   // Get the new position for the dropped item
-  var position = $selected.index();
+  console.log($(selected).index());
 
   // Get the index position of each object
   $objects = $(this).children();
   $objects.each(function(i) {
-    position[i] = $(this).index();
+    console.log($(this).index());
   });
 });
 ```
