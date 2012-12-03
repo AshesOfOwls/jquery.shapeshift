@@ -11,7 +11,7 @@ Shapeshift is intended to be a very bare bones version of these grid systems, ho
 
 ## Responsive Grid
 
-Resizing the grid to accomodate for more or less space is automatically turned on in Shapeshift, so if your parent container has a 100% grid resizing the window will shapeshift the child objects around to accomodate for the new layout.
+Resizing the grid to accomodate for more or less space is automatically turned on in Shapeshift, so if your parent container has a 100% grid resizing the window will shapeshift the child objects around to accomodate for the new layout. You can even set CSS3 media queries on your objects and watch as they get shapeshifted around their new size!
 
 ## Drag and Drop
 
