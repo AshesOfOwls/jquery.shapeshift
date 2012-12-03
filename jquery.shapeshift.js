@@ -8,7 +8,6 @@
         enableAutoHeight: true,
         enableDrag: true,
         enableDragAnimation: true,
-        enableDynamicWidth: true,
         enableRearrange: true,
         enableResize: true,
 
