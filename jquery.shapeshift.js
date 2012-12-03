@@ -8,12 +8,12 @@
         enableAutoHeight: true,
         enableDrag: true,
         enableDragAnimation: true,
+        enableDynamicWidth: true,
         enableRearrange: true,
         enableResize: true,
 
         // Options
         animateSpeed: 150,
-        childWidth: null,
         columns: null,
         dragClone: false,
         dragRate: 100,
@@ -196,7 +196,7 @@
     if(ignoreSelected) { $objects = $objects.not(".ss-moving"); }
 
     // Determine the width of each element.
-    if(!options.childWidth) { options.childWidth = $objects.first().outerWidth(true); }
+    options.childWidth = $objects.first().outerWidth(true);
 
     // Determine the column width.
     colWidth = options.childWidth + options.gutterX;

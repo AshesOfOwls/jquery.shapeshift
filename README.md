@@ -1,6 +1,8 @@
 [Shapeshift](http://mcpants.github.com/jquery.shapeshift/)
 ==========
 
+***12/3/2012 - The property 'childWidth' is no longer supported, instead shapeshift will now calculate the childWidth automatically***
+
 Inspired heavily by the jQuery Masonry plugin (http://masonry.desandro.com/), Shapeshift is a plugin which will dynamically arrange a collection of elements into a grid in their parent container. An example of this behavior is what you can find at sites like http://www.pinterest.com.
 
 Shapeshift is intended to be a very bare bones version of these grid systems, however the drag and drop is what sets it apart from the other similar plugins.
@@ -89,7 +91,6 @@ $('.container').shapeshift({
 
   // Options
   animateSpeed: 150,
-  childWidth: null,
   columns: null,
   dragClone: false,
   dragRate: 100,
@@ -175,13 +176,6 @@ $('.container').shapeshift({
     <td>Integer</td>
     <td>150</td>
     <td>276</td>
-  </tr>
-  <tr>
-    <td>childWidth</td>
-    <td>The width of each item is automatically calculated by getting the first item and finding its width. If for any reason you need to manually set the width, use this attribute.</td>
-    <td>Integer</td>
-    <td>null (Auto)</td>
-    <td>300</td>
   </tr>
   <tr>
     <td>columns</td>
