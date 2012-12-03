@@ -208,8 +208,7 @@
 
     // Offset the grid to center it.
     if(options.centerGrid) {
-      gridOffset = Math.floor((($container.innerWidth() / colWidth) % 1 * colWidth) / 2) + (options.gutterX / 2);
-      gridOffset = Math.floor(($container.innerWidth() - (columns * colWidth)) / 2)
+      gridOffset = Math.floor(($container.innerWidth() - (columns * colWidth)) / 2) + (options.gutterX / 2)
     }
 
     // Create an array element for each column, which is then
