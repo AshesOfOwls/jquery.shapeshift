@@ -294,11 +294,10 @@
     $(window).on("resize", function() {
       if(!resizing) {
         resizing = true;
-        ss.container.trigger("ss-event-arrange");
         setTimeout(function() {
           resizing = false;
           ss.container.trigger("ss-event-arrange");
-        }, 300);
+        }, 75);
       }
     });
   }
