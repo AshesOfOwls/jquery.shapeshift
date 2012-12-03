@@ -1,8 +1,6 @@
 [Shapeshift](http://mcpants.github.com/jquery.shapeshift/)
 ==========
 
-***11/23/2012: Breaking changes have been made to option and event names***
-
 Inspired heavily by the jQuery Masonry plugin (http://masonry.desandro.com/), Shapeshift is a plugin which will dynamically arrange a collection of elements into a grid in their parent container. An example of this behavior is what you can find at sites like http://www.pinterest.com.
 
 Shapeshift is intended to be a very bare bones version of these grid systems, however the drag and drop is what sets it apart from the other similar plugins.
@@ -28,6 +26,10 @@ A big thanks to all of our [contributors](https://github.com/McPants/jquery.shap
 ![we the media](http://wtmworldwide.com/wtm.png)
 
 Shapeshift is maintained by [We The Media, inc.](http://wtmworldwide.com/)
+
+## Sites Using Shapeshift
+
+Got a project that you are using shapeshift on? Let us know and we will happily throw a link to your page here!
 
 ## Getting Started
 
