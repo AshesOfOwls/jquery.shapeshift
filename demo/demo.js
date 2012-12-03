@@ -5,18 +5,18 @@ function renderChildren(placekitten) {
   $containers.children().filter(":not(.credits)").remove();
   $containers.each(function(container_i) {
     for(i=0;i<15;i++) {
-      var $element = $("<div></div>"),
+      var $element = $("<div class='object'></div>"),
           height = Math.floor(Math.random() * 200) + 100,
-          width = 140;
+          width = $containers.children().first().width();
       if(container_i === 1) { height = 140; }
       if(placekitten) {
         var background = 'url("http://www.placekitten.com/'+width+'/'+height+'")';
       } else {
         var background = getRandomColor(),
-            $img = $('<img src="http://fpoimg.com/'+width+'x'+Math.floor(height / 2)+'" />');
+            $img = $('<img src="http://fpoimg.com/'+width+'x'+Math.floor(height / 2)+'" class="placeholder" />');
         $element.append($img);
       }
-      $element.css({ background: background, height: height, width: width });
+      $element.css({ background: background, height: height });
       $(this).append($element);
     }
   });

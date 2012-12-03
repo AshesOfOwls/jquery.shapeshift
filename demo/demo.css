@@ -13,14 +13,13 @@ h1 { text-align: center; }
 
 .credits {
   background: #DEDEDE;
-  height: 160px;
   font-size: 13px;
   padding: 20px 0 13px 0;
   position: absolute; top: 10px; right: 10px; border: 0;
   text-align: center;
 }
 
-.credits img { padding: 4px; }
+.credits img { height: 75px; width: 84px; padding: 4px; }
 
 #nav { text-align: center; }
 
@@ -43,15 +42,19 @@ ul.description li { margin-bottom: 8px; }
   width: 47%;
 }
 
-.container > * {
+.container .object {
   border: 1px solid #777;
   border-radius: 3px;
   box-shadow: 0px 0px 4px 1px #ccc;
   position: absolute;
-  width: 140px;
+  width: 170px;
 }
 
-.container > *.ss-moving {
+.container .object .placeholder {
+  width: 170px;
+}
+
+.container .object.ss-moving {
   cursor: move;
   z-index: 9999;
   opacity: .7;
@@ -62,4 +65,26 @@ ul.description li { margin-bottom: 8px; }
   -o-transform:rotate(2deg); /* Opera */
 }
 
-.container > * > img { border-radius: 2px 2px 0 0; }
+.container .object img { border-radius: 2px 2px 0 0; }
+
+@media screen and (max-width: 1200px) {
+  .container .object {
+    width: 120px;
+  }
+
+  .container .object .placeholder {
+    width: 120px;
+  }
+}
+
+
+
+@media screen and (max-width: 800px) {
+  .container .object {
+    width: 90px;
+  }
+
+  .container .object .placeholder {
+    width: 90px;
+  }
+}
