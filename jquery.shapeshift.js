@@ -48,8 +48,7 @@
     ss.container.off("ss-event-arrange").on("ss-event-arrange", function() { ss.arrange(); });
     ss.container.off("ss-event-dragreset").on("ss-event-dragreset", function() { ss.dragClear(); ss.drag(); });
 
-    ss.dragClear();
-    if(options.enableDrag) { ss.drag(); }
+    if(options.enableDrag) { ss.container.trigger('ss-event-dragreset'); }
     if(options.enableResize) { ss.resize(); }
   }
 
