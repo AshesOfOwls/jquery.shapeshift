@@ -83,15 +83,18 @@ $(".filter").on("click", function(e) {
 })
 
 $containers.on("ss-event-dropped", function(e, selected) {
-  // Get the new position for the dropped item
-  var position = $(selected).index();
-  console.log("The dropped position:", position)
+  var $selected = $(selected)
+  console.log("The dropped item is:", $selected)
 
   // Get the index position of each object
-  console.log("Child positions:")
   $objects = $(this).children();
   $objects.each(function(i) {
-    position[i] = $(this).index();
-    console.log($(this).index())
+    console.log("Get the index position:", i)
+    console.log("Get the current element:", $(this))
   });
+});
+
+$containers.on("ss-event-dragged", function(e, selected) {
+  var $selected = $(selected);
+  console.log("This is the item being dragged:", $selected);
 });

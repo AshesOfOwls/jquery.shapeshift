@@ -111,6 +111,7 @@
         $clone = $selected.clone().insertBefore($selected).addClass("ss-clone");
       }
       $selected.addClass("ss-moving");
+      $curContainer.trigger("ss-event-dragged", $selected);
     }
 
     function stop(e) {

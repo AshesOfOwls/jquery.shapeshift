@@ -279,17 +279,27 @@ When an element is picked up it the ".ss-moving" class will be appended to it. J
 
 ### Detecting Changes
 
-When an item is dropped it will trigger the event "ss-event-dropped" on the container element. You can then write some code to be fired off when that event occurs. The object that was just selected is also passed back to you. For example,
+When an item has begun being dragged, it will trigger the "ss-event-dragged" on the container element. You can then write out some code to be fired off when that event occurs. The object that was just selected is also passed back to you. For example,
+
+```javascript
+$containers.on("ss-event-dragged", function(e, selected) {
+  var $selected = $(selected);
+  console.log("This is the item being dragged:", $selected);
+});
+```
+
+Another event that you can watch for is the dropped event. This will also return the selected element, and is useful for getting the final index positions for all the elements in the container. For example,
 
 ```javascript
 $containers.on("ss-event-dropped", function(e, selected) {
-  // Get the new position for the dropped item
-  console.log($(selected).index());
+  var $selected = $(selected)
+  console.log("The dropped item is:", $selected)
 
   // Get the index position of each object
   $objects = $(this).children();
   $objects.each(function(i) {
-    console.log($(this).index());
+    console.log("Get the index position:", i)
+    console.log("Get the current element:", $(this))
   });
 });
 ```
