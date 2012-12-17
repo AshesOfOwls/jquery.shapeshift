@@ -135,8 +135,13 @@
         position = ss.getIntendedPosition(e);
         $objects = $curContainer.children(":not(.ss-moving):visible");
         if(position != $objects.size()) {
-          $target = $objects.get(position);
-          $selected.insertBefore($target);
+          if($curContainer[0] != $selected.parent()[0]) {
+            $target = $objects.last();
+            $selected.insertAfter($target);
+          } else {
+            $target = $objects.get(position);
+            $selected.insertBefore($target);
+          }
         } else {
           $target = $objects.get(position - 1);
           $selected.insertAfter($target);
@@ -283,6 +288,7 @@
       }
     }
     // Return the intended index position
+    console.log(chosenIndex)
     return chosenIndex;
   }
 
