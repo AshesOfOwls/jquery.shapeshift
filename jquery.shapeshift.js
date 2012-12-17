@@ -12,7 +12,7 @@
         enableResize: true,
 
         // Options
-        animateSpeed: 150,
+        animateSpeed: 160,
         columns: null,
         dragClone: false,
         dragRate: 75,
@@ -279,7 +279,7 @@
             // then we may want to insert it as the last item.
             if(hov_i === positions.length - 1) {
               var $object = $container.children().not(".ss-moving").last();
-              if(yDist > ($object.outerHeight() * .9) || xDist > options.childWidth * .9) {
+              if(yDist > $object.outerHeight() * .75 || xDist > options.childWidth * .75 || xDist < 0) {
                 chosenIndex++;
               }
             }
