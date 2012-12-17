@@ -55,7 +55,11 @@
         } else {
           ss.dragClear();
         }
+      } else if(options.enableDrag) {
+        alert("jQuery.shapeshift is trying to enable drag and drop but jQuery UI Draggable/Droppable has not been included yet.")
       }
+    } else if(options.enableDrag) {
+      alert("jQuery.shapeshift is trying to enable drag and drop but jQuery UI has not been included yet.")
     }
     if(options.enableResize) { ss.resize(); }
   }
