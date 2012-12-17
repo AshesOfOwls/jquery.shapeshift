@@ -15,7 +15,7 @@
         animateSpeed: 150,
         columns: null,
         dragClone: false,
-        dragRate: 100,
+        dragRate: 75,
         dragWhitelist: "*",
         dropCutoff: 0,
         dropWhitelist: "*",
