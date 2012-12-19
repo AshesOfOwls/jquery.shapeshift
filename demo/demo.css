@@ -1,16 +1,3 @@
-body {
-  background: #EFEFEF;
-  font-family: Helvetica, Arial;
-  padding: 0;
-  margin: 0;
-}
-
-a { text-decoration: none; }
-
-h1 { text-align: center; }
-
-.forkme { position: absolute; top: 0; left: 0; border: 0; }
-
 .credits {
   background: #DEDEDE;
   font-size: 13px;
@@ -20,19 +7,6 @@ h1 { text-align: center; }
 }
 
 .credits img { height: 75px; width: 84px; padding: 4px; }
-
-#nav { text-align: center; }
-
-ul.description { list-style: none; }
-ul.description li { margin-bottom: 8px; }
-
-.hr {
-  background: #DDD;
-  border-bottom: 1px solid #FFF;
-  height: 1px;
-  margin: 25px 0;
-  width: 100%;
-}
 
 .container {
   outline: 1px dashed #CCC;
