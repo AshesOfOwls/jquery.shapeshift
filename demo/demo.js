@@ -83,7 +83,7 @@ $(document).ready(function() {
         break;
       case "placekittens":
         renderChildren(true);
-        $(".filter.dnd button").first().trigger("click")
+        $(".filters .dnd button").first().trigger("click")
         break;
     }
 
