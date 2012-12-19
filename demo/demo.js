@@ -46,7 +46,7 @@ $(document).ready(function() {
   // - Clicking the filter options
   // ----------------------------------------------------------------------
 
-  $(".filter.dnd button").on("click", function() {
+  $(".filters .dnd button").on("click", function() {
     switch($(this).data("attr")) {
       case "drag":
         options = {
@@ -69,7 +69,7 @@ $(document).ready(function() {
     $containers.shapeshift(options);
   });
 
-  $(".filter.other button").on("click", function() {
+  $(".filters .other button").on("click", function() {
     switch($(this).data("attr")) {
       case "hide":
         $objects = $containers.children().filter(":visible");
