@@ -1,0 +1,86 @@
+body {
+  background: url('soft_wallpaper.png') #EFEFEF;
+  color: #303030;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  padding: 0;
+  margin: 0;
+}
+
+header {
+  text-align: center;
+  text-shadow: 1px 1px 0px rgba(255,255,255,0.6);
+  min-height: 100px;
+  padding: 0 140px;
+}
+
+header .fork-me {
+  border: 0;
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+
+header .wtm-logo {
+  border: 0;
+  color: inherit;
+  font-size: 11px;
+  line-height: 14px;
+  padding: 10px;
+  position: absolute;
+  right: 0;
+  text-decoration: none;
+  top: 0;
+}
+
+header h1 a {
+  text-decoration: none;
+}
+
+ul { list-style: none; padding: 0; }
+
+.description ul li {
+  margin: 5px 0;
+}
+
+.hr {
+  background: rgba(0,0,0,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.8);
+  height: 1px;
+  margin: 25px 0;
+  width: 100%;
+}
+
+nav {
+  margin: 0 auto;
+  text-align: center;
+  width: 90%;
+}
+
+nav:after {
+  content: ".";
+  display: block;
+  clear: both;
+  visibility: hidden;
+  line-height: 0;
+  height: 0;
+}
+
+nav ul {
+  display: inline-block;
+}
+
+nav ul li {
+  float: left;
+  margin: 0 30px 20px 0;
+}
+
+nav ul li h6 {
+  margin: 0 0 10px 3px;
+  font-size: 12px;
+}
+
+nav ul li h6 a {
+  float: right;
+  text-decoration: none;
+}
