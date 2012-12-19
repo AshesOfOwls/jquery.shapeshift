@@ -300,7 +300,6 @@
       }
     }
     // Return the intended index position
-    console.log(chosenIndex)
     return chosenIndex;
   }
 
