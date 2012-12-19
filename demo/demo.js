@@ -49,7 +49,6 @@ $(document).ready(function() {
   $(".filter.dnd button").on("click", function() {
     switch($(this).data("attr")) {
       case "drag":
-        console.log("?", options)
         options = {
           paddingY: 20
         }
@@ -84,12 +83,11 @@ $(document).ready(function() {
         break;
       case "placekittens":
         renderChildren(true);
+        $(".filter.dnd button").first().trigger("click")
         break;
     }
 
-    $containers.shapeshift({
-      paddingY: 20
-    });
+    $containers.trigger("ss-event-arrange")
   });
 
   // ----------------------------------------------------------------------
