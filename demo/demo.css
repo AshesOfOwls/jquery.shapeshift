@@ -1,3 +1,8 @@
+nav {
+  text-align: center;
+  width: 880px;
+}
+
 .credits {
   background: #DEDEDE;
   font-size: 13px;
@@ -11,7 +16,7 @@
 .container {
   outline: 1px dashed #CCC;
   float: left;
-  margin: 50px 0 0 2%;
+  margin: 0 0 0 2%;
   position: relative;
   width: 47%;
 }
