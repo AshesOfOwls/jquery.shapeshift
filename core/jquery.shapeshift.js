@@ -21,7 +21,7 @@
         dropWhitelist: "*",
         gutterX: 10,
         gutterY: 10,
-        minHeight: 100,
+        minHeight: 200,
         paddingY: 0,
         paddingX: 0,
         selector: ""
@@ -102,8 +102,7 @@
     $curContainer = ss.container;
 
     var $objects = ss.container.children(options.selector),
-        $selected = null,
-        position = null,
+        $selected, selectedOffsetY, selectedOffsetX, position,
         dragging = false;
 
     // Dragging
@@ -118,6 +117,8 @@
 
     function start(e, ui) {
       $selected = $(e.target);
+      selectedOffsetY = $selected.outerHeight() / 2;
+      selectedOffsetX = $selected.outerWidth() / 2;
       $curContainer = $selected.parent();
       if(options.dragClone) {
         $clone = $selected.clone().insertBefore($selected).addClass("ss-clone");
@@ -149,7 +150,11 @@
         if(position != $objects.size()) {
           if($curContainer[0] != $selected.parent()[0]) {
             $target = $objects.last();
-            $selected.insertAfter($target);
+            if($target[0]) {
+              $selected.insertAfter($target);
+            } else {
+              $curContainer.prepend($selected);
+            }
           } else {
             $target = $objects.get(position);
             $selected.insertBefore($target);
@@ -169,13 +174,14 @@
         }, options.dragRate)
       }
       // Manually override the elements position
-      ui.position.left = e.pageX - $(e.target).parent().offset().left - (options.childWidth / 2);
-      ui.position.top = e.pageY - $(e.target).parent().offset().top - ($selected.outerHeight() / 2);
+      ui.position.left = e.pageX - $selected.parent().offset().left - selectedOffsetX;
+      ui.position.top = e.pageY - $selected.parent().offset().top - selectedOffsetY;
     }
 
     // Dropping
     ss.container.droppable({
       accept: options.dropWhitelist,
+      tolerance: 'intersect',
       drop: function(e) { drop(e); },
       over: function(e) { over(e); }
     });

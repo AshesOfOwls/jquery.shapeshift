@@ -8,7 +8,7 @@ $(document).ready(function() {
   // This just renders us some random temporary children
   function renderChildren(placekitten) {
     $containers.children().filter(":not(.credits)").remove();
-    $containers.each(function(container_i) {
+    $containers.first().each(function(container_i) {
       for(i=0;i<15;i++) {
         var $element = $("<div class='object'></div>"),
             height = Math.floor(Math.random() * 200) + 100,
