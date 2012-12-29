@@ -15,11 +15,9 @@ $(document).ready(function() {
             width = $containers.children().first().width();
         if(container_i === 1) { height = 140; }
         if(placekitten) {
-          var background = getRandomColor(),
-              $img = $('<img src="http://www.placekitten.com/'+width+'/'+Math.floor(height / 2)+'" class="placeholder" />');
-          $element.append($img);
+          var background = 'url("http://www.placekitten.com/'+width+'/'+height+'")';
         } else {
-          var background = 'url("http://fpoimg.com/'+width+'x'+height+'")';
+          var background = 'url("http://fpoimg.com/'+width+'x'+height+'?bg_color='+getRandomColor()+'&text_color=444444")';
         }
         $element.css({ background: background, height: height });
         $(this).append($element);
@@ -30,7 +28,7 @@ $(document).ready(function() {
 
   function getRandomColor() {
     var letters = 'ABCDEF'.split('');
-    var color = '#';
+    var color = '';
     for (var i=0;i<6;i++) {
       color += letters[Math.round(Math.random() * 5)];
     }
