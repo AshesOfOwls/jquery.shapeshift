@@ -15,11 +15,11 @@ $(document).ready(function() {
             width = $containers.children().first().width();
         if(container_i === 1) { height = 140; }
         if(placekitten) {
-          var background = 'url("http://www.placekitten.com/'+width+'/'+height+'")';
-        } else {
           var background = getRandomColor(),
-              $img = $('<img src="http://fpoimg.com/'+width+'x'+Math.floor(height / 2)+'" class="placeholder" />');
+              $img = $('<img src="http://www.placekitten.com/'+width+'/'+Math.floor(height / 2)+'" class="placeholder" />');
           $element.append($img);
+        } else {
+          var background = 'url("http://fpoimg.com/'+width+'x'+height+'")';
         }
         $element.css({ background: background, height: height });
         $(this).append($element);
@@ -69,7 +69,7 @@ $(document).ready(function() {
     $containers.shapeshift(options);
   });
 
-  $(".filters .other button").on("click", function() {
+  $(".filters .filtering button").on("click", function() {
     switch($(this).data("attr")) {
       case "hide":
         $objects = $containers.children().filter(":visible");
@@ -80,6 +80,15 @@ $(document).ready(function() {
         $objects = $containers.children().filter(":hidden");
         random = Math.round(Math.random() * $objects.size());
         $objects.eq(random).show();
+        break;
+    }
+  });
+
+  $(".filters .placeholders button").on("click", function() {
+    switch($(this).data("attr")) {
+      case "fpoimg":
+        renderChildren(false);
+        $(".filters .dnd button").first().trigger("click")
         break;
       case "placekittens":
         renderChildren(true);
