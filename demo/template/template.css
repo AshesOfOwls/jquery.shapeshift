@@ -84,3 +84,11 @@ nav ul li h6 a {
   float: right;
   text-decoration: none;
 }
+
+footer {
+  clear: both;
+  line-height: 200%;
+  padding: 40px 0;
+  text-align: center;
+  width: 100%;
+}
