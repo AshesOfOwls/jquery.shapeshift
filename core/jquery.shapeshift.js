@@ -189,7 +189,8 @@
 
     function drop(e) {
       if(options.enableTrash) {
-        $(".ss-moving").remove();
+        $selected = $(".ss-moving").remove();
+        $(".ss-prev-container").trigger("ss-event-arrange").trigger("ss-event-destroyed", $selected)
       } else {
         $selected = $(".ss-moving").removeClass("ss-moving");
         $selectedContainer = $selected.parent();
