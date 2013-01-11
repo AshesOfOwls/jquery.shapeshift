@@ -5,6 +5,7 @@
         // Features
         centerGrid: true,
         enableAnimation: true,
+        enableAnimationOnInit: false,
         enableAutoHeight: true,
         enableDrag: true,
         enableDragAnimation: true,
@@ -37,6 +38,7 @@
 
   Plugin.prototype.init = function() {
     var ss = this;
+    ss.initialized = false;
     ss.eventSetup();
     ss.container.trigger("ss-event-arrange");
   };
@@ -70,12 +72,17 @@
         options = ss.options,
         $objects = ss.container.children(options.selector).filter(':visible'),
         positions = ss.getPositions(ss.container, false),
+        initialized = ss.initialized,
         animated = true;
 
     if($objects.filter(".ss-moving")[0]) {
       animated = options.enableDragAnimation;
     } else {
       animated = options.enableAnimation;
+    }
+
+    if(!initialized) {
+      animated = options.enableAnimationOnInit;
     }
 
     // Animate / Move each object into place
@@ -94,6 +101,8 @@
 
     // Set the container height to match the tallest column
     ss.container.css("height", options.containerHeight);
+
+    if(!initialized) {ss.initialized = true;}
   }
 
   Plugin.prototype.drag = function () {

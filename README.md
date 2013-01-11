@@ -81,6 +81,7 @@ $('.container').shapeshift({
   // Features
   centerGrid: true,
   enableAnimation: true,
+  enableAnimationOnInit: false,
   enableAutoHeight: true,
   enableDrag: true,
   enableDragAnimation: true,
@@ -126,6 +127,13 @@ $('.container').shapeshift({
     <td>Boolean</td>
     <td>true</td>
     <td>false</td>
+  </tr>
+  <tr>
+    <td>enableAnimationOnInit</td>
+    <td>Determines if objects will be animated into position when the page initially loads.</td>
+    <td>Boolean</td>
+    <td>false</td>
+    <td>true</td>
   </tr>
   <tr>
     <td>enableAutoHeight</td>
