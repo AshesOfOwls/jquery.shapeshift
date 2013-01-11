@@ -86,6 +86,7 @@ $('.container').shapeshift({
   enableDragAnimation: true,
   enableRearrange: true,
   enableResize: true,
+  enableTrash: false,
 
   // Options
   animateSpeed: 150,
@@ -160,6 +161,13 @@ $('.container').shapeshift({
     <td>Boolean</td>
     <td>true</td>
     <td>false</td>
+  </tr>
+  <tr>
+    <td>enableTrash</td>
+    <td>Any element dropped on this container will be removed from the DOM.</td>
+    <td>Boolean</td>
+    <td>false</td>
+    <td>true</td>
   </tr>
   <tr>
     <th>Option</th>

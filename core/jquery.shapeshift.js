@@ -10,6 +10,7 @@
         enableDragAnimation: true,
         enableRearrange: true,
         enableResize: true,
+        enableTrash: false,
 
         // Options
         animateSpeed: 160,
@@ -187,9 +188,13 @@
     });
 
     function drop(e) {
-      $selected = $(".ss-moving").removeClass("ss-moving");
-      $selectedContainer = $selected.parent();
-      $selectedContainer.trigger("ss-event-arrange").trigger("ss-event-dropped", $selected);
+      if(options.enableTrash) {
+        $(".ss-moving").remove();
+      } else {
+        $selected = $(".ss-moving").removeClass("ss-moving");
+        $selectedContainer = $selected.parent();
+        $selectedContainer.trigger("ss-event-arrange").trigger("ss-event-dropped", $selected);
+      }
     }
 
     function over(e) {
