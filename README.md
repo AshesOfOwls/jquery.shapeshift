@@ -294,15 +294,6 @@ $containers.on("ss-event-dragged", function(e, selected) {
 });
 ```
 
-Similarly, when an item is destroyed by being dropped in a container that has the enableTrash attribute turned on, that item will trigger the "ss-event-destroyed" event on the last container it was placed in.
-
-```javascript
-$containers.on("ss-event-destroyed", function(e, selected) {
-  var $selected = $(selected);
-  console.log("This is the item being destroyed:", $selected);
-});
-```
-
 Another event that you can watch for is the dropped event. This will also return the selected element, and is useful for getting the final index positions for all the elements in the container. For example,
 
 ```javascript
@@ -316,6 +307,15 @@ $containers.on("ss-event-dropped", function(e, selected) {
     console.log("Get the index position:", i)
     console.log("Get the current element:", $(this))
   });
+});
+```
+
+Similarly, when an item is destroyed by being dropped in a container that has the enableTrash attribute turned on, that item will trigger the "ss-event-destroyed" event on the last container it was placed in.
+
+```javascript
+$containers.on("ss-event-destroyed", function(e, selected) {
+  var $selected = $(selected);
+  console.log("This is the item being destroyed:", $selected);
 });
 ```
 
