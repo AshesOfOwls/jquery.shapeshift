@@ -223,6 +223,7 @@
     var ss = this,
         options = ss.options,
         $objects = $container.children(options.selector).filter(":visible"),
+        enableMultiwidth = options.enableMultiwidth,
         columns = options.columns,
         colHeights = [],
         colWidth = null,
@@ -239,7 +240,7 @@
     $first_obj = $objects.first();
     options.childWidth = $first_obj.outerWidth(true);
 
-    if(options.enableMultiwidth) {
+    if(enableMultiwidth) {
       first_obj_span = $first_obj.data("colspan");
       if(isNaN(first_obj_span)) {first_obj_span = 1;}
       first_obj_span_offset = (options.childWidth - ((first_obj_span - 1) * gutterX)) / first_obj_span
@@ -278,6 +279,14 @@
 
       // Increase the calculated total height of the current column
       colHeights[col] += height;
+
+      if(options.enableMultiwidth) {
+        colSpan = $obj.data("colspan");
+        if(colSpan > 1) {
+          colSpan = colSpan - 1;
+          colHeights[col + colSpan] = colHeights[col];
+        }
+      }
     }
     // Store the height of the tallest column
     if(options.enableAutoHeight){
