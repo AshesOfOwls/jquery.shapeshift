@@ -9,6 +9,7 @@
         enableAutoHeight: true,
         enableDrag: true,
         enableDragAnimation: true,
+        enableMultiwidth: true,
         enableRearrange: true,
         enableResize: true,
         enableTrash: false,
@@ -225,18 +226,28 @@
         columns = options.columns,
         colHeights = [],
         colWidth = null,
+        gutterX = options.gutterX,
         gridOffset = options.paddingX,
-        positions = [];
+        positions = [],
+        first_obj_span, first_obj_span_offset;
 
     // If we want to get the positions for all items excluding the
     // one currently being dragged.
     if(ignoreSelected) { $objects = $objects.not(".ss-moving"); }
 
     // Determine the width of each element.
-    options.childWidth = $objects.first().outerWidth(true);
+    $first_obj = $objects.first();
+    options.childWidth = $first_obj.outerWidth(true);
+
+    if(options.enableMultiwidth) {
+      first_obj_span = $first_obj.data("colspan");
+      if(isNaN(first_obj_span)) {first_obj_span = 1;}
+      first_obj_span_offset = (options.childWidth - ((first_obj_span - 1) * gutterX)) / first_obj_span
+      options.childWidth = first_obj_span_offset;
+    }
 
     // Determine the column width.
-    colWidth = options.childWidth + options.gutterX;
+    colWidth = options.childWidth + gutterX;
 
     // Determine how many columns are currently active
     if(!columns) {
