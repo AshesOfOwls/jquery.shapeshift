@@ -3,21 +3,34 @@
     // Create the defaults once
     var pluginName = "shapeshift",
         defaults = {
+            // Features
             centerGrid: true,
+            enableAnimation: true,
+            enableAnimationOnInit: false,
+            enableDrag: true,
             enableResize: true,
+            enableRearrange: true,
 
+            // Feature Options
+            animateSpeed: 160,
+            dragRate: 75,
+            dropWhitelist: "*",
+            
+            // Grid Properties
             columns: null,
             containerHeight: null,
             containerMinHeight: 100,
             gutterX: 10,
             gutterY: 10,
-            paddingX: 20,
-            paddingY: 0
+            paddingX: 10,
+            paddingY: 10,
+            selector: ""
         };
 
     // The actual plugin constructor
     function Plugin(element, options) {
       var ss = this;
+      ss.initialized = false;
 
       ss.container = $(element);
       ss.options = $.extend({}, defaults, options);
@@ -27,47 +40,64 @@
     Plugin.prototype = {
 
       init: function() {
+        // First time initalization of Shapeshift.
+        // Create the events and render the grid.
+        
         var ss = this;
 
-        ss.setGlobals();
+        ss.render();
         ss.setEvents();
-        ss.arrange();
+
+        ss.initialized = true;
+      },
+
+      setEvents: function() {
+        // Creates events tied to the shapeshift containers.
+        // This is important because triggered events are the way to
+        // make sure the containers attributes apply to only to itself.
+        
+        var ss = this,
+            options = ss.options,
+            $container = ss.container;
+
+        if(options.enableResize) { ss.resize(); }
+        if(options.enableDrag) { ss.drag(); }
+
+        $container.off("ss-event-arrange").on("ss-event-arrange", function() { 
+                    if(options.enableRearrange) { ss.render(); } 
+                  });
+
       },
 
       render: function() {
+        // The generic rendering of everything
+        
         var ss = this;
+
         ss.setGlobals();
         ss.arrange();
       },
 
       setGlobals: function() {
+        // Create calculated variables that apply to multiple functions
+
         var ss = this,
             options = ss.options,
             $container = ss.container;
 
- 
-        // Set the Active Children
-        var $children = ss.activeChildren = $container.children();
-
-        // The Container Full Width
+        // Determine the children and initial grid attributes
+        var $children = ss.activeChildren = $container.children(options.selector);
         ss.container_width = $container.innerWidth();
-
-        // The Inner Container Width
         ss.inner_width = ss.container_width - (options.paddingX * 2);
-
-        // The Child width
         ss.child_width = ss.activeChildren.first().outerWidth();
-
-        // The Column width
         ss.col_width = ss.child_width + options.gutterX;
 
-        // The Column count
+        // Determine how many columns there will be,
+        // whilst never exceeding the amount of children
         var columns = options.columns;
         if(!columns) {
-          // Calculate the number of columns
           columns = Math.floor(ss.inner_width / ss.col_width);
 
-          // Columns cannot outnumber actual children
           if(columns > $children.length) {
             columns = $children.length;
           }
@@ -75,59 +105,64 @@
         ss.columns = columns;
       },
 
-      setEvents: function() {
-        var ss = this,
-            options = ss.options;
-
-        if(options.enableResize) {
-          ss.resize();
-        }
-
-        ss.container.off("ss-event-arrange").on("ss-event-arrange", function() { ss.render(); });
-      },
-
       arrange: function() {
-        console.log("arrange")
+        // Moves items into place. Doesn't care about anything except getting
+        // an array of positions and moving the objects to those places.
+
         var ss = this,
-            options = ss.options;
-
-
-        // Animate / Move each object into place
-        var $children = ss.activeChildren,
+            options = ss.options,
+            $children = ss.activeChildren,
             positions = ss.getChildPositions();
+
+        // Determine if we should animate the elements
+        if(!ss.initialized) {
+          var animated = options.enableAnimationOnInit;
+        } else {
+          var animated = options.enableAnimation;
+        }
 
         for(var i=0;i<positions.length;i++) {
           var $child = $($children[i]);
-          $child.css(positions[i]);
+
+          if(!$child.hasClass("ss-moving")) {
+            if(animated) {
+              $child.stop(true, false).animate(positions[i], options.animateSpeed);
+            } else {
+              $child.css(positions[i]);
+            }
+          }
         }
 
+
         // Set the container height to match the tallest column
+        // which is determined after getting child positions.
         var height = options.containerHeight
         if(!height) {
           height = ss.maxHeight;
-
-          // Cannot go below minimum height
           if(height < options.containerMinHeight) {
             height = options.containerMinHeight;
           }
         }
-
         ss.container.css("height", height);
       },
 
       getChildPositions: function() {
+        // Iterates over each child element and determines
+        // what column it will fit into.
+
         var ss = this,
             options = ss.options;
 
 
         // Create an array element for each column, which is then
-        // used to store that columns current height.
+        // used to store each columns current height.
         var colHeights = [],
             columns = ss.columns;
 
         for(var i=0;i<columns;i++) {colHeights.push(options.paddingY);}
 
-        // Get properties for the grid_offset
+
+        // Get properties for the grid
         var $children = ss.activeChildren,
             child_width = ss.child_width,
             col_width = ss.col_width,
@@ -140,18 +175,16 @@
         }
 
         // Loop over each element and determine what column it fits into
+        // and the attributes that apply to it.
         for(var i=0;i<$children.length;i++) {
           var $child = $($children[i]),
               col = $.inArray(Math.min.apply(window,colHeights), colHeights),
               height = $child.outerHeight(true) + options.gutterY,
               offsetX = (col_width * col) + grid_offset,
-              offsetY = colHeights[col],
+              offsetY = colHeights[col];
 
-              // Store the position to animate into place later
-              attributes = { left: offsetX, top: offsetY };
-
-
-          positions[i] = attributes;
+          // Store the position to animate into place later
+          positions[i] = { left: offsetX, top: offsetY };
 
           colHeights[col] += height;
         }
@@ -160,6 +193,102 @@
         ss.maxHeight = Math.max.apply(Math,colHeights) + options.paddingY;
 
         return positions;
+      },
+
+      drag: function() {
+        // Create the jQuery drag and drop functionality.
+
+        var ss = this,
+            options = ss.options,
+            $children = ss.activeChildren;
+
+        // Globals
+        var dragging = false,
+            $selected, selectedOffsetX, selectedOffsetY;
+        $currentContainer = ss.container;
+
+
+        // Dragging
+        $children.draggable({
+          addClasses: false,
+          containment: 'document',
+          zIndex: 9999,
+          start: function(e, ui) { start(e, ui); },
+          drag: function(e, ui) { drag(e, ui); },
+          stop: function(e, ui) { stop(e); }
+        });
+
+        function start(e, ui) {
+          // Set the selected item.
+          $selected = $(e.target).addClass("ss-moving");
+          $currentContainer = $selected.parent();
+
+          // For determining the mouse drag offset
+          selectedOffsetY = $selected.outerHeight() / 2;
+          selectedOffsetX = $selected.outerWidth() / 2;
+        }
+
+        function drag(e, ui) {
+          if(!dragging) {
+            $objects = $currentContainer.children();
+
+            // Determine the position to insert the selected item into
+            position = ss.getIntendedPosition(e);
+            $target = $objects.get(position - 1);
+
+            // Insert the selected item
+            $selected.insertAfter($target);
+
+            $currentContainer.trigger("ss-event-arrange");
+            $(".ss-prev-container").trigger("ss-event-arrange");
+
+            // Drag can only be called every X milliseconds
+            dragging = true;
+            window.setTimeout(function() {
+              dragging = false;
+            }, options.dragRate)
+          }
+
+          // Manually override the elements position
+          ui.position.left = e.pageX - $selected.parent().offset().left - selectedOffsetX;
+          ui.position.top = e.pageY - $selected.parent().offset().top - selectedOffsetY;
+        }
+
+        function stop(e) {
+          // Remove the selected item
+          $selected = $(e.target).removeClass("ss-moving");
+        }
+
+
+        // Dropping
+        ss.container.droppable({
+          accept: options.dropWhitelist,
+          tolerance: 'intersect',
+          drop: function(e) { drop(e); },
+          over: function(e) { over(e); }
+        });
+
+        function over(e) {
+          // Determine the current container we are hovering on
+          // top of and set the previous container.
+          $currentContainer.addClass("ss-prev-container");
+          $currentContainer = $(e.target).removeClass("ss-prev-container");
+          dragging = false;
+        }
+
+        function drop(e) {
+          // Arrange the current container back to normal,
+          // and reset the temporary class names
+          $selected = $(".ss-moving").removeClass("ss-moving");
+          $selectedContainer = $selected.parent();
+          $selectedContainer.trigger("ss-event-arrange").trigger("ss-event-dropped", $selected);
+          $(".ss-prev-container").removeClass("ss-prev-container")
+        }
+
+      },
+
+      getIntendedPosition: function(e) {
+        return 1;
       },
 
       resize: function() {
