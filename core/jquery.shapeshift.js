@@ -4,12 +4,13 @@
     var pluginName = "shapeshift",
         defaults = {
             // Features
-            centerGrid: true,
             enableAnimation: true,
             enableAnimationOnInit: false,
             enableDrag: true,
+            enableDragAnimation: false,
             enableResize: true,
             enableRearrange: true,
+            enableTrash: true,
 
             // Feature Options
             animateSpeed: 160,
@@ -17,6 +18,7 @@
             dropWhitelist: "*",
             
             // Grid Properties
+            centerGrid: true,
             columns: null,
             containerHeight: null,
             containerMinHeight: 100,
@@ -118,7 +120,11 @@
         if(!ss.initialized) {
           var animated = options.enableAnimationOnInit;
         } else {
-          var animated = options.enableAnimation;
+          if($(".ss-moving")[0]) {
+            var animated = options.enableDragAnimation;
+          } else {
+            var animated = options.enableAnimation;
+          }
         }
 
         for(var i=0;i<positions.length;i++) {
@@ -277,11 +283,17 @@
         }
 
         function drop(e) {
-          // Arrange the current container back to normal,
-          // and reset the temporary class names
-          $selected = $(".ss-moving").removeClass("ss-moving");
-          $selectedContainer = $selected.parent();
-          $selectedContainer.trigger("ss-event-arrange").trigger("ss-event-dropped", $selected);
+          if(options.enableTrash) {
+            // Remove the selected element
+            $selected = $(".ss-moving").remove();
+            $currentContainer.trigger("ss-event-arrange").trigger("ss-event-destroyed", $selected)
+          } else {
+            // Arrange the current container back to normal,
+            // and reset the temporary class names
+            $selected = $(".ss-moving").removeClass("ss-moving");
+            $selectedContainer = $selected.parent();
+            $selectedContainer.trigger("ss-event-arrange").trigger("ss-event-dropped", $selected);
+          }
           $(".ss-prev-container").removeClass("ss-prev-container")
         }
 
