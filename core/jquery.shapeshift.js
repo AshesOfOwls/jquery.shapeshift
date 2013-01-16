@@ -5,16 +5,17 @@
         defaults = {
             // Features
             enableAnimation: true,
-            enableAnimationOnInit: false,
+            enableAnimationOnInit: true,
             enableDrag: true,
-            enableDragAnimation: false,
+            enableDragAnimation: true,
             enableResize: true,
             enableRearrange: true,
-            enableTrash: true,
+            enableTrash: false,
 
             // Feature Options
             animateSpeed: 160,
             dragRate: 75,
+            dragWhitelist: ".credits",
             dropWhitelist: "*",
             
             // Grid Properties
@@ -215,7 +216,7 @@
 
 
         // Dragging
-        $children.draggable({
+        $children.filter(options.dragWhitelist).draggable({
           addClasses: false,
           containment: 'document',
           zIndex: 9999,
