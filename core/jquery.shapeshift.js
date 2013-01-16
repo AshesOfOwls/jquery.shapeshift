@@ -8,6 +8,7 @@
             enableAnimationOnInit: true,
             enableDrag: true,
             enableDragAnimation: true,
+            enableMultiwidth: true,
             enableResize: true,
             enableRearrange: true,
             enableTrash: false,
@@ -15,7 +16,7 @@
             // Feature Options
             animateSpeed: 160,
             dragRate: 75,
-            dragWhitelist: ".credits",
+            dragWhitelist: "*",
             dropWhitelist: "*",
             
             // Grid Properties
@@ -86,14 +87,27 @@
 
         var ss = this,
             options = ss.options,
-            $container = ss.container;
+            $container = ss.container,
+            gutterX = options.gutterX;
 
-        // Determine the children and initial grid attributes
+        // Determine the initial grid attributes
         var $children = ss.activeChildren = $container.children(options.selector);
         ss.container_width = $container.innerWidth();
         ss.inner_width = ss.container_width - (options.paddingX * 2);
-        ss.child_width = ss.activeChildren.first().outerWidth();
-        ss.col_width = ss.child_width + options.gutterX;
+
+        // Determine the width of each column
+        var $first_child = ss.activeChildren.first();
+        ss.child_width = $first_child.outerWidth();
+
+        // If multiwidth is enabled, determine the column based
+        // on the first childs colspan
+        if(options.enableMultiwidth) {
+          var child_span = $first_child.data("ss-colspan");
+          if(child_span > 1) {
+            ss.child_width = (ss.child_width - ((child_span - 1) * gutterX)) / child_span
+          }
+        }
+        ss.col_width = ss.child_width + gutterX;
 
         // Determine how many columns there will be,
         // whilst never exceeding the amount of children
