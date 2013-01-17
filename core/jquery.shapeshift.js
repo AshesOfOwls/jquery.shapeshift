@@ -107,6 +107,7 @@
             ss.child_width = (ss.child_width - ((child_span - 1) * gutterX)) / child_span
           }
         }
+
         ss.col_width = ss.child_width + gutterX;
 
         // Determine how many columns there will be,
@@ -197,9 +198,62 @@
 
         // Loop over each element and determine what column it fits into
         // and the attributes that apply to it.
+        var savedItems = [];
         for(var i=0;i<$children.length;i++) {
+          if(options.enableMultiwidth) {
+            placeSavedItems();
+            if(determineIfPlaceable(i)) {
+              savePosition(i);
+            } else {
+              savedItems.push(i);
+            }
+          } else {
+            savePosition(i);
+          }
+        }
+
+        console.log("saved items", savedItems)
+
+        // Store the max height
+        ss.maxHeight = Math.max.apply(Math,colHeights) + options.paddingY;
+
+        return positions;
+
+        function determineIfPlaceable(i) {
           var $child = $($children[i]),
               col = $.inArray(Math.min.apply(window,colHeights), colHeights),
+              colSpan = $child.data("ss-colspan"),
+              placeable = true;
+
+          if(colSpan + col > colHeights.length) {
+            placeable = false;
+          } else {
+            for(var i=1;i<colSpan;i++) {
+              currentHeight = colHeights[col];
+              nextHeight = colHeights[col + i];
+              if(currentHeight < nextHeight) {
+                placeable = false;
+                break;
+              }
+            }
+          }
+
+          return placeable; 
+        }
+
+        function placeSavedItems() {
+          for(var i=0;i<savedItems.length;i++) {
+            if(determineIfPlaceable(savedItems[i])) {
+              savePosition(savedItems[i]);
+              savedItems.splice(i,1);
+            }
+          }
+        }
+
+        function savePosition(i) {
+          var $child = $($children[i]),
+              col = $.inArray(Math.min.apply(window,colHeights), colHeights),
+              colSpan = $child.data("ss-colspan"),
               height = $child.outerHeight(true) + options.gutterY,
               offsetX = (col_width * col) + grid_offset,
               offsetY = colHeights[col];
@@ -207,13 +261,15 @@
           // Store the position to animate into place later
           positions[i] = { left: offsetX, top: offsetY };
 
+          // Append the height to the colHeights array
           colHeights[col] += height;
+
+          if(options.enableMultiwidth) {
+            for(i=1;i<colSpan;i++) {
+              colHeights[col + i] = colHeights[col];
+            }
+          }
         }
-
-        // Store the max height
-        ss.maxHeight = Math.max.apply(Math,colHeights) + options.paddingY;
-
-        return positions;
       },
 
       drag: function() {
