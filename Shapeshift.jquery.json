@@ -12,10 +12,15 @@
   ],
   "version": "1.0.0",
   "author": {
-    "name": "Scott Elwood and We the Media, inc.",
-    "url": "https://wtmworldwide.com"
+    "name": "Scott Elwood",
+    "url": "http://scottelwood.com"
   },
   "maintainers": [
+    {
+      "name": "We the Media, inc.",
+      "email": "dev@wtmworldwide.com",
+      "url": "http://wtmworldwide.com"
+    },
     {
       "name": "Scott Elwood",
       "email": "scott@wtmworldwide.com",
