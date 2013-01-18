@@ -210,27 +210,93 @@
 
         function generatePositions() {
           var savedItems = [],
-              offset = 0,
-              $child, i, col, colspan, multiwidth;
+              offset = 0;
 
-          for(i=0;i<$children.length;i++) {
-            generateSavedItems();
-            var $child = $($children[i]),
-                col = ss.lowestCol(colHeights),
-                colspan = $child.data("ss-colspan"),
-                multiwidth = options.enableMultiwidth && colspan >= 2;
+          for(var i=0;i<$children.length;i++) {
+           var child = parseChild(i);
 
-            if(multiwidth) {
-              determinePosition();
-            } else {
-              savePosition(col);
+            if(child.multiwidth) {
+              determineMultiposition(child)
+            }
+            saveChildPosition(child);
+          }
+
+          // Determines if the given element can be placed
+          function parseChild(i) {
+            var child = {};
+
+            child.index = i;
+            child.el = $($children[i]);
+            child.col = ss.lowestCol(colHeights);
+            child.offset = 0;
+            child.colspan = child.el.data("ss-colspan");
+            child.multiwidth = options.enableMultiwidth && child.colspan >= 2;
+            
+            if(!child.multiwidth) { child.placeable = true; }
+
+            return child;
+          }
+
+          function determineMultiposition(child) {
+            var placeable = false,
+                placedCol = 0;
+
+            // Go over each column
+            for(var j=0;j<columns;j++) {
+              // Starting with the lowest column
+              var current_col = ss.lowestCol(colHeights, j);
+              // Go over each colspan position, starting from the left and moving left each time
+              for(var k=0;k<colspan;k++) {
+                var left_col = current_col - k;
+
+                // Cannot go past left or right most col
+                if(left_col >= 0 && left_col + colspan <= columns) {
+                  // Adjacent columns must be lower height than current col
+                  var current_height = colHeights[current_col],
+                      higherCol = false;
+                  for(var l=0;l<colspan;l++) {
+                    var next_height = colHeights[left_col + l];
+                    if(next_height > current_height) {
+                      higherCol = true;
+                    } else {
+                      // If there is no higher adjacent column,
+                      // we must make sure that there isn't space for an upcoming
+                      // element to fit in
+                      var difference = current_height - next_height;
+                      for(var m=0;m<colspan;m++) {
+                        var next_child_height = $($children[i+m]).outerHeight(true) + options.gutterY;
+                        if(difference >= next_child_height) {
+                          higherCol = true;
+                        }
+                      }
+                    }
+                  }
+                  if(!higherCol) {
+                    placeable = true;
+                    placedCol = left_col;
+                  }
+                }
+              }
             }
           }
 
-          function generateSavedItems() {
-            for(var j=0;j<savedItems;j++) {
-              $saved_child = $($children[j + 1]);
-              console.log($saved_child)
+          function saveChildPosition(child) {
+            var column = child.col - child.offset,
+                height = child.el.outerHeight(true) + options.gutterY,
+                offsetX = (col_width * column) + grid_offset,
+                offsetY = colHeights[column];
+
+            // Store the position to animate into place later
+            positions[i] = { left: offsetX, top: offsetY };
+
+            // Append the height to the colHeights array
+            colHeights[column] += height;
+
+            // If we are multiwidth then adjust the adjacent columns
+            if(child.multiwidth) {
+              for(j=1;j<child.colspan;j++) {
+                colHeights[column + j] = colHeights[column];
+              }
             }
           }
 
