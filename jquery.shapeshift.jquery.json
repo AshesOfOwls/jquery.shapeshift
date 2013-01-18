@@ -1,6 +1,6 @@
 {
   "name": "Shapeshift",
-  "title": "jQuery.Shapeshift",
+  "title": "jQuery Shapeshift",
   "description": "jQuery plugin which can arrange a collection of elements into a grid while also providing drag and drop functionality.",
   "keywords": [
     "grid",
