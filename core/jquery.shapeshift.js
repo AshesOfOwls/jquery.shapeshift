@@ -193,7 +193,7 @@
         // Determine the grid offset if centered
         var grid_offset = options.paddingX;
         if(options.centerGrid) {
-          grid_offset += (ss.inner_width - ((col_width * columns) - options.gutterX)) / 2
+          grid_offset += (ss.inner_width - ((col_width * columns) - options.gutterX)) / 2;
         }
 
         // Loop over each element and determine what column it fits into
@@ -216,8 +216,9 @@
            var child = parseChild(i);
 
             if(child.multiwidth) {
-              determineMultiposition(child)
+              determineMultiposition(child);
             }
+
             saveChildPosition(child);
           }
 
@@ -227,53 +228,49 @@
 
             child.index = i;
             child.el = $($children[i]);
-            child.col = ss.lowestCol(colHeights);
+            child.col = undefined;
             child.offset = 0;
             child.colspan = child.el.data("ss-colspan");
             child.multiwidth = options.enableMultiwidth && child.colspan >= 2;
-            
-            if(!child.multiwidth) { child.placeable = true; }
+            child.placeable = !child.multiwidth;
+
+            if(!child.multiwidth) {
+              child.col = ss.lowestCol(colHeights);
+            }
 
             return child;
           }
 
           function determineMultiposition(child) {
-            var placeable = false,
-                placedCol = 0;
+            // Iterate over each position that the child can be in,
+            // starting with the left side and shifting left each iteration.
+            for(var i=0;i<1;i++) {
+              var offset = i;
 
-            // Go over each column
-            for(var j=0;j<columns;j++) {
-              // Starting with the lowest column
-              var current_col = ss.lowestCol(colHeights, j);
-              // Go over each colspan position, starting from the left and moving left each time
-              for(var k=0;k<colspan;k++) {
-                var left_col = current_col - k;
+              // Go over each column
+              for(var j=0;j<columns;j++) {
+                // Starting with the lowest column
+                var current_col = ss.lowestCol(colHeights, j);
+                var left_col = current_col - offset;
 
                 // Cannot go past left or right most col
-                if(left_col >= 0 && left_col + colspan <= columns) {
-                  // Adjacent columns must be lower height than current col
+                if(current_col >= 0 && current_col + child.colspan <= columns) {
+
+                  // Adjacent columns must be lower
                   var current_height = colHeights[current_col],
-                      higherCol = false;
-                  for(var l=0;l<colspan;l++) {
-                    var next_height = colHeights[left_col + l];
+                      lower = true;
+
+                  for(k=0;k<child.colspan;k++) {
+                    var next_height = colHeights[current_col + k];
                     if(next_height > current_height) {
-                      higherCol = true;
-                    } else {
-                      // If there is no higher adjacent column,
-                      // we must make sure that there isn't space for an upcoming
-                      // element to fit in
-                      var difference = current_height - next_height;
-                      for(var m=0;m<colspan;m++) {
-                        var next_child_height = $($children[i+m]).outerHeight(true) + options.gutterY;
-                        if(difference >= next_child_height) {
-                          higherCol = true;
-                        }
-                      }
+                      lower = false;
                     }
                   }
-                  if(!higherCol) {
-                    placeable = true;
-                    placedCol = left_col;
+
+                  if(lower) {
+                    child.placeable = true;
+                    child.col = current_col;
+                    i = j = 9999; // Break all for loops
                   }
                 }
               }
@@ -373,8 +370,8 @@
       lowestCol: function(array, offset) {
         array = array.slice()
         var lowest;
-        if(offset != undefined && offset != 0) {
-          for(var i=0;i<offset;i++) {
+        if(offset != undefined) {
+          for(var i=0;i<=offset;i++) {
             lowest = $.inArray(Math.min.apply(window,array), array);
             array[lowest] = 9999;
           }
