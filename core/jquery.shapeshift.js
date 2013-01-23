@@ -213,7 +213,9 @@
               offset = 0;
 
           for(var i=0;i<$children.length;i++) {
-           var child = parseChild(i);
+            parseSavedItems();
+
+            var child = parseChild(i);
 
             if(child.multiwidth) {
               determineMultiposition(child);
@@ -239,6 +241,12 @@
             }
 
             return child;
+          }
+
+          function parseSavedItems() {
+            for(var i=0;i<savedItems.length;i++) {
+              
+            }
           }
 
           function determineMultiposition(child) {
@@ -271,6 +279,8 @@
                     child.placeable = true;
                     child.col = current_col;
                     i = j = 9999; // Break all for loops
+                  } else {
+                    savedItems.push(child);
                   }
                 }
               }
