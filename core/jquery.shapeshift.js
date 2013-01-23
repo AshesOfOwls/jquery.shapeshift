@@ -188,6 +188,8 @@
         var $children = ss.activeChildren,
             child_width = ss.child_width,
             col_width = ss.col_width,
+            parsedChildren = [i],
+            savedChildren = [],
             positions = [];
 
         // Determine the grid offset if centered
@@ -198,7 +200,8 @@
 
         // Loop over each element and determine what column it fits into
         // and the attributes that apply to it.
-        generatePositions();
+        parseChildren();
+        determinePositions();
 
         // Store the max height
         ss.maxHeight = Math.max.apply(Math,colHeights) + options.paddingY;
@@ -208,187 +211,104 @@
         // -----------------
         // Sorting Functions
 
-        function generatePositions() {
-          var savedItems = [],
-              offset = 0;
-
+        function parseChildren() {
           for(var i=0;i<$children.length;i++) {
-            parseSavedItems();
+            var $child = $($children[i]);
 
-            var child = parseChild(i);
-
-            if(child.multiwidth) {
-              determineMultiposition(child);
-            }
-
-            saveChildPosition(child);
+            child = {};
+            child.i = i;
+            child.colspan = $child.data("ss-colspan");
+            child.column = 0;
+            child.height = $child.outerHeight(true) + options.gutterY;
+          
+            parsedChildren[i] = child;
           }
+        }
 
-          // Determines if the given element can be placed
-          function parseChild(i) {
-            var child = {};
+        function determinePositions() {
+          for(var i=0;i<parsedChildren.length;i++) {
+            var child = parsedChildren[i],
+                multiwidth = child.colspan > 1;
 
-            child.index = i;
-            child.el = $($children[i]);
-            child.col = undefined;
-            child.offset = 0;
-            child.colspan = child.el.data("ss-colspan");
-            child.multiwidth = options.enableMultiwidth && child.colspan >= 2;
-            child.placeable = !child.multiwidth;
-
-            if(!child.multiwidth) {
-              child.col = ss.lowestCol(colHeights);
-            }
-
-            return child;
-          }
-
-          function parseSavedItems() {
-            for(var i=0;i<savedItems.length;i++) {
-              
-            }
-          }
-
-          function determineMultiposition(child) {
-            // Iterate over each position that the child can be in,
-            // starting with the left side and shifting left each iteration.
-            for(var i=0;i<1;i++) {
-              var offset = i;
-
-              // Go over each column
-              for(var j=0;j<columns;j++) {
-                // Starting with the lowest column
-                var current_col = ss.lowestCol(colHeights, j);
-                var left_col = current_col - offset;
-
-                // Cannot go past left or right most col
-                if(current_col >= 0 && current_col + child.colspan <= columns) {
-
-                  // Adjacent columns must be lower
-                  var current_height = colHeights[current_col],
-                      lower = true;
-
-                  for(k=0;k<child.colspan;k++) {
-                    var next_height = colHeights[current_col + k];
-                    if(next_height > current_height) {
-                      lower = false;
-                    }
-                  }
-
-                  if(lower) {
-                    child.placeable = true;
-                    child.col = current_col;
-                    i = j = 9999; // Break all for loops
-                  } else {
-                    savedItems.push(child);
-                  }
-                }
-              }
-            }
-          }
-
-          function saveChildPosition(child) {
-            var column = child.col - child.offset,
-                height = child.el.outerHeight(true) + options.gutterY,
-                offsetX = (col_width * column) + grid_offset,
-                offsetY = colHeights[column];
-
-            // Store the position to animate into place later
-            positions[i] = { left: offsetX, top: offsetY };
-
-            // Append the height to the colHeights array
-            colHeights[column] += height;
-
-            // If we are multiwidth then adjust the adjacent columns
-            if(child.multiwidth) {
-              for(j=1;j<child.colspan;j++) {
-                colHeights[column + j] = colHeights[column];
-              }
-            }
-          }
-
-          function determinePosition() {
-            var placeable = false,
-                placedCol = 0;
-
-            // Go over each column
-            for(var j=0;j<columns;j++) {
-              // Starting with the lowest column
-              var current_col = ss.lowestCol(colHeights, j);
-              // Go over each colspan position, starting from the left and moving left each time
-              for(var k=0;k<colspan;k++) {
-                var left_col = current_col - k;
-
-                // Cannot go past left or right most col
-                if(left_col >= 0 && left_col + colspan <= columns) {
-                  // Adjacent columns must be lower height than current col
-                  var current_height = colHeights[current_col],
-                      higherCol = false;
-                  for(var l=0;l<colspan;l++) {
-                    var next_height = colHeights[left_col + l];
-                    if(next_height > current_height) {
-                      higherCol = true;
-                    } else {
-                      // If there is no higher adjacent column,
-                      // we must make sure that there isn't space for an upcoming
-                      // element to fit in
-                      var difference = current_height - next_height;
-                      for(var m=0;m<colspan;m++) {
-                        var next_child_height = $($children[i+m]).outerHeight(true) + options.gutterY;
-                        if(difference >= next_child_height) {
-                          higherCol = true;
-                        }
-                      }
-                    }
-                  }
-                  if(!higherCol) {
-                    placeable = true;
-                    placedCol = left_col;
-                  }
-                }
-              }
-            }
-            
-            if(placeable) {
-              savePosition(placedCol);
-            } else {
-              savedItems.push(i)
-            }
-          }
-
-          function savePosition(placedCol) {
-            var height = $child.outerHeight(true) + options.gutterY,
-                offsetX = (col_width * placedCol) + grid_offset,
-                offsetY = colHeights[placedCol];
-
-            // Store the position to animate into place later
-            positions[i] = { left: offsetX, top: offsetY };
-
-            // Append the height to the colHeights array
-            colHeights[placedCol] += height;
-
-            // If we are multiwidth then adjust the adjacent columns
             if(multiwidth) {
-              for(j=1;j<colspan;j++) {
-                colHeights[placedCol + j] = colHeights[placedCol];
-              }
+              child.column = determineMultiposition(child);
+            } else {
+              child.column = ss.lowestCol(colHeights);
+            }
+
+            if(child.column != undefined) {
+              saveChildPosition(child);
+            } else {
+              savedChildren.push(child)
+            }
+
+            recalculateSaved();
+          }
+        }
+
+        function recalculateSaved() {
+          for(var i=0;i<savedChildren.length;i++) {
+            child = savedChildren[i];
+            child.column = determineMultiposition(child);
+            if(child.column != undefined) {
+              saveChildPosition(child);
+              savedChildren.pop(i)
+            }
+          }
+        }
+
+        function determineMultiposition(child) {
+          var colspan = child.colspan,
+              maxCol = columns - colspan,
+              column = ss.lowestCol(colHeights, maxCol),
+              colHeight = colHeights[column],
+              placeable = true;
+          
+          // All of the further columns must be at or below
+          // the height of this column.
+          for(var i=1;i<colspan;i++) {
+            var nextColHeight = colHeights[column + i],
+                nextChild = parsedChildren[child.i + i];
+
+            if(nextColHeight > colHeight) {
+              column = undefined;
+            }
+
+            if(nextChild.height + nextColHeight <= colHeight) {
+              column = undefined;
+            }
+          }
+
+          return column;
+        }
+
+        function saveChildPosition(child) {
+          var column = child.column,
+              colspan = child.colspan,
+              offsetX = (col_width * column) + grid_offset,
+              offsetY = colHeights[column];
+
+          // Store the position to animate into place later
+          positions[child.i] = { left: offsetX, top: offsetY };
+
+          // Append the height to the colHeights array
+          colHeights[column] += child.height;
+
+          if(colspan > 1) {
+            for(var i=1;i<colspan;i++) {
+              colHeights[column + i] = colHeights[column];
             }
           }
         }
       },
 
-      lowestCol: function(array, offset) {
-        array = array.slice()
-        var lowest;
-        if(offset != undefined) {
-          for(var i=0;i<=offset;i++) {
-            lowest = $.inArray(Math.min.apply(window,array), array);
-            array[lowest] = 9999;
-          }
-        } else {
-          lowest = $.inArray(Math.min.apply(window,array), array);
+      lowestCol: function(array, max) {
+        var column;
+        if(max) {
+          array = array.slice(0).splice(0,max + 1);
         }
-        return lowest;
+        column = $.inArray(Math.min.apply(window,array), array)
+        return column;
       },
 
       drag: function() {
