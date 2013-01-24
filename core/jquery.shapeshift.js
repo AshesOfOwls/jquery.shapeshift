@@ -274,8 +274,10 @@
               column = undefined;
             }
 
-            if(nextChild.height + nextColHeight <= colHeight) {
-              column = undefined;
+            if(nextChild) {
+              if(nextChild.height + nextColHeight <= colHeight) {
+                column = undefined;
+              }
             }
           }
 
@@ -346,14 +348,21 @@
 
         function drag(e, ui) {
           if(!dragging) {
-            $objects = $currentContainer.children();
+            $objects = $currentContainer.children().not(".ss-moving");
 
             // Determine the position to insert the selected item into
             position = ss.getIntendedPosition(e);
-            $target = $objects.get(position - 1);
+            console.log(position)
+            if(position > 0) {
+              $target = $objects.get(position - 1);
+              // Insert the selected item
+              $selected.insertAfter($target);
+            } else {
+              $target = $objects.get(position);
+              console.log("yep", $target)
+              $selected.insertBefore($target);
+            }
 
-            // Insert the selected item
-            $selected.insertAfter($target);
 
             $currentContainer.trigger("ss-event-arrange");
             $(".ss-prev-container").trigger("ss-event-arrange");
@@ -410,7 +419,50 @@
       },
 
       getIntendedPosition: function(e) {
-        return 1;
+        var ss = this,
+            options = ss.options,
+            $selected = $(".ss-moving"),
+            $container = $selected.parent(),
+            chosenIndex = 0,
+            selectedX = $selected.position().left + (options.childWidth / 2),
+            selectedY = $selected.position().top + ($selected.outerHeight() / 2),
+            shortestDistance = 9999,
+            positions = ss.getChildPositions(),
+            endCap = positions.length - options.dropCutoff;
+
+        // Go over all of those positions and figure out
+        // which is the closest to the cursor.
+        for(var hov_i=0;hov_i<positions.length;hov_i++) {
+          // If we are able to insert at this index position
+          if(hov_i < endCap) {
+            attributes = positions[hov_i];
+
+            // If the current item is to the bottom right of the current object position
+            if(selectedX > attributes.left && selectedY > attributes.top) {
+              var xDist = selectedX - attributes.left,
+                  yDist = selectedY - attributes.top;
+
+              distance = Math.sqrt((xDist * xDist) + (yDist * yDist));
+
+              // If this is the shortest distance so far
+              if(distance < shortestDistance) {
+                shortestDistance = distance;
+                chosenIndex = hov_i;
+
+                // If this is the last item, and we are below it or to the right,
+                // then we may want to insert it as the last item.
+                if(hov_i === positions.length - 1) {
+                  var $object = $container.children().not(".ss-moving").last();
+                  if(yDist > $object.outerHeight() * .75 || xDist > options.childWidth * .75 || xDist < 0) {
+                    chosenIndex++;
+                  }
+                }
+              }
+            }
+          }
+        }
+        // Return the intended index position
+        return chosenIndex;
       },
 
       resize: function() {
