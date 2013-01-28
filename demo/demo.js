@@ -1,30 +1,42 @@
 $(document).ready(function() {
-  var $containers = $(".container");
+  var $containers = $(".container"),
+      child_count = 15;
 
   // ----------------------------------------------------------------------
   // - Generate some fake elements
   // ----------------------------------------------------------------------
 
-  // This just renders us some random temporary children
-  function renderChildren(placekitten) {
-    $containers.children().filter(":not(.credits)").remove();
-    $containers.each(function(container_i) {
-      for(i=0;i<15;i++) {
+  function renderChildren() {
+    $containers.each(function() {
+      for(var i=0;i<child_count;i++) {
         var $element = $("<div class='object'></div>"),
-            height = Math.floor(Math.random() * 200) + 100,
-            width = $containers.children().first().width();
-        if(container_i === 1) { height = 140; }
+            height = Math.floor(Math.random() * 200) + 100;
+        $element.height(height);
+        $(this).append($element);
+      }
+    })
+  }
+
+  function renderPlaceholders(placekitten) {
+    $containers.each(function() {
+      var $children = $(this).children().not(".credits"),
+          child_count = $children.length;
+      for(var i=0;i<child_count;i++) {
+        var $child = $($children[i]),
+            height = $child.height(),
+            width = $child.width();
+
         if(placekitten) {
           var background = 'url("http://www.placekitten.com/'+width+'/'+height+'")';
         } else {
           var background = 'url("http://fpoimg.com/'+width+'x'+height+'?bg_color='+getRandomColor()+'&text_color=444444")';
         }
-        $element.css({ background: background, height: height });
-        $(this).append($element);
+        $child.css({ background: background, height: height });
       }
-    });
+    })
   }
-  renderChildren(false);
+  renderChildren();
+  renderPlaceholders();
 
   function getRandomColor() {
     var letters = 'ABCDEF'.split('');
@@ -85,11 +97,11 @@ $(document).ready(function() {
   $(".filters .placeholders button").on("click", function() {
     switch($(this).data("attr")) {
       case "fpoimg":
-        renderChildren(false);
+        renderPlaceholders(false);
         $(".filters .dnd button").first().trigger("click")
         break;
       case "placekittens":
-        renderChildren(true);
+        renderPlaceholders(true);
         $(".filters .dnd button").first().trigger("click")
         break;
     }
