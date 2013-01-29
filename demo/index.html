@@ -8,12 +8,12 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
 
-    <!-- Core Files -->
+    <!-- Core Shapeshift Files -->
     <script type="text/JavaScript" src="../core/vendor/jquery.ui.touch-punch.min.js"></script>
     <script type="text/JavaScript" src="../core/jquery.shapeshift.js"></script>
 
     <!-- Template Files -->
-    <link href="template/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="template/reset.css" rel="stylesheet" type="text/css" />
     <link href="template/template.css" rel="stylesheet" type="text/css" />
     <script type="text/JavaScript" src="template/template.js"></script>
 
@@ -23,11 +23,11 @@
   </head>
   <body>
     <header>
-      <a href="https://github.com/McPants/jquery.shapeshift" class="fork-me">
-        <img src="https://s3.amazonaws.com/github/ribbons/forkme_left_darkblue_121621.png" alt="Fork me on GitHub">
-      </a>
-      <h1><a href="https://github.com/McPants/jquery.shapeshift">jQuery.Shapeshift</a></h1>
-      <div class="description">
+      <div class="title gradient-charblue">
+        <a href="#">jQuery.Shapeshift</a>
+      </div>
+
+      <div class="more-info">
         <ul>
           <li><strong>Grid System:</strong> All items flow from left to right, top to bottom.</li>
           <li><strong>Drag & Drop:</strong> Click and drag elements to move them, even to different containers.</li>
@@ -35,49 +35,20 @@
           <li><strong>Media Queries:</strong> Work normally with responsive grids, watch as the page shifts with the new attributes.</li>
           <li><strong>Works on Touch:</strong> Enable drag and drop on touch devices by using the included <a href="http://touchpunch.furf.com/">jQuery UI Touch Punch</a>.</li>
         </ul>
+
+        <div class="togglebar">
+          <div>More Info</div>
+        </div>
       </div>
     </header>
 
-    <div class="hr"></div>
+    <div class="content">
+      <a href="https://github.com/McPants/jquery.shapeshift" class="fork-me">
+        <img src="https://s3.amazonaws.com/github/ribbons/forkme_left_darkblue_121621.png" alt="Fork me on GitHub">
+      </a>
 
-    <nav>
-      <ul class="filters">
-        <li class="dnd">
-          <h6>Drag and Drop</h6>
-          <div class="btn-group toggle">
-            <button class="btn active" data-attr="drag">Drag (Animated)</a>
-            <button class="btn" data-attr="no-drag-animate">Drag (Not Animated)</a>
-            <button class="btn" data-attr="no-drag">Disable Drag</a>
-          </div>
-        </li>
-        <li class="filtering">
-          <h6>Filtering</h6>
-          <div class="btn-group">
-            <button class="btn" data-attr="hide">Hide Random</a>
-            <button class="btn" data-attr="show">Show Random (if hidden)</a>
-          </div>
-        </li>
-        <li class="placeholders">
-          <h6>Placeholders</h6>
-          <div class="btn-group toggle">
-            <button class="btn active" data-attr="fpoimg">FPOImg</a>
-            <button class="btn" data-attr="placekittens">Placekittens</a>
-          </div>
-        </li>
-      </ul>
-    </nav>
-
-    <div class="hr"></div>
-
-    <div class="container"></div>
-    <div class="container">
-       <div class="object credits" data-ss-colspan="3">
-        Shapeshift is maintained by <br />
-        <a href="http://wtmworldwide.com/">We the Media, inc</a><br />
-        <a href="http://www.wtmworldwide.com">
-          <img src="template/wtm_logo.png"></a><br />
-        List of <a href="https://github.com/McPants/jquery.shapeshift/graphs/contributors">contributors</a><br />
-      </div>
+      <div class="container"></div>
+      <div class="container"></div>
     </div>
 
     <footer>

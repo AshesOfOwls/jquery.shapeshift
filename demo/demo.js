@@ -1,5 +1,5 @@
 $(document).ready(function() {
-  var $containers = $(".container"),
+  var $containers = $(".ss-container"),
       child_count = 15;
 
   // ----------------------------------------------------------------------

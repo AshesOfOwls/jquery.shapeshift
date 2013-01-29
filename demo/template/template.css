@@ -1,94 +1,119 @@
 body {
   background: url('soft_wallpaper.png') #EFEFEF;
-  color: #303030;
-  font-family: Helvetica, Arial, sans-serif;
-  font-size: 13px;
-  padding: 0;
-  margin: 0;
+  font-family: Helvetica, Arial;
+  font-size: 14px;
+}
+
+a {
+  text-decoration: none;
 }
 
 header {
-  text-align: center;
-  text-shadow: 1px 1px 0px rgba(255,255,255,0.6);
-  min-height: 100px;
-  padding: 0 140px;
+  position: relative;
 }
 
-header .fork-me {
+.title {
+  border-bottom: 1px solid #444;
+  box-shadow: 1px 0px 3px #444;
+  color: #FFF;
+  height: 35px;
+  padding: 10px;
+  position: relative;
+  text-shadow: 0px 1px 0px #000;
+  z-index: 20;
+}
+
+.title a {
+  color: #FFF;
+  display: block;
+  font-size: 26px;
+  font-weight: 200;
+  margin-top: 3px;
+  text-align: center;
+}
+
+.gradient-charblue {
+  background: rgb(64,150,238); /* Old browsers */
+  background: -moz-linear-gradient(top,  rgba(64,150,238,1) 0%, rgba(64,150,238,1) 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(64,150,238,1)), color-stop(100%,rgba(64,150,238,1))); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top,  rgba(64,150,238,1) 0%,rgba(64,150,238,1) 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top,  rgba(64,150,238,1) 0%,rgba(64,150,238,1) 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top,  rgba(64,150,238,1) 0%,rgba(64,150,238,1) 100%); /* IE10+ */
+  background: linear-gradient(to bottom,  rgba(64,150,238,1) 0%,rgba(64,150,238,1) 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4096ee', endColorstr='#4096ee',GradientType=0 ); /* IE6-9 */
+}
+
+.more-info {
+  background: rgb(80, 164, 221);
+  padding: 10px 0;
+  position: relative;
+  width: 100%;
+  z-index: 10;
+}
+
+.more-info ul {
+  display: none;
+  margin: 10px auto 15px;
+  max-width: 800px;
+  text-align: center;
+}
+
+.more-info li {
+  margin: 3px 0;
+}
+
+.more-info li strong {
+  font-weight: bold;
+}
+
+.more-info .togglebar {
+  background: #222;
+  bottom: 0px;
+  height: 1px;
+  position: absolute;
+  text-align: center;
+  width: 100%;
+}
+
+.more-info .togglebar div {
+  background: #EFEFEF;
+  border-radius: 15px;
+  border: 1px solid #000;
+  bottom: -9px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  height: 12px;
+  left: 50%;
+  margin-left: -38px;
+  padding: 3px 8px;
+  position: absolute;
+  width: 60px;
+  z-index; 50;
+}
+
+.content {
+  min-height: 200px;
+  position: relative;
+}
+
+.fork-me {
   border: 0;
   left: 0;
   position: absolute;
   top: 0;
+  z-index: 100;
 }
 
-header .wtm-logo {
-  border: 0;
-  color: inherit;
-  font-size: 11px;
-  line-height: 14px;
-  padding: 10px;
-  position: absolute;
-  right: 0;
-  text-decoration: none;
-  top: 0;
-}
-
-header h1 a {
-  text-decoration: none;
-}
-
-ul { list-style: none; padding: 0; }
-
-.description ul li {
-  margin: 5px 0;
-}
-
-.hr {
-  background: rgba(0,0,0,0.08);
-  border-bottom: 1px solid rgba(255,255,255,0.8);
-  height: 1px;
-  margin: 25px 0;
-  width: 100%;
-}
-
-nav {
-  margin: 0 auto;
-  text-align: center;
-  width: 90%;
-}
-
-nav:after {
-  content: ".";
-  display: block;
-  clear: both;
-  visibility: hidden;
-  line-height: 0;
-  height: 0;
-}
-
-nav ul {
-  display: inline-block;
-}
-
-nav ul li {
+.container {
+  outline: 1px dashed #666;
   float: left;
-  margin: 0 30px 20px 0;
-}
-
-nav ul li h6 {
-  margin: 0 0 10px 3px;
-  font-size: 12px;
-}
-
-nav ul li h6 a {
-  float: right;
-  text-decoration: none;
+  margin: 70px 2%;
+  min-height: 200px;
+  position: relative;
+  width: 46%;
 }
 
 footer {
-  clear: both;
-  line-height: 200%;
-  padding: 40px 0;
   text-align: center;
-  width: 100%;
 }
