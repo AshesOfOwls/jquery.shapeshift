@@ -1,0 +1,14 @@
+ul.ss-container {
+  outline: 1px dashed rgba(0,0,0,0.25);
+  float: left;
+  margin: 1%;
+  position: relative;
+  width: 48%;
+}
+
+ul.ss-container li {
+  border-radius: 3px;
+  border: 1px solid rgba(0,0,0,0.4);
+  position: absolute;
+  width: 150px;
+}

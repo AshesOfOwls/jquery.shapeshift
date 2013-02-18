@@ -9,7 +9,7 @@ $(document).ready(function() {
   function renderChildren() {
     $containers.each(function() {
       for(var i=0;i<child_count;i++) {
-        var $element = $("<div class='object'></div>"),
+        var $element = $("<li></li>"),
             height = Math.floor(Math.random() * 200) + 100;
         $element.height(height);
         $(this).append($element);

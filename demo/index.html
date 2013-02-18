@@ -1,59 +1,82 @@
-<!DOCTYPE html>
 <html>
-  <head>
-    <title>jQuery.Shapeshift Demo</title>
-    <meta name="description" content="A dynamic grid system with drag and drop functionality." />
+<head>
+  <title>jQuery.Shapeshift Demo</title>
+  <meta name="description" content="A dynamic grid system with drag and drop functionality." />
+  <meta name="keywords" content="jquery,html,grid,drag,drop,pinterest,style">
+ 
+  <!-- Libraries -->
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+  
+  <!-- Core Shapeshift Files -->
+  <script type="text/JavaScript" src="../core/vendor/jquery.ui.touch-punch.min.js"></script>
+  <script type="text/JavaScript" src="../core/jquery.shapeshift.js"></script>
 
-    <!-- Required Libraries -->
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+  <!-- Template Assets -->
+  <link rel="stylesheet" type="text/css" href="template/css/reset.css">
+  <link rel="stylesheet" type="text/css" href="template/css/template.css">
+  <script src="template/javascript/template.js"></script>
 
-    <!-- Core Shapeshift Files -->
-    <script type="text/JavaScript" src="../core/vendor/jquery.ui.touch-punch.min.js"></script>
-    <script type="text/JavaScript" src="../core/jquery.shapeshift.js"></script>
+  <!-- Demo Assets -->
+  <link rel="stylesheet" type="text/css" href="demo.css">
+  <script src="demo.js"></script>
+</head>
+<body>
+  <div class="overlay"></div>
+  <a href="https://github.com/wtm/demo-template" class="fork-me">
+    <img src="https://s3.amazonaws.com/github/ribbons/forkme_left_darkblue_121621.png" alt="Fork me on GitHub">
+  </a>
+  <a href="http://www.wtmworldwide.com" target="_blank" class="logo">We the Media</a>
+  <header>
 
-    <!-- Template Files -->
-    <link href="template/reset.css" rel="stylesheet" type="text/css" />
-    <link href="template/template.css" rel="stylesheet" type="text/css" />
-    <script type="text/JavaScript" src="template/template.js"></script>
-
-    <!-- Demo Files -->
-    <link href="demo.css" rel="stylesheet" type="text/css" />
-    <script type="text/JavaScript" src="demo.js"></script>
-  </head>
-  <body>
-    <header>
-      <div class="title gradient-charblue">
-        <a href="#">jQuery.Shapeshift</a>
-      </div>
-
-      <div class="more-info">
-        <ul>
-          <li><strong>Grid System:</strong> All items flow from left to right, top to bottom.</li>
-          <li><strong>Drag & Drop:</strong> Click and drag elements to move them, even to different containers.</li>
-          <li><strong>Responsive:</strong> Resize the browser window so see the grid change with the new dimensions.</li>
-          <li><strong>Media Queries:</strong> Work normally with responsive grids, watch as the page shifts with the new attributes.</li>
-          <li><strong>Works on Touch:</strong> Enable drag and drop on touch devices by using the included <a href="http://touchpunch.furf.com/">jQuery UI Touch Punch</a>.</li>
-        </ul>
-
-        <div class="togglebar">
-          <div>More Info</div>
-        </div>
-      </div>
-    </header>
-
-    <div class="content">
-      <a href="https://github.com/McPants/jquery.shapeshift" class="fork-me">
-        <img src="https://s3.amazonaws.com/github/ribbons/forkme_left_darkblue_121621.png" alt="Fork me on GitHub">
-      </a>
-
-      <div class="container"></div>
-      <div class="container"></div>
+    <h1><a class="title" href="#">jQuery.Shapeshift</a></h1>
+    <div class="details">
+      <a class="toggle" href="#">Details</a>
+      <ul>
+        <li><strong>Grid System:</strong> All items flow from left to right, top to bottom.</li>
+        <li><strong>Drag &amp; Drop:</strong> Click and drag elements to move them, even to different containers.</li>
+        <li><strong>Responsive:</strong> Resize the browser window so see the grid change with the new dimensions.</li>
+        <li><strong>Media Queries:</strong> Work normally with responsive grids, watch as the page shifts with the new attributes.</li>
+        <li><strong>Works on Touch:</strong> Enable drag and drop on touch devices by using the included <a href="http://touchpunch.furf.com/">jQuery UI Touch Punch</a>.</li>
+      </ul>
     </div>
+    <div class="hr"></div>
 
-    <footer>
-      jQuery.Shapeshift uses the <a href="https://github.com/McPants/jquery.shapeshift/blob/master/LICENSE">MIT license</a><br />
-      Placeholder images provided by <a href="http://fpoimg.com">FPOImg.com</a> and <a href="http://placekitten.com">Placekitten.com</a>.
-    </footer>
-  </body>
+
+    <ul class="options">
+      <li>
+        <h4>Options</h4>
+        <ul class="btn-group toggle">
+          <li class="active">Do Something</li>
+          <li>Something Else</li>
+        </ul>
+      </li>
+      <li>
+        <h4>Other Stuff</h4>
+        <ul class="btn-group">
+          <li>Show it</li>
+          <li>Hide it</li>
+          <li>Do the Moonwalk</li>
+        </ul>
+      </li>
+      <li>
+        <h4>Controls</h4>
+        <ul class="btn-group">
+          <li>Stop</li>
+          <li>Hammertime</li>
+        </ul>
+      </li>
+    </ul>
+  </header>
+
+  <div class="content">
+    <ul class="ss-container"></ul>
+    <ul class="ss-container"></ul>
+  </div>
+
+  <footer>
+    <div>jQuery.Shapeshift uses the <a href="https://github.com/McPants/jquery.shapeshift/blob/master/LICENSE">MIT license</a></div>
+    <div>Placeholder images provided by <a href="http://fpoimg.com">FPOImg.com</a> and <a href="http://placekitten.com">Placekitten.com</a>.</div>
+  </footer>
+</body>
 </html>
