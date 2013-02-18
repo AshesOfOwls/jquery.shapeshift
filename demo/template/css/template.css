@@ -3,18 +3,11 @@ body {
   font-family: Georgia;
   font-size: 13px;
   min-width: 300px;
+  height: 100%;
 }
 
 a {
   color: rgba(0,0,0,0.8);
-}
-
-.overlay {
-  background: rgba(95, 79, 100, 0.12);
-  height: 100%;
-  position: absolute;
-  width: 100%;
-  z-index: -1;
 }
 
 header {
@@ -32,7 +25,7 @@ header h1 a.title {
 }
 
 header .hr {
-  max-width: 640px;
+  max-width: 620px;
   margin: 5px auto 4px;
 }
 
@@ -114,7 +107,10 @@ ul.btn-group li:last-child {
 }
 
 footer {
+  clear: both;
+  padding: 30px 0 20px 0;
   text-align: center;
+  width: 100%;
 }
 
 footer div {

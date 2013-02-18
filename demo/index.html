@@ -22,7 +22,6 @@
   <script src="demo.js"></script>
 </head>
 <body>
-  <div class="overlay"></div>
   <a href="https://github.com/wtm/demo-template" class="fork-me">
     <img src="https://s3.amazonaws.com/github/ribbons/forkme_left_darkblue_121621.png" alt="Fork me on GitHub">
   </a>
@@ -45,25 +44,25 @@
 
     <ul class="options">
       <li>
-        <h4>Options</h4>
-        <ul class="btn-group toggle">
-          <li class="active">Do Something</li>
-          <li>Something Else</li>
+        <h4>Drag & Drop</h4>
+        <ul class="btn-group toggle dragndrop">
+          <li data-option="animated" class="active">Animated</li>
+          <li data-option="no-animation">No Animation</li>
+          <li data-option="disabled">Disable</li>
         </ul>
       </li>
       <li>
-        <h4>Other Stuff</h4>
-        <ul class="btn-group">
-          <li>Show it</li>
-          <li>Hide it</li>
-          <li>Do the Moonwalk</li>
+        <h4>Filtering</h4>
+        <ul class="btn-group filtering">
+          <li data-option="show">Show Random</li>
+          <li data-option="hide">Hide Random</li>
         </ul>
       </li>
       <li>
-        <h4>Controls</h4>
-        <ul class="btn-group">
-          <li>Stop</li>
-          <li>Hammertime</li>
+        <h4>Placeholders</h4>
+        <ul class="btn-group toggle placeholders">
+          <li data-option="fpoimg" class="active">FPOImg</li>
+          <li data-option="placekittens">Placekittens</li>
         </ul>
       </li>
     </ul>

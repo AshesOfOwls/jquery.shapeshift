@@ -56,20 +56,20 @@ $(document).ready(function() {
   // - Clicking the filter options
   // ----------------------------------------------------------------------
 
-  $(".filters .dnd button").on("click", function() {
-    switch($(this).data("attr")) {
-      case "drag":
+  $(".options ul.dragndrop li").on("click", function() {
+    switch($(this).data("option")) {
+      case "animated":
         options = {
           paddingY: 20
         }
         break;
-      case "no-drag":
+      case "no-animation":
         options = {
           enableDrag: false,
           paddingY: 20
         }
         break;
-      case "no-drag-animate":
+      case "disabled":
         options = {
           enableDragAnimation: false,
           paddingY: 20
@@ -79,8 +79,8 @@ $(document).ready(function() {
     $containers.shapeshift(options);
   });
 
-  $(".filters .filtering button").on("click", function() {
-    switch($(this).data("attr")) {
+  $(".options ul.filtering li").on("click", function() {
+    switch($(this).data("option")) {
       case "hide":
         $objects = $containers.children().filter(":visible");
         random = Math.round(Math.random() * $objects.size());
@@ -94,15 +94,13 @@ $(document).ready(function() {
     }
   });
 
-  $(".filters .placeholders button").on("click", function() {
-    switch($(this).data("attr")) {
+  $(".options ul.placeholders li").on("click", function() {
+    switch($(this).data("option")) {
       case "fpoimg":
         renderPlaceholders(false);
-        $(".filters .dnd button").first().trigger("click")
         break;
       case "placekittens":
         renderPlaceholders(true);
-        $(".filters .dnd button").first().trigger("click")
         break;
     }
 

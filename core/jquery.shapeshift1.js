@@ -304,7 +304,7 @@
         }
       },
 
-      lowestCol: function(array, max) {
+      zestCol: function(array, max) {
         var column;
         if(max) {
           array = array.slice(0).splice(0,max + 1);
