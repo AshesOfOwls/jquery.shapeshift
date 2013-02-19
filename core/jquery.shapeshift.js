@@ -3,9 +3,14 @@
     var pluginName = "shapeshift",
         defaults = {
           // Grid Properties
+          autoHeight: true,
           centerGrid: true,
+          columns: null,
           gutterX: 10,
           gutterY: 10,
+          height: null,
+          maxHeight: null,
+          minHeight: 100,
           paddingX: 10,
           paddingY: 10,
 
@@ -24,7 +29,7 @@
 
       // Set Globals
       ss.container = $(element);
-      ss.grid_height = 100;
+      ss.container_height = 100;
       ss.animate = false;
 
       ss.init();
@@ -59,6 +64,7 @@
         if(options.enableResize) { ss.resize(); }
         if(options.enableAnimation && options.enableAnimationOnInit) { ss.animate = true; }
       },
+
       createEvents: function() {
         var ss = this;
 
@@ -88,11 +94,12 @@
       // their determined positions.
       arrange: function() {
         var ss = this,
+            options = ss.options,
             $container = ss.container,
             $children = $container.children(":visible"),
             positions = ss.getPositions(),
             animate = ss.animate,
-            animateSpeed = ss.options.animateSpeed;
+            animateSpeed = options.animateSpeed;
 
         for(var i=0;i<positions.length;i++) {
           var $child = $children.eq(i);
@@ -104,7 +111,27 @@
           }
         }
 
-        $container.height(ss.grid_height)
+
+        // Set the container height
+        if(ss.options.autoHeight) {
+          var height = options.height;
+
+          if(height) {
+              $container.height(height);
+          } else {
+            var container_height = ss.container_height,
+                max_height = options.maxHeight,
+                min_height = options.minHeight;
+
+            if(min_height && ((container_height < min_height) || (max_height && max_height < min_height))) {
+              $container.height(min_height);
+            } else if(max_height && container_height > max_height) {
+              $container.height(max_height);
+            } else {
+              $container.height(container_height);
+            }
+          }
+        }
       },
 
       // Returns an array containing all margin left/top
@@ -123,7 +150,7 @@
             container_width = $container.innerWidth() - (paddingX * 2),
             child_width = $children.first().outerWidth(),
             col_width = child_width + gutterX,
-            columns = Math.floor((container_width + gutterX) / col_width);
+            columns = options.columns || Math.floor((container_width + gutterX) / col_width);
 
         // Determine offset
         var offset = 0;
@@ -151,7 +178,7 @@
 
         // Store the grid height
         var grid_height = col_heights[ss.highestCol(col_heights)]
-        ss.grid_height = grid_height - gutterY + paddingY;
+        ss.container_height = grid_height - gutterY + paddingY;
 
         return positions;
       },
