@@ -92,6 +92,8 @@ $(document).ready(function() {
         $objects.eq(random).show();
         break;
     }
+
+    $containers.trigger("ss-arrange")
   });
 
   $(".options ul.placeholders li").on("click", function() {
@@ -103,8 +105,6 @@ $(document).ready(function() {
         renderPlaceholders(true);
         break;
     }
-
-    $containers.trigger("ss-event-arrange")
   });
 
   // ----------------------------------------------------------------------

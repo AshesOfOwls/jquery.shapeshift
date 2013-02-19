@@ -10,7 +10,7 @@
           paddingY: 10,
 
           // Others
-          animateSpeed: 300,
+          animateSpeed: 150,
 
           // Features
           enableAnimation: true,
@@ -39,18 +39,17 @@
       init: function() {
         var ss = this;
 
+        ss.detectDependencies();
+
         ss.enableFeatures();
-        ss.arrange();
+        ss.createEvents();
+        ss.render();
 
         ss.afterInit();
       },
 
-      afterInit: function() {
-        var ss = this,
-            options = ss.options;
-
-        // Re-enable animation if it was canceled on init
-        if(options.enableAnimation) { ss.animate = true; }
+      detectDependencies: function() {
+        var ss = this;
       },
 
       enableFeatures: function() {
@@ -59,6 +58,26 @@
 
         if(options.enableResize) { ss.resize(); }
         if(options.enableAnimation && options.enableAnimationOnInit) { ss.animate = true; }
+      },
+      createEvents: function() {
+        var ss = this;
+
+        ss.container.off("ss-arrange").on("ss-arrange", function() { ss.render(); });
+        ss.container.off("ss-destroy").on("ss-destroy", function() { ss.destroy(); });
+      },
+
+      render: function() {
+        var ss = this;
+
+        ss.arrange();
+      },
+
+      afterInit: function() {
+        var ss = this,
+            options = ss.options;
+
+        // Re-enable animation if it was canceled on init
+        if(options.enableAnimation) { ss.animate = true; }
       },
 
       // --------------------
@@ -70,7 +89,7 @@
       arrange: function() {
         var ss = this,
             $container = ss.container,
-            $children = $container.children(),
+            $children = $container.children(":visible"),
             positions = ss.getPositions(),
             animate = ss.animate,
             animateSpeed = ss.options.animateSpeed;
@@ -100,7 +119,7 @@
 
         // Get DOM properties
         var $container = ss.container,
-            $children = $container.children(),
+            $children = $container.children(":visible"),
             container_width = $container.innerWidth() - (paddingX * 2),
             child_width = $children.first().outerWidth(),
             col_width = child_width + gutterX,
@@ -127,7 +146,7 @@
 
           col_heights[col] += $child.height() + gutterY;
 
-          positions.push({marginLeft: offsetX, marginTop: offsetY});
+          positions.push({left: offsetX, top: offsetY});
         }
 
         // Store the grid height
@@ -148,15 +167,16 @@
             resizing = false,
             animateSpeed = ss.options.animateSpeed;
 
-        $(window).on("resize", function() {
+        $(window).on("resize.shapeshift", function() {
+          console.log("resize")
           if(!resizing) {
             resizing = true;
-            
-            setTimeout(function() { ss.arrange(); }, animateSpeed / 2);
-            setTimeout(function() { ss.arrange(); }, animateSpeed);
+
+            setTimeout(function() { ss.container.trigger("ss-arrange"); }, animateSpeed / 2);
+            setTimeout(function() { ss.container.trigger("ss-arrange"); }, animateSpeed);
 
             setTimeout(function() {
-              ss.arrange();
+              ss.container.trigger("ss-arrange");
               resizing = false;
             }, animateSpeed * 1.5);
           }
@@ -173,7 +193,26 @@
 
       highestCol: function(array) {
         return $.inArray(Math.max.apply(window,array), array);
+      },
+
+      // --------------------
+      // Other
+      // --------------------
+      
+      destroy: function() {
+        var ss = this;
+
+        ss.container.children().each(function() {
+          $(this).css({left: 0, top: 0})
+        })
+
+        ss.container.off("ss-arrange");
+        ss.container.off("ss-destroy");
+        $(window).off("resize.shapeshift");
+
+        console.info("Shapeshift successfully destroyed")
       }
+
     };
 
     $.fn[pluginName] = function (options) {
