@@ -9,7 +9,8 @@ $(document).ready(function() {
   function renderChildren() {
     $containers.each(function() {
       for(var i=0;i<child_count;i++) {
-        var $element = $("<li></li>"),
+        var colspan = Math.ceil(Math.random() * 3),
+            $element = $("<li data-ss-colspan="+colspan+"></li>"),
             height = Math.floor(Math.random() * 200) + 100;
         $element.height(height);
         $(this).append($element);
@@ -56,55 +57,58 @@ $(document).ready(function() {
   // - Clicking the filter options
   // ----------------------------------------------------------------------
 
-  $(".options ul.dragndrop li").on("click", function() {
-    switch($(this).data("option")) {
-      case "animated":
-        options = {
-          paddingY: 20
-        }
-        break;
-      case "no-animation":
-        options = {
-          enableDrag: false,
-          paddingY: 20
-        }
-        break;
-      case "disabled":
-        options = {
-          enableDragAnimation: false,
-          paddingY: 20
-        }
-        break;
+  var filter_options = { paddingY: 20 };
+
+  $(".options ul.animation li").on("click", function() {
+    var option = $(this).data("option");
+
+    if(option === "enable") {
+      filter_options.enableAnimation = true;
+    } else {
+      filter_options.enableAnimation = false;
     }
-    $containers.shapeshift(options);
+
+    $containers.shapeshift(filter_options);
+  });
+
+  $(".options ul.dragndrop li").on("click", function() {
+    var option = $(this).data("option");
+
+    if(option === "enable") {
+      filter_options.enableAnimation = true;
+    } else {
+      filter_options.enableAnimation = false;
+    }
+
+    $containers.shapeshift(filter_options);
   });
 
   $(".options ul.filtering li").on("click", function() {
-    switch($(this).data("option")) {
-      case "hide":
-        $objects = $containers.children().filter(":visible");
-        random = Math.round(Math.random() * $objects.size());
-        $objects.eq(random).hide();
-        break;
-      case "show":
-        $objects = $containers.children().filter(":hidden");
-        random = Math.round(Math.random() * $objects.size());
-        $objects.eq(random).show();
-        break;
+    var option = $(this).data("option");
+
+    if(option === "hide") {
+      $objects = $containers.children().filter(":visible");
+      random = Math.round(Math.random() * $objects.size());
+      $objects.eq(random).hide();
+    } else {
+      $objects = $containers.children().filter(":hidden");
+      random = Math.round(Math.random() * $objects.size());
+      $objects.eq(random).show();
     }
 
-    $containers.trigger("ss-arrange")
+    $containers.trigger("ss-arrange");
   });
 
   $(".options ul.placeholders li").on("click", function() {
-    switch($(this).data("option")) {
-      case "fpoimg":
-        renderPlaceholders(false);
-        break;
-      case "placekittens":
-        renderPlaceholders(true);
-        break;
+    var option = $(this).data("option");
+
+    if(option === "fpoimg") {
+      renderPlaceholders(false);
+    } else {
+      renderPlaceholders(true);
     }
+
+    $containers.shapeshift(filter_options);
   });
 
   // ----------------------------------------------------------------------

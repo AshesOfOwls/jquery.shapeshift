@@ -12,3 +12,6 @@ ul.ss-container li {
   position: absolute;
   width: 100px;
 }
+
+ul.ss-container li[data-ss-colspan="2"] { width: 210px; }
+ul.ss-container li[data-ss-colspan="3"] { width: 320px; }

@@ -111,7 +111,6 @@
           }
         }
 
-
         // Set the container height
         if(ss.options.autoHeight) {
           var height = options.height;
@@ -144,11 +143,16 @@
             paddingX = options.paddingX,
             paddingY = options.paddingY;
 
-        // Get DOM properties
+        // Get DOM Elements
         var $container = ss.container,
             $children = $container.children(":visible"),
-            container_width = $container.innerWidth() - (paddingX * 2),
-            child_width = $children.first().outerWidth(),
+            $first_child = $children.first();
+
+        // Determine proportions
+        var container_width = $container.innerWidth() - (paddingX * 2),
+            fc_width = $children.first().innerWidth(),
+            fc_colspan = $first_child.data("ss-colspan"),
+            child_width = (fc_width - (gutterX * (fc_colspan - 1))) / fc_colspan,
             col_width = child_width + gutterX,
             columns = options.columns || Math.floor((container_width + gutterX) / col_width);
 
@@ -167,11 +171,19 @@
         var positions = [];
         for(var i=0;i<$children.length;i++) {
           var $child = $children.eq(i),
-              col = ss.lowestCol(col_heights),
+              colspan = $child.data("ss-colspan"),
+              col = ss.lowestCol(col_heights, colspan),
               offsetX = (col * col_width) + paddingX + offset,
               offsetY = col_heights[col];
 
           col_heights[col] += $child.height() + gutterY;
+
+          // Multiwidth
+          if(colspan > 1) {
+            for(var j=1;j<colspan;j++) {
+              col_heights[col + j] = col_heights[col];
+            }
+          }
 
           positions.push({left: offsetX, top: offsetY});
         }
@@ -195,7 +207,6 @@
             animateSpeed = ss.options.animateSpeed;
 
         $(window).on("resize.shapeshift", function() {
-          console.log("resize")
           if(!resizing) {
             resizing = true;
 
@@ -214,7 +225,11 @@
       // Helper Functions
       // --------------------
 
-      lowestCol: function(array) {
+      lowestCol: function(array, max) {
+        if(max) {
+          max = array.length - max + 1;
+          array = array.slice(0).splice(0,max);
+        }
         return $.inArray(Math.min.apply(window,array), array);
       },
 
@@ -244,9 +259,7 @@
 
     $.fn[pluginName] = function (options) {
       return this.each(function () {
-        if (!$.data(this, "plugin_" + pluginName)) {
-          $.data(this, "plugin_" + pluginName, new Plugin( this, options ));
-        }
+        $.data(this, "plugin_" + pluginName, new Plugin( this, options ));
       });
     };
 
