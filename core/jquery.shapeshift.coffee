@@ -229,6 +229,7 @@
       # Determine the columns children fit in
       positions = []
       savedChildren = []
+      current_i = 0
 
       # If a child correctly fits in a column,
       # calculate its x/y data and save it
@@ -246,26 +247,84 @@
 
       determineMultiposition = (child) =>
         colspan = child.colspan
-        lowest_col = @lowestCol(col_heights, colspan)
+        col = @lowestCol(col_heights, colspan)
 
-        col = 0
-        for i in [1..colspan]
-          if col_heights[lowest_col] >= col_heights[lowest_col + i]
-            col = lowest_col
+        for k in [1...colspan]
+          current_height = col_heights[col]
+          next_height = col_heights[col + k]
+          difference = current_height - next_height
+
+          # Check to see if the next rows have an equal to or
+          # lower position than the currently lowest column
+          if difference < 0
+            col = undefined
+            break
+
+          # Check that no other elements can fit into blank spots
+          children_left = @parsedChildren.length - current_i
+          for p in [0...children_left]
+            child = @parsedChildren[p + current_i]
+            if child.height < difference
+              col = undefined
+              break
 
         return col
 
+      recalculateSaved = =>
+        popped = []
+        for l in [0...savedChildren.length]
+          savedChild = savedChildren[l]
+          child = @parsedChildren[savedChild.i]
+          child.col = determineMultiposition(child)
+
+          if child.col isnt undefined
+            savePosition(child)
+            popped.push l
+
+        for m in [popped.length - 1..0] by -1
+          index = popped[m]
+          savedChildren.splice(index,1)
+
+      forceSaved = =>
+        for o in [0...savedChildren.length]
+          savedChild = savedChildren[o]
+          child = @parsedChildren[savedChild.i]
+          child.col = determineMultiposition(child)
+
+          if child.col is undefined
+            iteration = 1
+            while child.col is undefined
+              console.log "Asd"
+              lowest_col = @lowestCol(col_heights, child.colspan)
+              second_lowest = @lowestCol(col_heights, child.colspan, iteration)
+
+              col_heights[lowest_col] = col_heights[second_lowest]
+              child.col = determineMultiposition(child)
+              iteration++
+
+          savePosition(child)
+
+
       do determinePositions = =>
         for n in [0...@parsedChildren.length]
+          current_i++
           child = @parsedChildren[n]
           multiwidth = child.colspan > 1
 
           if multiwidth
             child.col = determineMultiposition(child)
           else
-            child.col = @lowestCol(col_heights)
+            child.col = @lowestCol(col_heights, child.colspan)
 
-          savePosition(child)
+          if child.col is undefined
+            savedChildren.push child
+          else
+            savePosition(child)
+
+          if n < @parsedChildren.length - 1
+            recalculateSaved()
+          else
+            forceSaved()
 
       # Store the container height since we already have the data
       if @options.autoHeight

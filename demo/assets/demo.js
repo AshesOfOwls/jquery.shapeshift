@@ -1,6 +1,6 @@
 $(document).ready(function() {
   var $containers = $(".ss-container"),
-      child_count = 10;
+      child_count = 30;
 
   // ----------------------------------------------------------------------
   // - Generate some fake elements
@@ -9,7 +9,7 @@ $(document).ready(function() {
   function renderChildren() {
     $containers.each(function() {
       for(var i=0;i<child_count;i++) {
-        var colspan = Math.ceil(Math.random() * 3),
+        var colspan = Math.ceil(Math.random() * 2),
             $element = $("<li data-ss-colspan="+colspan+"></li>"),
             height = colspan * 80 + ((colspan - 1) * 12);
         $element.height(height);
