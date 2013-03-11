@@ -19,6 +19,7 @@
     align: "center"
     autoHeight: true
     columns: null
+    minColumns: 2
     height: 200
     gutterX: 10
     gutterY: 10
@@ -109,6 +110,7 @@
           i: i
           el: $child
           colspan: $child.data("ss-colspan")
+          height: $child.outerHeight()
         parsedChildren.push child
 
       @parsedChildren = parsedChildren
@@ -154,7 +156,11 @@
       @globals.col_width = col_width = single_width + gutterX
 
       # Determine how many columns there currently can be
-      @globals.columns = columns = @options.columns || Math.floor (inner_width + gutterX) / col_width
+      minColumns = @options.minColumns
+      columns = @options.columns || Math.floor (inner_width + gutterX) / col_width
+      if minColumns and minColumns > columns
+        columns = minColumns
+      @globals.columns = columns
 
       # Columns cannot exceed children
       children_count = @parsedChildren.length
@@ -181,8 +187,7 @@
       positions = @getPositions()
 
       # Arrange each child element
-      for i in [0...@parsedChildren.length]
-
+      for i in [0...positions.length]
         $child = @parsedChildren[i].el
 
         if @globals.animated
@@ -221,17 +226,46 @@
       for i in [0...@globals.columns]
         col_heights.push paddingY
 
-      # Store the x/y attributes for each child
+      # Determine the columns children fit in
       positions = []
-      for i in [0...@parsedChildren.length]
-        $child = @parsedChildren[i].el
-        col = @lowestCol(col_heights)
+      savedChildren = []
 
-        offsetX = (col * @globals.col_width) + @globals.child_offset
+      # If a child correctly fits in a column,
+      # calculate its x/y data and save it
+      savePosition = (child) =>
+        col = child.col
+        offsetX = (child.col * @globals.col_width) + @globals.child_offset
         offsetY = col_heights[col]
 
-        positions.push left: offsetX, top: offsetY
-        col_heights[col] += $child.outerHeight() + gutterY
+        positions[child.i] = left: offsetX, top: offsetY
+        col_heights[col] += child.height + gutterY
+
+        if child.colspan >= 1
+          for j in [1...child.colspan]
+            col_heights[col + j] = col_heights[col]
+
+      determineMultiposition = (child) =>
+        colspan = child.colspan
+        lowest_col = @lowestCol(col_heights, colspan)
+
+        col = 0
+        for i in [1..colspan]
+          if col_heights[lowest_col] >= col_heights[lowest_col + i]
+            col = lowest_col
+
+        return col
+
+      do determinePositions = =>
+        for n in [0...@parsedChildren.length]
+          child = @parsedChildren[n]
+          multiwidth = child.colspan > 1
+
+          if multiwidth
+            child.col = determineMultiposition(child)
+          else
+            child.col = @lowestCol(col_heights)
+
+          savePosition(child)
 
       # Store the container height since we already have the data
       if @options.autoHeight
@@ -271,8 +305,20 @@
     # Returns the index position of the
     # array column with the lowest number
     # ----------------------------
-    lowestCol: (array) ->
-      $.inArray Math.min.apply(window,array), array
+    lowestCol: (array, span, offset) ->
+      if span
+        max = array.length - span + 1
+        if max > span
+          array = array.slice(0).splice(0,max)
+        else
+          array = array.slice(0).splice(0,1)
+
+
+      if offset
+        nth_smallest = array.slice(0).sort()[offset]
+        $.inArray nth_smallest, array
+      else
+        $.inArray Math.min.apply(window,array), array
 
 
     # ----------------------------
@@ -281,7 +327,14 @@
     # Returns the index position of the
     # array column with the highest number
     # ----------------------------
-    highestCol: (array) ->
+    highestCol: (array, span) ->
+      if span
+        max = array.length - span + 1
+        if max > span
+          array = array.slice(0).splice(0,max)
+        else
+          array = array.slice(0).splice(0,1)
+
       $.inArray Math.max.apply(window,array), array 
 
 

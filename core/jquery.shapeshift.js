@@ -12,6 +12,7 @@
       align: "center",
       autoHeight: true,
       columns: null,
+      minColumns: 2,
       height: 200,
       gutterX: 10,
       gutterY: 10,
@@ -83,7 +84,8 @@
           child = {
             i: i,
             el: $child,
-            colspan: $child.data("ss-colspan")
+            colspan: $child.data("ss-colspan"),
+            height: $child.outerHeight()
           };
           parsedChildren.push(child);
         }
@@ -103,7 +105,7 @@
       };
 
       Plugin.prototype.setGrid = function() {
-        var children_count, col_width, columns, fc_colspan, fc_width, first_child, grid_width, gutterX, inner_width, paddingX, single_width;
+        var children_count, col_width, columns, fc_colspan, fc_width, first_child, grid_width, gutterX, inner_width, minColumns, paddingX, single_width;
         gutterX = this.options.gutterX;
         paddingX = this.options.paddingX;
         inner_width = this.$container.width() - (paddingX * 2);
@@ -112,7 +114,12 @@
         fc_colspan = first_child.colspan;
         single_width = (fc_width - ((fc_colspan - 1) * gutterX)) / fc_colspan;
         this.globals.col_width = col_width = single_width + gutterX;
-        this.globals.columns = columns = this.options.columns || Math.floor((inner_width + gutterX) / col_width);
+        minColumns = this.options.minColumns;
+        columns = this.options.columns || Math.floor((inner_width + gutterX) / col_width);
+        if (minColumns && minColumns > columns) {
+          columns = minColumns;
+        }
+        this.globals.columns = columns;
         children_count = this.parsedChildren.length;
         if (columns > children_count) {
           columns = children_count;
@@ -131,7 +138,7 @@
       Plugin.prototype.arrange = function() {
         var $child, container_height, i, maxHeight, minHeight, positions, _i, _ref;
         positions = this.getPositions();
-        for (i = _i = 0, _ref = this.parsedChildren.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        for (i = _i = 0, _ref = positions.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
           $child = this.parsedChildren[i].el;
           if (this.globals.animated) {
             $child.stop(true, false).animate(positions[i], this.options.animationSpeed);
@@ -155,7 +162,8 @@
       };
 
       Plugin.prototype.getPositions = function() {
-        var $child, col, col_heights, grid_height, gutterY, i, offsetX, offsetY, paddingY, positions, _i, _j, _ref, _ref1;
+        var col_heights, determineMultiposition, determinePositions, grid_height, gutterY, i, paddingY, positions, savePosition, savedChildren, _i, _ref,
+          _this = this;
         gutterY = this.options.gutterY;
         paddingY = this.options.paddingY;
         col_heights = [];
@@ -163,17 +171,52 @@
           col_heights.push(paddingY);
         }
         positions = [];
-        for (i = _j = 0, _ref1 = this.parsedChildren.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
-          $child = this.parsedChildren[i].el;
-          col = this.lowestCol(col_heights);
-          offsetX = (col * this.globals.col_width) + this.globals.child_offset;
+        savedChildren = [];
+        savePosition = function(child) {
+          var col, j, offsetX, offsetY, _j, _ref1, _results;
+          col = child.col;
+          offsetX = (child.col * _this.globals.col_width) + _this.globals.child_offset;
           offsetY = col_heights[col];
-          positions.push({
+          positions[child.i] = {
             left: offsetX,
             top: offsetY
-          });
-          col_heights[col] += $child.outerHeight() + gutterY;
-        }
+          };
+          col_heights[col] += child.height + gutterY;
+          if (child.colspan >= 1) {
+            _results = [];
+            for (j = _j = 1, _ref1 = child.colspan; 1 <= _ref1 ? _j < _ref1 : _j > _ref1; j = 1 <= _ref1 ? ++_j : --_j) {
+              _results.push(col_heights[col + j] = col_heights[col]);
+            }
+            return _results;
+          }
+        };
+        determineMultiposition = function(child) {
+          var col, colspan, lowest_col, _j;
+          colspan = child.colspan;
+          lowest_col = _this.lowestCol(col_heights, colspan);
+          col = 0;
+          for (i = _j = 1; 1 <= colspan ? _j <= colspan : _j >= colspan; i = 1 <= colspan ? ++_j : --_j) {
+            if (col_heights[lowest_col] >= col_heights[lowest_col + i]) {
+              col = lowest_col;
+            }
+          }
+          return col;
+        };
+        (determinePositions = function() {
+          var child, multiwidth, n, _j, _ref1, _results;
+          _results = [];
+          for (n = _j = 0, _ref1 = _this.parsedChildren.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; n = 0 <= _ref1 ? ++_j : --_j) {
+            child = _this.parsedChildren[n];
+            multiwidth = child.colspan > 1;
+            if (multiwidth) {
+              child.col = determineMultiposition(child);
+            } else {
+              child.col = _this.lowestCol(col_heights);
+            }
+            _results.push(savePosition(child));
+          }
+          return _results;
+        })();
         if (this.options.autoHeight) {
           grid_height = col_heights[this.highestCol(col_heights)] - gutterY;
           this.globals.container_height = grid_height + paddingY;
@@ -203,11 +246,34 @@
         });
       };
 
-      Plugin.prototype.lowestCol = function(array) {
-        return $.inArray(Math.min.apply(window, array), array);
+      Plugin.prototype.lowestCol = function(array, span, offset) {
+        var max, nth_smallest;
+        if (span) {
+          max = array.length - span + 1;
+          if (max > span) {
+            array = array.slice(0).splice(0, max);
+          } else {
+            array = array.slice(0).splice(0, 1);
+          }
+        }
+        if (offset) {
+          nth_smallest = array.slice(0).sort()[offset];
+          return $.inArray(nth_smallest, array);
+        } else {
+          return $.inArray(Math.min.apply(window, array), array);
+        }
       };
 
-      Plugin.prototype.highestCol = function(array) {
+      Plugin.prototype.highestCol = function(array, span) {
+        var max;
+        if (span) {
+          max = array.length - span + 1;
+          if (max > span) {
+            array = array.slice(0).splice(0, max);
+          } else {
+            array = array.slice(0).splice(0, 1);
+          }
+        }
         return $.inArray(Math.max.apply(window, array), array);
       };
 
