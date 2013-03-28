@@ -1,6 +1,6 @@
 $(document).ready(function() {
   var $containers = $(".ss-container"),
-      child_count = 30;
+      child_count = 500;
 
   // ----------------------------------------------------------------------
   // - Generate some fake elements
@@ -8,10 +8,11 @@ $(document).ready(function() {
 
   function renderChildren() {
     $containers.each(function() {
+      weighted_colspans = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,3,3]
       for(var i=0;i<child_count;i++) {
-        var colspan = Math.ceil(Math.random() * 2),
+        var colspan = weighted_colspans[Math.floor(Math.random() * weighted_colspans.length)],
             $element = $("<li data-ss-colspan="+colspan+"></li>"),
-            height = colspan * 80 + ((colspan - 1) * 12);
+            height = Math.random() * 100 + 100;
         $element.height(height);
         $(this).append($element);
       }
@@ -28,10 +29,11 @@ $(document).ready(function() {
             width = $child.width();
 
         if(placekitten) {
-          var background = 'url("http://www.placekitten.com/'+width+'/'+height+'")';
+          // var background = 'url("http://www.placekitten.com/'+width+'/'+height+'")';
         } else {
-          var background = 'url("http://fpoimg.com/'+width+'x'+height+'?bg_color='+getRandomColor()+'&text_color=444444")';
+          // var background = 'url("http://fpoimga.com/'+width+'x'+height+'?bg_color='+getRandomColor()+'&text_color=444444")';
         }
+        var background = '';
         $child.css({ backgroundImage: background, height: height });
       }
     })
@@ -49,13 +51,14 @@ $(document).ready(function() {
   }
 
   // Initial Shapeshift
-  $containers.shapeshift();
+  var filter_options = {
+    minColumns: 3
+  };
+  $containers.shapeshift(filter_options);
 
   // ----------------------------------------------------------------------
   // - Clicking the filter options
   // ----------------------------------------------------------------------
-
-  var filter_options = {};
 
   $(".options ul.animation li").on("click", function() {
     var option = $(this).data("option");

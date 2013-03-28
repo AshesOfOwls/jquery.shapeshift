@@ -16,3 +16,4 @@ ul.ss-container li {
 
 ul.ss-container li[data-ss-colspan="2"] { width: 172px; }
 ul.ss-container li[data-ss-colspan="3"] { width: 264px; }
+ul.ss-container li[data-ss-colspan="4"] { width: 356px; }

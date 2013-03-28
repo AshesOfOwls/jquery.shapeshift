@@ -7,12 +7,13 @@
     defaults = {
       enableResize: true,
       animated: true,
-      animateOnInit: false,
+      animateOnInit: true,
       animationSpeed: 120,
+      animationThreshold: 150,
       align: "center",
       autoHeight: true,
       columns: null,
-      minColumns: 2,
+      minColumns: 1,
       height: 200,
       gutterX: 10,
       gutterY: 10,
@@ -136,14 +137,16 @@
       };
 
       Plugin.prototype.arrange = function() {
-        var $child, container_height, i, maxHeight, minHeight, positions, _i, _ref;
+        var $child, attributes, container_height, i, maxHeight, minHeight, positions, _i, _ref;
+        console.time("Arrange");
         positions = this.getPositions();
         for (i = _i = 0, _ref = positions.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
           $child = this.parsedChildren[i].el;
-          if (this.globals.animated) {
-            $child.stop(true, false).animate(positions[i], this.options.animationSpeed);
+          attributes = positions[i];
+          if (this.globals.animated && this.parsedChildren.length <= this.options.animationThreshold) {
+            $child.stop(true, false).animate(attributes, this.options.animationSpeed);
           } else {
-            $child.css(positions[i]);
+            $child.css(attributes);
           }
         }
         if (this.options.autoHeight) {
@@ -155,14 +158,15 @@
           } else if (maxHeight && container_height > maxHeight) {
             container_height = maxHeight;
           }
-          return this.$container.height(container_height);
+          this.$container.height(container_height);
         } else {
-          return this.$container.height(this.options.height);
+          this.$container.height(this.options.height);
         }
+        return console.timeEnd("Arrange");
       };
 
       Plugin.prototype.getPositions = function() {
-        var col_heights, current_i, determineMultiposition, determinePositions, forceSaved, grid_height, gutterY, i, paddingY, positions, recalculateSaved, savePosition, savedChildren, _i, _ref,
+        var col_heights, current_i, determineMultiposition, determinePositions, forceSave, grid_height, gutterY, i, paddingY, positions, recalculateSavedChildren, savePosition, savedChildren, _i, _ref,
           _this = this;
         gutterY = this.options.gutterY;
         paddingY = this.options.paddingY;
@@ -173,6 +177,57 @@
         positions = [];
         savedChildren = [];
         current_i = 0;
+        determineMultiposition = function(child) {
+          var col, col_height, j, _j, _ref1;
+          col = _this.lowestCol(col_heights, child.colspan);
+          col_height = col_heights[col];
+          for (j = _j = 1, _ref1 = child.colspan; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; j = 1 <= _ref1 ? ++_j : --_j) {
+            if (col_heights[col + j] > col_height) {
+              col = void 0;
+            }
+          }
+          return col;
+        };
+        forceSave = function(child) {
+          var height, highest, l, lowestCol, m, _j, _k, _ref1, _ref2;
+          child.col = determineMultiposition(child);
+          if (child.col === void 0) {
+            lowestCol = _this.lowestCol(col_heights, child.colspan);
+            highest = 0;
+            for (l = _j = 1, _ref1 = child.colspan; 1 <= _ref1 ? _j < _ref1 : _j > _ref1; l = 1 <= _ref1 ? ++_j : --_j) {
+              height = col_heights[lowestCol + l];
+              if (height > highest) {
+                highest = height;
+              }
+            }
+            for (m = _k = 0, _ref2 = child.colspan; 0 <= _ref2 ? _k < _ref2 : _k > _ref2; m = 0 <= _ref2 ? ++_k : --_k) {
+              col_heights[lowestCol + m] = highest;
+            }
+            child.col = lowestCol;
+          }
+          return savePosition(child);
+        };
+        recalculateSavedChildren = function() {
+          var child, idx, k, m, to_pop, _j, _k, _ref1, _ref2, _results;
+          to_pop = [];
+          for (k = _j = 0, _ref1 = savedChildren.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; k = 0 <= _ref1 ? ++_j : --_j) {
+            child = savedChildren[k];
+            child.col = determineMultiposition(child);
+            if (child.col !== void 0) {
+              savePosition(child);
+              to_pop.push(k);
+            } else if (child.i + child.colspan < current_i || current_i + child.colspan > _this.parsedChildren.length - 1) {
+              forceSave(child);
+              to_pop.push(k);
+            }
+          }
+          _results = [];
+          for (m = _k = _ref2 = to_pop.length - 1; _k >= 0; m = _k += -1) {
+            idx = to_pop[m];
+            _results.push(savedChildren.splice(idx, 1));
+          }
+          return _results;
+        };
         savePosition = function(child) {
           var col, j, offsetX, offsetY, _j, _ref1, _results;
           col = child.col;
@@ -191,92 +246,22 @@
             return _results;
           }
         };
-        determineMultiposition = function(child) {
-          var children_left, col, colspan, current_height, difference, k, next_height, p, _j, _k;
-          colspan = child.colspan;
-          col = _this.lowestCol(col_heights, colspan);
-          for (k = _j = 1; 1 <= colspan ? _j < colspan : _j > colspan; k = 1 <= colspan ? ++_j : --_j) {
-            current_height = col_heights[col];
-            next_height = col_heights[col + k];
-            difference = current_height - next_height;
-            if (difference < 0) {
-              col = void 0;
-              break;
-            }
-            children_left = _this.parsedChildren.length - current_i;
-            for (p = _k = 0; 0 <= children_left ? _k < children_left : _k > children_left; p = 0 <= children_left ? ++_k : --_k) {
-              child = _this.parsedChildren[p + current_i];
-              if (child.height < difference) {
-                col = void 0;
-                break;
-              }
-            }
-          }
-          return col;
-        };
-        recalculateSaved = function() {
-          var child, index, l, m, popped, savedChild, _j, _k, _ref1, _ref2, _results;
-          popped = [];
-          for (l = _j = 0, _ref1 = savedChildren.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; l = 0 <= _ref1 ? ++_j : --_j) {
-            savedChild = savedChildren[l];
-            child = _this.parsedChildren[savedChild.i];
-            child.col = determineMultiposition(child);
-            if (child.col !== void 0) {
-              savePosition(child);
-              popped.push(l);
-            }
-          }
-          _results = [];
-          for (m = _k = _ref2 = popped.length - 1; _k >= 0; m = _k += -1) {
-            index = popped[m];
-            _results.push(savedChildren.splice(index, 1));
-          }
-          return _results;
-        };
-        forceSaved = function() {
-          var child, iteration, lowest_col, o, savedChild, second_lowest, _j, _ref1, _results;
-          _results = [];
-          for (o = _j = 0, _ref1 = savedChildren.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; o = 0 <= _ref1 ? ++_j : --_j) {
-            savedChild = savedChildren[o];
-            child = _this.parsedChildren[savedChild.i];
-            child.col = determineMultiposition(child);
-            if (child.col === void 0) {
-              iteration = 1;
-              while (child.col === void 0) {
-                console.log("Asd");
-                lowest_col = _this.lowestCol(col_heights, child.colspan);
-                second_lowest = _this.lowestCol(col_heights, child.colspan, iteration);
-                col_heights[lowest_col] = col_heights[second_lowest];
-                child.col = determineMultiposition(child);
-                iteration++;
-              }
-            }
-            _results.push(savePosition(child));
-          }
-          return _results;
-        };
         (determinePositions = function() {
-          var child, multiwidth, n, _j, _ref1, _results;
+          var child, _j, _ref1, _results;
           _results = [];
-          for (n = _j = 0, _ref1 = _this.parsedChildren.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; n = 0 <= _ref1 ? ++_j : --_j) {
-            current_i++;
-            child = _this.parsedChildren[n];
-            multiwidth = child.colspan > 1;
-            if (multiwidth) {
+          for (i = _j = 0, _ref1 = _this.parsedChildren.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
+            child = _this.parsedChildren[i];
+            if (child.colspan > 1) {
               child.col = determineMultiposition(child);
             } else {
               child.col = _this.lowestCol(col_heights, child.colspan);
             }
             if (child.col === void 0) {
               savedChildren.push(child);
-            } else {
-              savePosition(child);
             }
-            if (n < _this.parsedChildren.length - 1) {
-              _results.push(recalculateSaved());
-            } else {
-              _results.push(forceSaved());
-            }
+            savePosition(child);
+            recalculateSavedChildren();
+            _results.push(current_i++);
           }
           return _results;
         })();
