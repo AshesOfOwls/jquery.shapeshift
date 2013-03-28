@@ -1,6 +1,6 @@
 $(document).ready(function() {
   var $containers = $(".ss-container"),
-      child_count = 500;
+      child_count = 1500;
 
   // ----------------------------------------------------------------------
   // - Generate some fake elements
@@ -12,7 +12,8 @@ $(document).ready(function() {
       for(var i=0;i<child_count;i++) {
         var colspan = weighted_colspans[Math.floor(Math.random() * weighted_colspans.length)],
             $element = $("<li data-ss-colspan="+colspan+"></li>"),
-            height = Math.random() * 100 + 100;
+            height =colspan * 80 + ((colspan - 1) * 12);
+            // height = Math.random() * 100 + 100;
         $element.height(height);
         $(this).append($element);
       }

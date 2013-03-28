@@ -189,7 +189,7 @@
           return col;
         };
         forceSave = function(child) {
-          var height, highest, l, lowestCol, m, _j, _k, _ref1, _ref2;
+          var difference, filler, height, highest, l, lowestCol, m, next_child, _j, _k, _l, _ref1, _ref2;
           child.col = determineMultiposition(child);
           if (child.col === void 0) {
             lowestCol = _this.lowestCol(col_heights, child.colspan);
@@ -200,25 +200,45 @@
                 highest = height;
               }
             }
-            for (m = _k = 0, _ref2 = child.colspan; 0 <= _ref2 ? _k < _ref2 : _k > _ref2; m = 0 <= _ref2 ? ++_k : --_k) {
-              col_heights[lowestCol + m] = highest;
+            filler = false;
+            if (current_i < _this.parsedChildren.length - 10) {
+              difference = highest - col_heights[lowestCol];
+              for (m = _k = 0; _k < 10; m = ++_k) {
+                next_child = _this.parsedChildren[current_i + m];
+                if (next_child.height < difference) {
+                  filler = true;
+                  break;
+                }
+              }
             }
-            child.col = lowestCol;
+            if (!filler) {
+              for (m = _l = 0, _ref2 = child.colspan; 0 <= _ref2 ? _l < _ref2 : _l > _ref2; m = 0 <= _ref2 ? ++_l : --_l) {
+                col_heights[lowestCol + m] = highest;
+              }
+              child.col = lowestCol;
+            }
           }
-          return savePosition(child);
+          if (child.col !== void 0) {
+            savePosition(child);
+            return true;
+          } else {
+            return false;
+          }
         };
         recalculateSavedChildren = function() {
-          var child, idx, k, m, to_pop, _j, _k, _ref1, _ref2, _results;
+          var child, idx, is_unimportant, k, m, to_pop, _j, _k, _ref1, _ref2, _results;
           to_pop = [];
           for (k = _j = 0, _ref1 = savedChildren.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; k = 0 <= _ref1 ? ++_j : --_j) {
             child = savedChildren[k];
             child.col = determineMultiposition(child);
+            is_unimportant = current_i + child.colspan > _this.parsedChildren.length - 1;
             if (child.col !== void 0) {
               savePosition(child);
               to_pop.push(k);
-            } else if (child.i + child.colspan < current_i || current_i + child.colspan > _this.parsedChildren.length - 1) {
-              forceSave(child);
-              to_pop.push(k);
+            } else if (child.i + child.colspan < current_i || is_unimportant) {
+              if (forceSave(child)) {
+                to_pop.push(k);
+              }
             }
           }
           _results = [];

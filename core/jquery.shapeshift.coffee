@@ -269,18 +269,37 @@
         if child.col is undefined
           lowestCol = @lowestCol(col_heights, child.colspan)
 
+          # Get the highest column within the childs colspan
           highest = 0
           for l in [1...child.colspan]
             height = col_heights[lowestCol + l]
             if height > highest
               highest = height
 
-          for m in [0...child.colspan]
-            col_heights[lowestCol + m] = highest
+          # Determine if there is a child that can fit into the empty
+          # space created by the force save
+          filler = false
+          if current_i < @parsedChildren.length - 10
+            difference = highest - col_heights[lowestCol]
 
-          child.col = lowestCol
+            for m in [0...10]
+              next_child = @parsedChildren[current_i + m]
+              if next_child.height < difference
+                filler = true
+                break
 
-        savePosition(child)
+          unless filler
+            # Force all columns within range to be the height of the tallest column
+            for m in [0...child.colspan]
+              col_heights[lowestCol + m] = highest
+
+            child.col = lowestCol
+
+        unless child.col is undefined
+          savePosition(child)
+          true
+        else
+          false
 
       # ----------------------------
       # recalculateSavedChildren
@@ -291,18 +310,18 @@
         to_pop = []
         for k in [0...savedChildren.length]
           child = savedChildren[k]
-
           child.col = determineMultiposition(child)
+          is_unimportant = current_i + child.colspan > @parsedChildren.length - 1
 
           if child.col isnt undefined
             savePosition(child)
             to_pop.push k
-          else if child.i + child.colspan < current_i or current_i + child.colspan > @parsedChildren.length - 1
-            forceSave(child)
-            to_pop.push k
+          else if child.i + child.colspan < current_i or is_unimportant
+            if forceSave(child)
+              to_pop.push k
 
-        # Remove from savedChildren array if the
-        # child has been successfully saved.
+        # Remove from savedChildren array if the child has been successfully saved.
+        # Must do it in reverse to protect index values from changing.
         for m in [to_pop.length - 1..0] by -1
           idx = to_pop[m]
           savedChildren.splice(idx,1)
