@@ -28,10 +28,14 @@
     minHeight: 100
     paddingX: 10
     paddingY: 10
+
+    # Other Options
+    fillerThreshold: 10
     selector: ""
 
   class Plugin
     constructor: (@element, options) ->
+      console.log "Started"
       @options = $.extend {}, defaults, options
       @globals = {}
       @$container = $ element
@@ -47,9 +51,14 @@
     # ----------------------------
     errorDetection: ->
       options = @options
+      message = "Shapeshift ERROR: "
+
+      if options.animated and !jQuery.ui
+        console.error message + "You are trying to enable animation however jQuery UI has not loaded yet."
+        
 
       if !options.autoHeight and !options.height
-        console.error "Shapeshift ERROR: You must specify a height if autoHeight is turned off."
+        console.error message + "You must specify a height if autoHeight is turned off."
 
 
     # ----------------------------
@@ -58,11 +67,16 @@
     # then call a full render of the elements
     # ----------------------------
     init: ->
+      @setIdentifier()
       @createEvents()
       @enableFeatures()
       @setGlobals()
       @render(true)
       @afterInit()
+
+    setIdentifier: ->
+      @identifier = "shapeshifted_container_" + Math.random().toString(36).substring(7)
+      @$container.addClass(@identifier)
 
 
     # ----------------------------
@@ -185,7 +199,7 @@
     # Animates the elements into their calcluated positions
     # ----------------------------
     arrange: ->
-      console.time "Arrange"
+      console.log "arrange"
       positions = @getPositions()
 
       # Arrange each child element
@@ -212,7 +226,6 @@
         @$container.height container_height
       else
         @$container.height @options.height
-      console.timeEnd "Arrange"
       
 
     # ----------------------------
@@ -279,10 +292,11 @@
           # Determine if there is a child that can fit into the empty
           # space created by the force save
           filler = false
-          if current_i < @parsedChildren.length - 10
+          filler_threshold = @options.fillerThreshold
+          if current_i < @parsedChildren.length - filler_threshold
             difference = highest - col_heights[lowestCol]
 
-            for m in [0...10]
+            for m in [0...filler_threshold]
               next_child = @parsedChildren[current_i + m]
               if next_child.height < difference
                 filler = true
@@ -383,10 +397,12 @@
     # the browser window is resized.
     # ----------------------------
     resize: ->
+      $container = @$container
       animation_speed = @options.animationSpeed
 
       resizing = false
-      $(window).on "resize.shapeshift", =>
+      binding = "resize." + @identifier
+      $(window).on binding, =>
         unless resizing
           resizing = true
 
@@ -414,12 +430,7 @@
         else
           array = array.slice(0).splice(0,1)
 
-
-      if offset
-        nth_smallest = array.slice(0).sort()[offset]
-        $.inArray nth_smallest, array
-      else
-        $.inArray Math.min.apply(window,array), array
+      $.inArray Math.min.apply(window,array), array
 
 
     # ----------------------------
@@ -447,7 +458,6 @@
       @$container.off "ss-arrange"
       @$container.off "ss-destroy"
       @$container.off "ss-destroyAll"
-      $(window).off "resize.shapeshift"
 
       if revertChildren
         @$container.children().each -> $(@).css({left: 0, top: 0})
@@ -457,7 +467,14 @@
 
   $.fn[pluginName] = (options) ->
     @each ->
-      if !$.data(@, "plugin_#{pluginName}")
-        $.data(@, "plugin_#{pluginName}", new Plugin(@, options))
+      # Destroy any old resize events
+      old_class = $(@).attr("class").match(/shapeshifted_container_\w+/)
+      if old_class
+        bound_indentifier = "resize." + old_class[0]
+        $(window).off(bound_indentifier)
+        $(@).removeClass(old_class[0])
+
+      # Create the new plugin instance
+      $.data(@, "plugin_#{pluginName}", new Plugin(@, options))
 
 )(jQuery, window, document)

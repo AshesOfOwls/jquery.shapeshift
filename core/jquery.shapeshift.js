@@ -21,12 +21,14 @@
       minHeight: 100,
       paddingX: 10,
       paddingY: 10,
+      fillerThreshold: 10,
       selector: ""
     };
     Plugin = (function() {
 
       function Plugin(element, options) {
         this.element = element;
+        console.log("Started");
         this.options = $.extend({}, defaults, options);
         this.globals = {};
         this.$container = $(element);
@@ -35,19 +37,29 @@
       }
 
       Plugin.prototype.errorDetection = function() {
-        var options;
+        var message, options;
         options = this.options;
+        message = "Shapeshift ERROR: ";
+        if (options.animated && !jQuery.ui) {
+          console.error(message + "You are trying to enable animation however jQuery UI has not loaded yet.");
+        }
         if (!options.autoHeight && !options.height) {
-          return console.error("Shapeshift ERROR: You must specify a height if autoHeight is turned off.");
+          return console.error(message + "You must specify a height if autoHeight is turned off.");
         }
       };
 
       Plugin.prototype.init = function() {
+        this.setIdentifier();
         this.createEvents();
         this.enableFeatures();
         this.setGlobals();
         this.render(true);
         return this.afterInit();
+      };
+
+      Plugin.prototype.setIdentifier = function() {
+        this.identifier = "shapeshifted_container_" + Math.random().toString(36).substring(7);
+        return this.$container.addClass(this.identifier);
       };
 
       Plugin.prototype.createEvents = function() {
@@ -138,7 +150,7 @@
 
       Plugin.prototype.arrange = function() {
         var $child, attributes, container_height, i, maxHeight, minHeight, positions, _i, _ref;
-        console.time("Arrange");
+        console.log("arrange");
         positions = this.getPositions();
         for (i = _i = 0, _ref = positions.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
           $child = this.parsedChildren[i].el;
@@ -158,11 +170,10 @@
           } else if (maxHeight && container_height > maxHeight) {
             container_height = maxHeight;
           }
-          this.$container.height(container_height);
+          return this.$container.height(container_height);
         } else {
-          this.$container.height(this.options.height);
+          return this.$container.height(this.options.height);
         }
-        return console.timeEnd("Arrange");
       };
 
       Plugin.prototype.getPositions = function() {
@@ -189,7 +200,7 @@
           return col;
         };
         forceSave = function(child) {
-          var difference, filler, height, highest, l, lowestCol, m, next_child, _j, _k, _l, _ref1, _ref2;
+          var difference, filler, filler_threshold, height, highest, l, lowestCol, m, next_child, _j, _k, _l, _ref1, _ref2;
           child.col = determineMultiposition(child);
           if (child.col === void 0) {
             lowestCol = _this.lowestCol(col_heights, child.colspan);
@@ -201,9 +212,10 @@
               }
             }
             filler = false;
-            if (current_i < _this.parsedChildren.length - 10) {
+            filler_threshold = _this.options.fillerThreshold;
+            if (current_i < _this.parsedChildren.length - filler_threshold) {
               difference = highest - col_heights[lowestCol];
-              for (m = _k = 0; _k < 10; m = ++_k) {
+              for (m = _k = 0; 0 <= filler_threshold ? _k < filler_threshold : _k > filler_threshold; m = 0 <= filler_threshold ? ++_k : --_k) {
                 next_child = _this.parsedChildren[current_i + m];
                 if (next_child.height < difference) {
                   filler = true;
@@ -293,11 +305,13 @@
       };
 
       Plugin.prototype.resize = function() {
-        var animation_speed, resizing,
+        var $container, animation_speed, binding, resizing,
           _this = this;
+        $container = this.$container;
         animation_speed = this.options.animationSpeed;
         resizing = false;
-        return $(window).on("resize.shapeshift", function() {
+        binding = "resize." + this.identifier;
+        return $(window).on(binding, function() {
           if (!resizing) {
             resizing = true;
             setTimeout((function() {
@@ -315,7 +329,7 @@
       };
 
       Plugin.prototype.lowestCol = function(array, span, offset) {
-        var max, nth_smallest;
+        var max;
         if (span) {
           max = array.length - span + 1;
           if (max > span) {
@@ -324,12 +338,7 @@
             array = array.slice(0).splice(0, 1);
           }
         }
-        if (offset) {
-          nth_smallest = array.slice(0).sort()[offset];
-          return $.inArray(nth_smallest, array);
-        } else {
-          return $.inArray(Math.min.apply(window, array), array);
-        }
+        return $.inArray(Math.min.apply(window, array), array);
       };
 
       Plugin.prototype.highestCol = function(array, span) {
@@ -349,7 +358,6 @@
         this.$container.off("ss-arrange");
         this.$container.off("ss-destroy");
         this.$container.off("ss-destroyAll");
-        $(window).off("resize.shapeshift");
         if (revertChildren) {
           this.$container.children().each(function() {
             return $(this).css({
@@ -366,9 +374,14 @@
     })();
     return $.fn[pluginName] = function(options) {
       return this.each(function() {
-        if (!$.data(this, "plugin_" + pluginName)) {
-          return $.data(this, "plugin_" + pluginName, new Plugin(this, options));
+        var bound_indentifier, old_class;
+        old_class = $(this).attr("class").match(/shapeshifted_container_\w+/);
+        if (old_class) {
+          bound_indentifier = "resize." + old_class[0];
+          $(window).off(bound_indentifier);
+          $(this).removeClass(old_class[0]);
         }
+        return $.data(this, "plugin_" + pluginName, new Plugin(this, options));
       });
     };
   })(jQuery, window, document);

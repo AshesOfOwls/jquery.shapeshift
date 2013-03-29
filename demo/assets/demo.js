@@ -1,60 +1,11 @@
 $(document).ready(function() {
-  var $containers = $(".ss-container"),
-      child_count = 1500;
-
-  // ----------------------------------------------------------------------
-  // - Generate some fake elements
-  // ----------------------------------------------------------------------
-
-  function renderChildren() {
-    $containers.each(function() {
-      weighted_colspans = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,3,3]
-      for(var i=0;i<child_count;i++) {
-        var colspan = weighted_colspans[Math.floor(Math.random() * weighted_colspans.length)],
-            $element = $("<li data-ss-colspan="+colspan+"></li>"),
-            height =colspan * 80 + ((colspan - 1) * 12);
-            // height = Math.random() * 100 + 100;
-        $element.height(height);
-        $(this).append($element);
-      }
-    })
-  }
-
-  function renderPlaceholders(placekitten) {
-    $containers.each(function() {
-      var $children = $(this).children().not(".credits"),
-          child_count = $children.length;
-      for(var i=0;i<child_count;i++) {
-        var $child = $($children[i]),
-            height = $child.height(),
-            width = $child.width();
-
-        if(placekitten) {
-          // var background = 'url("http://www.placekitten.com/'+width+'/'+height+'")';
-        } else {
-          // var background = 'url("http://fpoimga.com/'+width+'x'+height+'?bg_color='+getRandomColor()+'&text_color=444444")';
-        }
-        var background = '';
-        $child.css({ backgroundImage: background, height: height });
-      }
-    })
-  }
-  renderChildren();
-  renderPlaceholders();
-
-  function getRandomColor() {
-    var letters = 'ABCDEF'.split('');
-    var color = '';
-    for (var i=0;i<6;i++) {
-      color += letters[Math.round(Math.random() * 5)];
-    }
-    return color;
-  }
-
+  var $containers = $(".ss-container");
+  
   // Initial Shapeshift
   var filter_options = {
     minColumns: 3
   };
+
   $containers.shapeshift(filter_options);
 
   // ----------------------------------------------------------------------
@@ -65,9 +16,9 @@ $(document).ready(function() {
     var option = $(this).data("option");
 
     if(option === "enable") {
-      filter_options.enableAnimation = true;
+      filter_options.animated = true;
     } else {
-      filter_options.enableAnimation = false;
+      filter_options.animated = false;
     }
 
     $containers.shapeshift(filter_options);
@@ -77,9 +28,9 @@ $(document).ready(function() {
     var option = $(this).data("option");
 
     if(option === "enable") {
-      filter_options.enableAnimation = true;
+      filter_options.animated = true;
     } else {
-      filter_options.enableAnimation = false;
+      filter_options.animated = false;
     }
 
     $containers.shapeshift(filter_options);
