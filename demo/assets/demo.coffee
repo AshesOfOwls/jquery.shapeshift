@@ -1,6 +1,6 @@
 $ ->
   $containers = $(".ss-container")
-  child_count = 30
+  child_count = 5000
 
   # -------------
   # Render Dummy Content
@@ -10,13 +10,15 @@ $ ->
     weighted_colspans = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,3,3]
 
     $containers.each ->
+      elements = []
+
       for i in [0...child_count]
         colspan = weighted_colspans[Math.floor(Math.random() * weighted_colspans.length)]
-        $element = $("<li data-ss-colspan="+colspan+"><div class='position'><div>"+i+"</div></div></li>")
         height = colspan * 80 + ((colspan - 1) * 12)
         # height = Math.random() * 100 + 100
-        $element.height(height);
-        $(this).append($element);
+        elements.push "<li data-ss-colspan="+colspan+" style='height: "+height+"'><div class='position'><div>"+i+"</div></div></li>"
+
+      $(@).append(elements.join(""))
 
     $containers.children().on "mouseenter mouseleave", (e) ->
       if $("ul.toggle.placeholders li.active").data("option") isnt "index"
@@ -38,30 +40,26 @@ $ ->
       $children = $(this).children().not(".credits")
       child_count = $children.length
 
-      for i in [0...child_count]
-        $child = $($children[i])
-        height = $child.height()
-        width = $child.width()
+      if child_count > 50
+        type = "index"
 
-        if child_count > 50
-          type = "indexes"
+      if type is "index"
+        $(@).find(".position").show()
+      else
+        for i in [0...child_count]
+          $child = $($children[i])
+          height = $child.height()
+          width = $child.width()
 
+          switch type
+            when "fpoimg"
+              background = 'url("http://fpoimg.com/'+width+'x'+height+'?bg_color='+getRandomColor()+'&text_color=444444")'
+            when "placekittens"
+              background = 'url("http://www.placekitten.com/'+width+'/'+height+'")'
 
-        $(@).children().each ->
-          $(@).find(".position").hide()
-
-        switch type
-          when "fpoimg"
-            background = 'url("http://fpoimg.com/'+width+'x'+height+'?bg_color='+getRandomColor()+'&text_color=444444")'
-          when "placekittens"
-            background = 'url("http://www.placekitten.com/'+width+'/'+height+'")'
-          when "index"
-            $(@).children().each ->
-              $(@).find(".position").show()
-
-        $child.css
-          backgroundImage: background
-          height: height
+          $child.css
+            backgroundImage: background
+            height: height
 
   # -------------
   # Initial Shapeshift

@@ -4,21 +4,19 @@
   $(function() {
     var $containers, child_count, filter_options, getRandomColor, renderChildren, renderPlaceholders;
     $containers = $(".ss-container");
-    child_count = 30;
+    child_count = 5000;
     (renderChildren = function() {
       var weighted_colspans;
       weighted_colspans = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3];
       $containers.each(function() {
-        var $element, colspan, height, i, _i, _results;
-        _results = [];
+        var colspan, elements, height, i, _i;
+        elements = [];
         for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
           colspan = weighted_colspans[Math.floor(Math.random() * weighted_colspans.length)];
-          $element = $("<li data-ss-colspan=" + colspan + "><div class='position'><div>" + i + "</div></div></li>");
           height = colspan * 80 + ((colspan - 1) * 12);
-          $element.height(height);
-          _results.push($(this).append($element));
+          elements.push("<li data-ss-colspan=" + colspan + " style='height: " + height + "'><div class='position'><div>" + i + "</div></div></li>");
         }
-        return _results;
+        return $(this).append(elements.join(""));
       });
       return $containers.children().on("mouseenter mouseleave", function(e) {
         if ($("ul.toggle.placeholders li.active").data("option") !== "index") {
@@ -45,35 +43,31 @@
         var $child, $children, background, height, i, width, _i, _results;
         $children = $(this).children().not(".credits");
         child_count = $children.length;
-        _results = [];
-        for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
-          $child = $($children[i]);
-          height = $child.height();
-          width = $child.width();
-          if (child_count > 50) {
-            type = "indexes";
-          }
-          $(this).children().each(function() {
-            return $(this).find(".position").hide();
-          });
-          switch (type) {
-            case "fpoimg":
-              background = 'url("http://fpoimg.com/' + width + 'x' + height + '?bg_color=' + getRandomColor() + '&text_color=444444")';
-              break;
-            case "placekittens":
-              background = 'url("http://www.placekitten.com/' + width + '/' + height + '")';
-              break;
-            case "index":
-              $(this).children().each(function() {
-                return $(this).find(".position").show();
-              });
-          }
-          _results.push($child.css({
-            backgroundImage: background,
-            height: height
-          }));
+        if (child_count > 50) {
+          type = "index";
         }
-        return _results;
+        if (type === "index") {
+          return $(this).find(".position").show();
+        } else {
+          _results = [];
+          for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
+            $child = $($children[i]);
+            height = $child.height();
+            width = $child.width();
+            switch (type) {
+              case "fpoimg":
+                background = 'url("http://fpoimg.com/' + width + 'x' + height + '?bg_color=' + getRandomColor() + '&text_color=444444")';
+                break;
+              case "placekittens":
+                background = 'url("http://www.placekitten.com/' + width + '/' + height + '")';
+            }
+            _results.push($child.css({
+              backgroundImage: background,
+              height: height
+            }));
+          }
+          return _results;
+        }
       });
     })("fpoimg");
     filter_options = {

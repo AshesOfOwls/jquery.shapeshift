@@ -224,7 +224,6 @@
             }
           } else {
             chosen_col = _this.lowestCol(possible_col_heights);
-            console.log(chosen_col);
             highest = 0;
             for (span = _m = 1, _ref4 = child.colspan; 1 <= _ref4 ? _m < _ref4 : _m > _ref4; span = 1 <= _ref4 ? ++_m : --_m) {
               next_height = col_heights[chosen_col + span];

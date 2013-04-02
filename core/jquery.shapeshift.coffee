@@ -307,7 +307,6 @@
         else
           # Force it into position
           chosen_col = @lowestCol(possible_col_heights)
-          console.log chosen_col
           
           highest = 0
           for span in [1...child.colspan]
