@@ -1,6 +1,52 @@
 $(document).ready(function() {
-  var $containers = $(".ss-container");
-  
+  var $containers = $(".ss-container"),
+      child_count = 30;
+
+  function renderChildren() {
+    $containers.each(function() {
+      weighted_colspans = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,3,3]
+      for(var i=0;i<child_count;i++) {
+        var colspan = weighted_colspans[Math.floor(Math.random() * weighted_colspans.length)],
+            $element = $("<li data-ss-colspan="+colspan+"></li>"),
+            height =colspan * 80 + ((colspan - 1) * 12);
+            // height = Math.random() * 100 + 100;
+        $element.height(height);
+        $(this).append($element);
+      }
+    })
+  }
+
+  function renderPlaceholders(placekitten) {
+    $containers.each(function() {
+      var $children = $(this).children().not(".credits"),
+          child_count = $children.length;
+      for(var i=0;i<child_count;i++) {
+        var $child = $($children[i]),
+            height = $child.height(),
+            width = $child.width();
+
+        if(placekitten) {
+          var background = 'url("http://www.placekitten.com/'+width+'/'+height+'")';
+        } else {
+          var background = 'url("http://fpoimg.com/'+width+'x'+height+'?bg_color='+getRandomColor()+'&text_color=444444")';
+        }
+        background = ''
+        $child.css({ backgroundImage: background, height: height });
+      }
+    })
+  }
+  renderChildren();
+  renderPlaceholders();
+
+  function getRandomColor() {
+    var letters = 'ABCDEF'.split('');
+    var color = '';
+    for (var i=0;i<6;i++) {
+      color += letters[Math.round(Math.random() * 5)];
+    }
+    return color;
+  }
+
   // Initial Shapeshift
   var filter_options = {
     minColumns: 3

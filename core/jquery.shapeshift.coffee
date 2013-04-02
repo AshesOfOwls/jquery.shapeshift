@@ -30,12 +30,11 @@
     paddingY: 10
 
     # Other Options
-    fillerThreshold: 10
+    fillerThreshold: 200
     selector: ""
 
   class Plugin
     constructor: (@element, options) ->
-      console.log "Started"
       @options = $.extend {}, defaults, options
       @globals = {}
       @$container = $ element
@@ -56,7 +55,6 @@
       if options.animated and !jQuery.ui
         console.error message + "You are trying to enable animation however jQuery UI has not loaded yet."
         
-
       if !options.autoHeight and !options.height
         console.error message + "You must specify a height if autoHeight is turned off."
 
@@ -74,6 +72,12 @@
       @render(true)
       @afterInit()
 
+    
+    # ----------------------------
+    # setIdentifier
+    # Create a random identifier to tie to this container so that
+    # it is easy to unbind the specific resize event from the browser
+    # ----------------------------
     setIdentifier: ->
       @identifier = "shapeshifted_container_" + Math.random().toString(36).substring(7)
       @$container.addClass(@identifier)
@@ -199,7 +203,6 @@
     # Animates the elements into their calcluated positions
     # ----------------------------
     arrange: ->
-      console.log "arrange"
       positions = @getPositions()
 
       # Arrange each child element
@@ -261,84 +264,27 @@
       # placed in the grid.
       # ----------------------------
       determineMultiposition = (child) =>
-        col = @lowestCol(col_heights, child.colspan)
-        col_height = col_heights[col]
+        possible_cols = col_heights.length - child.colspan + 1
+        possible_col_heights = col_heights.slice(0).splice(0, possible_cols)
 
-        for j in [1..child.colspan]
-          if col_heights[col + j] > col_height
-            col = undefined
+        chosen_col = undefined
+        for offset in [0..possible_cols - 1]
+          col = @lowestCol(possible_col_heights, offset)
+          height = col_heights[col]
 
-        col
+          kosher = true
 
-      # ----------------------------
-      # forceSave
-      # In order to keep importance of children in regards to their
-      # physical placement, sometimes we need to force the columns to
-      # a certain height to maintain that importance
-      # ----------------------------
-      forceSave = (child) =>
-        child.col = determineMultiposition(child)
+          for span in [1...child.colspan]
+            next_height = col_heights[col + span]
 
-        if child.col is undefined
-          lowestCol = @lowestCol(col_heights, child.colspan)
+            if height < next_height
+              kosher = false
 
-          # Get the highest column within the childs colspan
-          highest = 0
-          for l in [1...child.colspan]
-            height = col_heights[lowestCol + l]
-            if height > highest
-              highest = height
+          if kosher
+            chosen_col = col
+            break
 
-          # Determine if there is a child that can fit into the empty
-          # space created by the force save
-          filler = false
-          filler_threshold = @options.fillerThreshold
-          if current_i < @parsedChildren.length - filler_threshold
-            difference = highest - col_heights[lowestCol]
-
-            for m in [0...filler_threshold]
-              next_child = @parsedChildren[current_i + m]
-              if next_child.height < difference
-                filler = true
-                break
-
-          unless filler
-            # Force all columns within range to be the height of the tallest column
-            for m in [0...child.colspan]
-              col_heights[lowestCol + m] = highest
-
-            child.col = lowestCol
-
-        unless child.col is undefined
-          savePosition(child)
-          true
-        else
-          false
-
-      # ----------------------------
-      # recalculateSavedChildren
-      # Redetermine if any saved children can be
-      # placed into the grid now.
-      # ----------------------------
-      recalculateSavedChildren = =>
-        to_pop = []
-        for k in [0...savedChildren.length]
-          child = savedChildren[k]
-          child.col = determineMultiposition(child)
-          is_unimportant = current_i + child.colspan > @parsedChildren.length - 1
-
-          if child.col isnt undefined
-            savePosition(child)
-            to_pop.push k
-          else if child.i + child.colspan < current_i or is_unimportant
-            if forceSave(child)
-              to_pop.push k
-
-        # Remove from savedChildren array if the child has been successfully saved.
-        # Must do it in reverse to protect index values from changing.
-        for m in [to_pop.length - 1..0] by -1
-          idx = to_pop[m]
-          savedChildren.splice(idx,1)
+        chosen_col
 
       # ----------------------------
       # savePosition
@@ -370,7 +316,7 @@
           if child.colspan > 1
             child.col = determineMultiposition(child)
           else
-            child.col = @lowestCol(col_heights, child.colspan)
+            child.col = @lowestCol(col_heights)
           
           # If col is undefined, it couldn't be placed, so save it
           if child.col is undefined
@@ -378,8 +324,6 @@
 
           savePosition(child)
 
-          # Recalculate any saved children to see if they now fit
-          recalculateSavedChildren()
           current_i++
 
       # Store the container height since we already have the data
@@ -422,15 +366,15 @@
     # Returns the index position of the
     # array column with the lowest number
     # ----------------------------
-    lowestCol: (array, span, offset) ->
-      if span
-        max = array.length - span + 1
-        if max > span
-          array = array.slice(0).splice(0,max)
-        else
-          array = array.slice(0).splice(0,1)
+    lowestCol: (array, offset = 0) ->
+      augmented_array = array.map (val, index) -> [val, index]
 
-      $.inArray Math.min.apply(window,array), array
+      augmented_array.sort (a, b) ->
+          ret = a[0] - b[0]
+          ret = a[1] - b[1] if ret is 0
+          ret
+
+      augmented_array[offset][1]
 
 
     # ----------------------------
@@ -462,17 +406,23 @@
       if revertChildren
         @$container.children().each -> $(@).css({left: 0, top: 0})
 
+      # Remove window resize binding
+      old_class = $(@).attr("class").match(/shapeshifted_container_\w+/)?[0]
+      bound_indentifier = "resize." + old_class
+      $(window).off(bound_indentifier)
+      $(@).removeClass(old_class)
+
       console.info "Shapeshift has been successfully destroyed on container:", @$container 
 
 
   $.fn[pluginName] = (options) ->
     @each ->
       # Destroy any old resize events
-      old_class = $(@).attr("class").match(/shapeshifted_container_\w+/)
+      old_class = $(@).attr("class").match(/shapeshifted_container_\w+/)?[0]
       if old_class
-        bound_indentifier = "resize." + old_class[0]
+        bound_indentifier = "resize." + old_class
         $(window).off(bound_indentifier)
-        $(@).removeClass(old_class[0])
+        $(@).removeClass(old_class)
 
       # Create the new plugin instance
       $.data(@, "plugin_#{pluginName}", new Plugin(@, options))

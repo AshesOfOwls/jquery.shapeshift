@@ -21,14 +21,13 @@
       minHeight: 100,
       paddingX: 10,
       paddingY: 10,
-      fillerThreshold: 10,
+      fillerThreshold: 200,
       selector: ""
     };
     Plugin = (function() {
 
       function Plugin(element, options) {
         this.element = element;
-        console.log("Started");
         this.options = $.extend({}, defaults, options);
         this.globals = {};
         this.$container = $(element);
@@ -150,7 +149,6 @@
 
       Plugin.prototype.arrange = function() {
         var $child, attributes, container_height, i, maxHeight, minHeight, positions, _i, _ref;
-        console.log("arrange");
         positions = this.getPositions();
         for (i = _i = 0, _ref = positions.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
           $child = this.parsedChildren[i].el;
@@ -177,7 +175,7 @@
       };
 
       Plugin.prototype.getPositions = function() {
-        var col_heights, current_i, determineMultiposition, determinePositions, forceSave, grid_height, gutterY, i, paddingY, positions, recalculateSavedChildren, savePosition, savedChildren, _i, _ref,
+        var col_heights, current_i, determineMultiposition, determinePositions, grid_height, gutterY, i, paddingY, positions, savePosition, savedChildren, _i, _ref,
           _this = this;
         gutterY = this.options.gutterY;
         paddingY = this.options.paddingY;
@@ -189,76 +187,26 @@
         savedChildren = [];
         current_i = 0;
         determineMultiposition = function(child) {
-          var col, col_height, j, _j, _ref1;
-          col = _this.lowestCol(col_heights, child.colspan);
-          col_height = col_heights[col];
-          for (j = _j = 1, _ref1 = child.colspan; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; j = 1 <= _ref1 ? ++_j : --_j) {
-            if (col_heights[col + j] > col_height) {
-              col = void 0;
-            }
-          }
-          return col;
-        };
-        forceSave = function(child) {
-          var difference, filler, filler_threshold, height, highest, l, lowestCol, m, next_child, _j, _k, _l, _ref1, _ref2;
-          child.col = determineMultiposition(child);
-          if (child.col === void 0) {
-            lowestCol = _this.lowestCol(col_heights, child.colspan);
-            highest = 0;
-            for (l = _j = 1, _ref1 = child.colspan; 1 <= _ref1 ? _j < _ref1 : _j > _ref1; l = 1 <= _ref1 ? ++_j : --_j) {
-              height = col_heights[lowestCol + l];
-              if (height > highest) {
-                highest = height;
+          var chosen_col, col, height, kosher, next_height, offset, possible_col_heights, possible_cols, span, _j, _k, _ref1, _ref2;
+          possible_cols = col_heights.length - child.colspan + 1;
+          possible_col_heights = col_heights.slice(0).splice(0, possible_cols);
+          chosen_col = void 0;
+          for (offset = _j = 0, _ref1 = possible_cols - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; offset = 0 <= _ref1 ? ++_j : --_j) {
+            col = _this.lowestCol(possible_col_heights, offset);
+            height = col_heights[col];
+            kosher = true;
+            for (span = _k = 1, _ref2 = child.colspan; 1 <= _ref2 ? _k < _ref2 : _k > _ref2; span = 1 <= _ref2 ? ++_k : --_k) {
+              next_height = col_heights[col + span];
+              if (height < next_height) {
+                kosher = false;
               }
             }
-            filler = false;
-            filler_threshold = _this.options.fillerThreshold;
-            if (current_i < _this.parsedChildren.length - filler_threshold) {
-              difference = highest - col_heights[lowestCol];
-              for (m = _k = 0; 0 <= filler_threshold ? _k < filler_threshold : _k > filler_threshold; m = 0 <= filler_threshold ? ++_k : --_k) {
-                next_child = _this.parsedChildren[current_i + m];
-                if (next_child.height < difference) {
-                  filler = true;
-                  break;
-                }
-              }
-            }
-            if (!filler) {
-              for (m = _l = 0, _ref2 = child.colspan; 0 <= _ref2 ? _l < _ref2 : _l > _ref2; m = 0 <= _ref2 ? ++_l : --_l) {
-                col_heights[lowestCol + m] = highest;
-              }
-              child.col = lowestCol;
+            if (kosher) {
+              chosen_col = col;
+              break;
             }
           }
-          if (child.col !== void 0) {
-            savePosition(child);
-            return true;
-          } else {
-            return false;
-          }
-        };
-        recalculateSavedChildren = function() {
-          var child, idx, is_unimportant, k, m, to_pop, _j, _k, _ref1, _ref2, _results;
-          to_pop = [];
-          for (k = _j = 0, _ref1 = savedChildren.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; k = 0 <= _ref1 ? ++_j : --_j) {
-            child = savedChildren[k];
-            child.col = determineMultiposition(child);
-            is_unimportant = current_i + child.colspan > _this.parsedChildren.length - 1;
-            if (child.col !== void 0) {
-              savePosition(child);
-              to_pop.push(k);
-            } else if (child.i + child.colspan < current_i || is_unimportant) {
-              if (forceSave(child)) {
-                to_pop.push(k);
-              }
-            }
-          }
-          _results = [];
-          for (m = _k = _ref2 = to_pop.length - 1; _k >= 0; m = _k += -1) {
-            idx = to_pop[m];
-            _results.push(savedChildren.splice(idx, 1));
-          }
-          return _results;
+          return chosen_col;
         };
         savePosition = function(child) {
           var col, j, offsetX, offsetY, _j, _ref1, _results;
@@ -286,13 +234,12 @@
             if (child.colspan > 1) {
               child.col = determineMultiposition(child);
             } else {
-              child.col = _this.lowestCol(col_heights, child.colspan);
+              child.col = _this.lowestCol(col_heights);
             }
             if (child.col === void 0) {
               savedChildren.push(child);
             }
             savePosition(child);
-            recalculateSavedChildren();
             _results.push(current_i++);
           }
           return _results;
@@ -328,17 +275,23 @@
         });
       };
 
-      Plugin.prototype.lowestCol = function(array, span, offset) {
-        var max;
-        if (span) {
-          max = array.length - span + 1;
-          if (max > span) {
-            array = array.slice(0).splice(0, max);
-          } else {
-            array = array.slice(0).splice(0, 1);
-          }
+      Plugin.prototype.lowestCol = function(array, offset) {
+        var augmented_array;
+        if (offset == null) {
+          offset = 0;
         }
-        return $.inArray(Math.min.apply(window, array), array);
+        augmented_array = array.map(function(val, index) {
+          return [val, index];
+        });
+        augmented_array.sort(function(a, b) {
+          var ret;
+          ret = a[0] - b[0];
+          if (ret === 0) {
+            ret = a[1] - b[1];
+          }
+          return ret;
+        });
+        return augmented_array[offset][1];
       };
 
       Plugin.prototype.highestCol = function(array, span) {
@@ -355,6 +308,7 @@
       };
 
       Plugin.prototype.destroy = function(revertChildren) {
+        var bound_indentifier, old_class, _ref;
         this.$container.off("ss-arrange");
         this.$container.off("ss-destroy");
         this.$container.off("ss-destroyAll");
@@ -366,6 +320,10 @@
             });
           });
         }
+        old_class = (_ref = $(this).attr("class").match(/shapeshifted_container_\w+/)) != null ? _ref[0] : void 0;
+        bound_indentifier = "resize." + old_class;
+        $(window).off(bound_indentifier);
+        $(this).removeClass(old_class);
         return console.info("Shapeshift has been successfully destroyed on container:", this.$container);
       };
 
@@ -374,12 +332,12 @@
     })();
     return $.fn[pluginName] = function(options) {
       return this.each(function() {
-        var bound_indentifier, old_class;
-        old_class = $(this).attr("class").match(/shapeshifted_container_\w+/);
+        var bound_indentifier, old_class, _ref;
+        old_class = (_ref = $(this).attr("class").match(/shapeshifted_container_\w+/)) != null ? _ref[0] : void 0;
         if (old_class) {
-          bound_indentifier = "resize." + old_class[0];
+          bound_indentifier = "resize." + old_class;
           $(window).off(bound_indentifier);
-          $(this).removeClass(old_class[0]);
+          $(this).removeClass(old_class);
         }
         return $.data(this, "plugin_" + pluginName, new Plugin(this, options));
       });
