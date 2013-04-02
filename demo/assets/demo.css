@@ -14,6 +14,20 @@ ul.ss-container li {
   width: 80px;
 }
 
+ul.ss-container li .position {
+  background: #DEDEDE;
+  border-radius: 4px;
+  display: none;
+  font-size: 30px;
+  height: 100%;
+  text-align: center;
+  width: 100%;
+}
+
+ul.ss-container li .position div {
+  padding-top: 30%;
+}
+
 ul.ss-container li[data-ss-colspan="2"] { width: 172px; }
 ul.ss-container li[data-ss-colspan="3"] { width: 264px; }
 ul.ss-container li[data-ss-colspan="4"] { width: 356px; }

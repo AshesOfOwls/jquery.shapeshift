@@ -21,7 +21,7 @@
       minHeight: 100,
       paddingX: 10,
       paddingY: 10,
-      fillerThreshold: 200,
+      fillerThreshold: 10,
       selector: ""
     };
     Plugin = (function() {
@@ -175,7 +175,7 @@
       };
 
       Plugin.prototype.getPositions = function() {
-        var col_heights, current_i, determineMultiposition, determinePositions, grid_height, gutterY, i, paddingY, positions, savePosition, savedChildren, _i, _ref,
+        var col_heights, current_i, determineMultiposition, determinePositions, grid_height, gutterY, i, paddingY, positions, recalculateSavedChildren, savePosition, savedChildren, _i, _ref,
           _this = this;
         gutterY = this.options.gutterY;
         paddingY = this.options.paddingY;
@@ -187,26 +187,74 @@
         savedChildren = [];
         current_i = 0;
         determineMultiposition = function(child) {
-          var chosen_col, col, height, kosher, next_height, offset, possible_col_heights, possible_cols, span, _j, _k, _ref1, _ref2;
+          var chosen_col, col, difference, filler_child, filler_cutoff, filler_i, filler_threshold, height, highest, kosher, next_height, offset, possible_col_heights, possible_cols, span, total_children, _j, _k, _l, _m, _n, _ref1, _ref2, _ref3, _ref4, _ref5;
           possible_cols = col_heights.length - child.colspan + 1;
           possible_col_heights = col_heights.slice(0).splice(0, possible_cols);
+          total_children = _this.parsedChildren.length;
+          filler_threshold = _this.options.fillerThreshold;
+          filler_cutoff = child.i + filler_threshold;
+          if (filler_cutoff > total_children) {
+            filler_cutoff = total_children;
+          }
           chosen_col = void 0;
-          for (offset = _j = 0, _ref1 = possible_cols - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; offset = 0 <= _ref1 ? ++_j : --_j) {
-            col = _this.lowestCol(possible_col_heights, offset);
-            height = col_heights[col];
-            kosher = true;
-            for (span = _k = 1, _ref2 = child.colspan; 1 <= _ref2 ? _k < _ref2 : _k > _ref2; span = 1 <= _ref2 ? ++_k : --_k) {
-              next_height = col_heights[col + span];
-              if (height < next_height) {
-                kosher = false;
+          if (current_i <= filler_cutoff) {
+            for (offset = _j = 0, _ref1 = possible_cols - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; offset = 0 <= _ref1 ? ++_j : --_j) {
+              col = _this.lowestCol(possible_col_heights, offset);
+              height = col_heights[col];
+              kosher = true;
+              for (span = _k = 1, _ref2 = child.colspan; 1 <= _ref2 ? _k < _ref2 : _k > _ref2; span = 1 <= _ref2 ? ++_k : --_k) {
+                next_height = col_heights[col + span];
+                if (height < next_height) {
+                  kosher = false;
+                  break;
+                }
+                difference = height - next_height;
+                for (filler_i = _l = _ref3 = current_i + 1; _ref3 <= filler_cutoff ? _l < filler_cutoff : _l > filler_cutoff; filler_i = _ref3 <= filler_cutoff ? ++_l : --_l) {
+                  filler_child = _this.parsedChildren[filler_i];
+                  if (difference >= filler_child.height) {
+                    kosher = false;
+                    break;
+                  }
+                }
+              }
+              if (kosher) {
+                chosen_col = col;
+                break;
               }
             }
-            if (kosher) {
-              chosen_col = col;
-              break;
+          } else {
+            chosen_col = _this.lowestCol(possible_col_heights);
+            console.log(chosen_col);
+            highest = 0;
+            for (span = _m = 1, _ref4 = child.colspan; 1 <= _ref4 ? _m < _ref4 : _m > _ref4; span = 1 <= _ref4 ? ++_m : --_m) {
+              next_height = col_heights[chosen_col + span];
+              if (next_height > highest) {
+                highest = next_height;
+              }
+            }
+            for (span = _n = 0, _ref5 = child.colspan; 0 <= _ref5 ? _n < _ref5 : _n > _ref5; span = 0 <= _ref5 ? ++_n : --_n) {
+              col_heights[chosen_col + span] = highest;
             }
           }
           return chosen_col;
+        };
+        recalculateSavedChildren = function() {
+          var index, pop_i, saved_child, saved_i, to_pop, _j, _k, _ref1, _ref2, _results;
+          to_pop = [];
+          for (saved_i = _j = 0, _ref1 = savedChildren.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; saved_i = 0 <= _ref1 ? ++_j : --_j) {
+            saved_child = savedChildren[saved_i];
+            saved_child.col = determineMultiposition(saved_child);
+            if (saved_child.col >= 0) {
+              savePosition(saved_child);
+              to_pop.push(saved_i);
+            }
+          }
+          _results = [];
+          for (pop_i = _k = _ref2 = to_pop.length - 1; _k >= 0; pop_i = _k += -1) {
+            index = to_pop[pop_i];
+            _results.push(savedChildren.splice(index, 1));
+          }
+          return _results;
         };
         savePosition = function(child) {
           var col, j, offsetX, offsetY, _j, _ref1, _results;
@@ -238,8 +286,10 @@
             }
             if (child.col === void 0) {
               savedChildren.push(child);
+            } else {
+              savePosition(child);
             }
-            savePosition(child);
+            recalculateSavedChildren();
             _results.push(current_i++);
           }
           return _results;

@@ -264,18 +264,13 @@
       # placed in the grid.
       # ----------------------------
       determineMultiposition = (child) =>
-        # Only use the columns that this child can fit into
+        total_children = @parsedChildren.length
         possible_cols = col_heights.length - child.colspan + 1
         possible_col_heights = col_heights.slice(0).splice(0, possible_cols)
-
-        # Determine the filler thresholds / cutoff
-        total_children = @parsedChildren.length
         filler_threshold = @options.fillerThreshold
         filler_cutoff = child.i + filler_threshold
         filler_cutoff = total_children if filler_cutoff > total_children
 
-        # Go over each column, lowest to highest, left to right,
-        # and determine if the child is able to fit there
         chosen_col = undefined
         if current_i <= filler_cutoff
           for offset in [0..possible_cols - 1]
@@ -284,7 +279,7 @@
 
             kosher = true
 
-            # Determine if it is able to be placed at this col
+            # Determine if it is able to be placed somewhere
             for span in [1...child.colspan]
               next_height = col_heights[col + span]
 
@@ -293,47 +288,37 @@
                 kosher = false
                 break
 
-              difference = height - next_height
-              for filler_i in [current_i + 1...filler_cutoff]
-                filler_child = @parsedChildren[filler_i]
+              # The next height must not be vacant enough
+              # for a nearby element
+              for i in [1..filler_threshold]
+                filler_child = @parsedChildren[current_i + i]
 
-                if difference >= filler_child.height
-                  kosher = false
-                  break
+                if filler_child
+                  if height - next_height >= filler_child.height
+                    kosher = false
+                    break
 
             if kosher
               chosen_col = col
               break
         else
-          # Force it into position
-          chosen_col = @lowestCol(possible_col_heights)
-          console.log chosen_col
-          
+          # Force it into place
+          lowest_col = @lowestCol(possible_col_heights)
+
+          # Get the highest column within the childs colspan
           highest = 0
           for span in [1...child.colspan]
-            next_height = col_heights[chosen_col + span]
-            if next_height > highest
-              highest = next_height
+            height = col_heights[lowest_col + span]
+            if height > highest
+              highest = height
 
+          # Force all columns within range to be the height of the tallest column
           for span in [0...child.colspan]
-            col_heights[chosen_col + span] = highest
+            col_heights[lowest_col + span] = highest
+
+          chosen_col = lowest_col
 
         chosen_col
-
-      recalculateSavedChildren = =>
-        to_pop = []
-        for saved_i in [0...savedChildren.length]
-          saved_child = savedChildren[saved_i]
-          saved_child.col = determineMultiposition(saved_child)
-
-          if saved_child.col >= 0
-            savePosition(saved_child)
-            to_pop.push(saved_i)
-
-        # Popeye. Lol.
-        for pop_i in [to_pop.length - 1..0] by -1
-          index = to_pop[pop_i]
-          savedChildren.splice(index,1)
 
       # ----------------------------
       # savePosition
@@ -351,6 +336,23 @@
         if child.colspan >= 1
           for j in [1...child.colspan]
             col_heights[col + j] = col_heights[col]
+
+      recalculateSavedChildren = =>
+        to_pop = []
+        for saved_i in [0...savedChildren.length]
+          child = savedChildren[saved_i]
+          child.col = determineMultiposition(child)
+
+          if child.col >= 0
+            savePosition(child)
+            to_pop.push(saved_i)
+
+        # Popeye. Lol.
+        for pop_i in [to_pop.length - 1..0] by -1
+          idx = to_pop[pop_i]
+          savedChildren.splice(idx,1)
+
+
 
       # ----------------------------
       # determinePositions
