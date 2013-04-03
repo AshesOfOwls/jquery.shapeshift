@@ -156,11 +156,13 @@
         positions = this.getPositions();
         for (i = _i = 0, _ref = positions.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
           $child = this.parsedChildren[i].el;
-          attributes = positions[i];
-          if (this.globals.animated && this.parsedChildren.length <= this.options.animationThreshold) {
-            $child.stop(true, false).animate(attributes, this.options.animationSpeed);
-          } else {
-            $child.css(attributes);
+          if (!$child.hasClass("ss-dragging")) {
+            attributes = positions[i];
+            if (this.globals.animated && this.parsedChildren.length <= this.options.animationThreshold) {
+              $child.stop(true, false).animate(attributes, this.options.animationSpeed);
+            } else {
+              $child.css(attributes);
+            }
           }
         }
         if (this.options.autoHeight) {
@@ -305,44 +307,58 @@
       };
 
       Plugin.prototype.enableDrag = function() {
-        var $selected, dragging, selectedOffsetX, selectedOffsetY, starting, stopping;
+        var $curContainer, $selected, drag, dragRate, dragging, selectedOffsetX, selectedOffsetY, start, stop;
         $selected = null;
+        $curContainer = null;
         selectedOffsetY = null;
         selectedOffsetX = null;
+        dragging = false;
+        dragRate = this.options.dragRate;
         this.$container.children().draggable({
           addClasses: false,
           containment: 'document',
           zIndex: 9999,
           start: function(e, ui) {
-            return starting(e, ui);
+            return start(e, ui);
           },
           drag: function(e, ui) {
-            return dragging(e, ui);
+            return drag(e, ui);
           },
           stop: function() {
-            return stopping();
+            return stop();
           }
         });
-        starting = function(e, ui) {
+        start = function(e, ui) {
           $selected = $(e.target);
+          $curContainer = $selected.parent();
           $selected.addClass("ss-dragging");
           selectedOffsetY = $selected.outerHeight() / 2;
           return selectedOffsetX = $selected.outerWidth() / 2;
         };
-        dragging = function(e, ui) {
+        drag = function(e, ui) {
+          var $target;
+          if (!dragging) {
+            dragging = true;
+            $target = $curContainer.children().first();
+            $selected.insertBefore($target);
+            $curContainer.trigger("ss-arrange");
+            window.setTimeout((function() {
+              return dragging = false;
+            }), dragRate);
+          }
           ui.position.left = e.pageX - $selected.parent().offset().left - selectedOffsetX;
           return ui.position.top = e.pageY - $selected.parent().offset().top - selectedOffsetY;
         };
-        return stopping = function() {
+        return stop = function() {
           $selected.removeClass("ss-dragging");
-          return $selected = null;
+          $selected = null;
+          return $curContainer.trigger("ss-arrange");
         };
       };
 
       Plugin.prototype.enableResize = function() {
-        var $container, animation_speed, binding, resizing,
+        var animation_speed, binding, resizing,
           _this = this;
-        $container = this.$container;
         animation_speed = this.options.animationSpeed;
         resizing = false;
         binding = "resize." + this.identifier;
@@ -382,16 +398,7 @@
         return augmented_array[offset][1];
       };
 
-      Plugin.prototype.highestCol = function(array, span) {
-        var max;
-        if (span) {
-          max = array.length - span + 1;
-          if (max > span) {
-            array = array.slice(0).splice(0, max);
-          } else {
-            array = array.slice(0).splice(0, 1);
-          }
-        }
+      Plugin.prototype.highestCol = function(array) {
         return $.inArray(Math.max.apply(window, array), array);
       };
 

@@ -210,12 +210,14 @@
       # Arrange each child element
       for i in [0...positions.length]
         $child = @parsedChildren[i].el
-        attributes = positions[i]
 
-        if @globals.animated && @parsedChildren.length <= @options.animationThreshold
-          $child.stop(true, false).animate attributes, @options.animationSpeed
-        else
-          $child.css attributes
+        if !$child.hasClass("ss-dragging")
+          attributes = positions[i]
+
+          if @globals.animated && @parsedChildren.length <= @options.animationThreshold
+            $child.stop(true, false).animate attributes, @options.animationSpeed
+          else
+            $child.css attributes
 
       # Set the container height
       if @options.autoHeight
@@ -398,33 +400,49 @@
     # ----------------------------
     enableDrag: ->
       $selected = null
+      $curContainer = null
       selectedOffsetY = null
       selectedOffsetX = null
+      dragging = false
+      dragRate = @options.dragRate
 
       @$container.children().draggable
         addClasses: false
         containment: 'document'
         zIndex: 9999
 
-        start: (e, ui) -> starting(e, ui)
-        drag: (e, ui) -> dragging(e, ui)
-        stop: -> stopping()
+        start: (e, ui) -> start(e, ui)
+        drag: (e, ui) -> drag(e, ui)
+        stop: -> stop()
 
-      starting = (e, ui) ->
+      start = (e, ui) ->
         $selected = $(e.target)
+        $curContainer = $selected.parent()
         $selected.addClass("ss-dragging")
 
         selectedOffsetY = $selected.outerHeight() / 2
         selectedOffsetX = $selected.outerWidth() / 2
 
-      dragging = (e, ui) ->
+      drag = (e, ui) ->
+        if !dragging
+          dragging = true
+          $target = $curContainer.children().first()
+          $selected.insertBefore($target)
+
+          $curContainer.trigger("ss-arrange")
+
+          window.setTimeout ( ->
+            dragging = false
+          ), dragRate
+
         # Manually override the elements position
         ui.position.left = e.pageX - $selected.parent().offset().left - selectedOffsetX;
         ui.position.top = e.pageY - $selected.parent().offset().top - selectedOffsetY;
 
-      stopping = ->
+      stop = ->
         $selected.removeClass("ss-dragging")
         $selected = null
+        $curContainer.trigger("ss-arrange")
 
     # ----------------------------
     # resize:
@@ -433,7 +451,6 @@
     # the browser window is resized.
     # ----------------------------
     enableResize: ->
-      $container = @$container
       animation_speed = @options.animationSpeed
 
       resizing = false
@@ -475,14 +492,7 @@
     # Returns the index position of the
     # array column with the highest number
     # ----------------------------
-    highestCol: (array, span) ->
-      if span
-        max = array.length - span + 1
-        if max > span
-          array = array.slice(0).splice(0,max)
-        else
-          array = array.slice(0).splice(0,1)
-
+    highestCol: (array) ->
       $.inArray Math.max.apply(window,array), array 
 
 
