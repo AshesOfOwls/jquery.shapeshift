@@ -4,29 +4,19 @@
   $(function() {
     var $containers, child_count, filter_options, getRandomColor, renderChildren, renderPlaceholders;
     $containers = $(".ss-container");
-    child_count = 5000;
+    child_count = 30;
     (renderChildren = function() {
       var weighted_colspans;
       weighted_colspans = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3];
-      $containers.each(function() {
+      return $containers.each(function() {
         var colspan, elements, height, i, _i;
         elements = [];
         for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
           colspan = weighted_colspans[Math.floor(Math.random() * weighted_colspans.length)];
-          height = colspan * 80 + ((colspan - 1) * 12);
+          height = Math.random() * 100 + 100;
           elements.push("<li data-ss-colspan=" + colspan + " style='height: " + height + "'><div class='position'><div>" + i + "</div></div></li>");
         }
         return $(this).append(elements.join(""));
-      });
-      return $containers.children().on("mouseenter mouseleave", function(e) {
-        if ($("ul.toggle.placeholders li.active").data("option") !== "index") {
-          switch (e.type) {
-            case "mouseenter":
-              return $(this).find(".position").show();
-            case "mouseleave":
-              return $(this).find(".position").hide();
-          }
-        }
       });
     })();
     getRandomColor = function() {

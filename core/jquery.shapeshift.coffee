@@ -8,11 +8,12 @@
   pluginName = "shapeshift"
   defaults =
     # Features
+    enableDrag: true
     enableResize: true
 
     # Animation
     animated: true
-    animateOnInit: true
+    animateOnInit: false
     animationSpeed: 120
     animationThreshold: 150
 
@@ -22,15 +23,15 @@
     columns: null
     minColumns: 1
     height: 200
-    gutterX: 10
-    gutterY: 10
     maxHeight: null
     minHeight: 100
+    gutterX: 10
+    gutterY: 10
     paddingX: 10
     paddingY: 10
 
     # Other Options
-    fillerThreshold: 10
+    fillerThreshold: 5
     selector: ""
 
   class Plugin
@@ -102,7 +103,8 @@
     # Enables options features
     # ----------------------------
     enableFeatures: ->
-      @resize() if @options.enableResize
+      @enableResize() if @options.enableResize
+      @enableDrag() if @options.enableDrag
 
 
     # ----------------------------
@@ -319,6 +321,11 @@
 
         chosen_col
 
+      # ----------------------------
+      # recalculateSavedChildren
+      # Sometimes child elements cannot save the first time around,
+      # iterate over those children and determine if its ok to place now.
+      # ----------------------------
       recalculateSavedChildren = =>
         to_pop = []
         for saved_i in [0...savedChildren.length]
@@ -385,12 +392,47 @@
 
 
     # ----------------------------
+    # enableDrag:
+    # Optional feature.
+    # Initialize dragging.
+    # ----------------------------
+    enableDrag: ->
+      $selected = null
+      selectedOffsetY = null
+      selectedOffsetX = null
+
+      @$container.children().draggable
+        addClasses: false
+        containment: 'document'
+        zIndex: 9999
+
+        start: (e, ui) -> starting(e, ui)
+        drag: (e, ui) -> dragging(e, ui)
+        stop: -> stopping()
+
+      starting = (e, ui) ->
+        $selected = $(e.target)
+        $selected.addClass("ss-dragging")
+
+        selectedOffsetY = $selected.outerHeight() / 2
+        selectedOffsetX = $selected.outerWidth() / 2
+
+      dragging = (e, ui) ->
+        # Manually override the elements position
+        ui.position.left = e.pageX - $selected.parent().offset().left - selectedOffsetX;
+        ui.position.top = e.pageY - $selected.parent().offset().top - selectedOffsetY;
+
+      stopping = ->
+        $selected.removeClass("ss-dragging")
+        $selected = null
+
+    # ----------------------------
     # resize:
     # Optional feature.
     # Runs a full render of the elements when
     # the browser window is resized.
     # ----------------------------
-    resize: ->
+    enableResize: ->
       $container = @$container
       animation_speed = @options.animationSpeed
 

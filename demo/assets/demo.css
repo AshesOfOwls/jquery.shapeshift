@@ -14,6 +14,17 @@ ul.ss-container li {
   width: 80px;
 }
 
+ul.ss-container li.ss-dragging {
+  cursor: move;
+  z-index: 9999;
+  opacity: .7;
+  transform:rotate(2deg);
+  -ms-transform:rotate(2deg); /* IE 9 */
+  -moz-transform:rotate(2deg); /* Firefox */
+  -webkit-transform:rotate(2deg); /* Safari and Chrome */
+  -o-transform:rotate(2deg); /* Opera */
+}
+
 ul.ss-container li .position {
   background: #DEDEDE;
   border-radius: 4px;

@@ -5,9 +5,10 @@
     var Plugin, defaults, pluginName;
     pluginName = "shapeshift";
     defaults = {
+      enableDrag: true,
       enableResize: true,
       animated: true,
-      animateOnInit: true,
+      animateOnInit: false,
       animationSpeed: 120,
       animationThreshold: 150,
       align: "center",
@@ -15,13 +16,13 @@
       columns: null,
       minColumns: 1,
       height: 200,
-      gutterX: 10,
-      gutterY: 10,
       maxHeight: null,
       minHeight: 100,
+      gutterX: 10,
+      gutterY: 10,
       paddingX: 10,
       paddingY: 10,
-      fillerThreshold: 10,
+      fillerThreshold: 5,
       selector: ""
     };
     Plugin = (function() {
@@ -79,7 +80,10 @@
 
       Plugin.prototype.enableFeatures = function() {
         if (this.options.enableResize) {
-          return this.resize();
+          this.enableResize();
+        }
+        if (this.options.enableDrag) {
+          return this.enableDrag();
         }
       };
 
@@ -300,7 +304,42 @@
         return positions;
       };
 
-      Plugin.prototype.resize = function() {
+      Plugin.prototype.enableDrag = function() {
+        var $selected, dragging, selectedOffsetX, selectedOffsetY, starting, stopping;
+        $selected = null;
+        selectedOffsetY = null;
+        selectedOffsetX = null;
+        this.$container.children().draggable({
+          addClasses: false,
+          containment: 'document',
+          zIndex: 9999,
+          start: function(e, ui) {
+            return starting(e, ui);
+          },
+          drag: function(e, ui) {
+            return dragging(e, ui);
+          },
+          stop: function() {
+            return stopping();
+          }
+        });
+        starting = function(e, ui) {
+          $selected = $(e.target);
+          $selected.addClass("ss-dragging");
+          selectedOffsetY = $selected.outerHeight() / 2;
+          return selectedOffsetX = $selected.outerWidth() / 2;
+        };
+        dragging = function(e, ui) {
+          ui.position.left = e.pageX - $selected.parent().offset().left - selectedOffsetX;
+          return ui.position.top = e.pageY - $selected.parent().offset().top - selectedOffsetY;
+        };
+        return stopping = function() {
+          $selected.removeClass("ss-dragging");
+          return $selected = null;
+        };
+      };
+
+      Plugin.prototype.enableResize = function() {
         var $container, animation_speed, binding, resizing,
           _this = this;
         $container = this.$container;
