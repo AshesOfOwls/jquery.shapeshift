@@ -164,7 +164,6 @@
           attributes = positions[i];
           if ($child.hasClass(draggedClass)) {
             $child = $child.siblings(".ss-placeholder");
-            console.log("!", $child);
           }
           if (this.globals.animated && this.parsedChildren.length <= this.options.animationThreshold) {
             $child.stop(true, false).animate(attributes, this.options.animationSpeed);
@@ -187,9 +186,13 @@
         }
       };
 
-      Plugin.prototype.getPositions = function() {
-        var col_heights, current_i, determineMultiposition, determinePositions, grid_height, gutterY, i, paddingY, positions, recalculateSavedChildren, savePosition, savedChildren, _i, _ref,
+      Plugin.prototype.getPositions = function(include_dragged) {
+        var col_heights, current_i, determineMultiposition, determinePositions, dragged_class, grid_height, gutterY, i, paddingY, positions, recalculateSavedChildren, savePosition, savedChildren, _i, _ref,
           _this = this;
+        if (include_dragged == null) {
+          include_dragged = true;
+        }
+        dragged_class = this.options.draggedClass;
         gutterY = this.options.gutterY;
         paddingY = this.options.paddingY;
         col_heights = [];
@@ -291,18 +294,22 @@
           _results = [];
           for (i = _j = 0, _ref1 = _this.parsedChildren.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
             child = _this.parsedChildren[i];
-            if (child.colspan > 1) {
-              child.col = determineMultiposition(child);
+            if (!(!include_dragged && child.el.hasClass(dragged_class))) {
+              if (child.colspan > 1) {
+                child.col = determineMultiposition(child);
+              } else {
+                child.col = _this.lowestCol(col_heights);
+              }
+              if (child.col === void 0) {
+                savedChildren.push(child);
+              } else {
+                savePosition(child);
+              }
+              recalculateSavedChildren();
+              _results.push(current_i++);
             } else {
-              child.col = _this.lowestCol(col_heights);
+              _results.push(void 0);
             }
-            if (child.col === void 0) {
-              savedChildren.push(child);
-            } else {
-              savePosition(child);
-            }
-            recalculateSavedChildren();
-            _results.push(current_i++);
           }
           return _results;
         })();
@@ -313,8 +320,35 @@
         return positions;
       };
 
+      Plugin.prototype.getDragTarget = function() {
+        var $selected, attributes, chosen_index, distance, dragged_class, i, positions, selected_x, selected_y, shortest_distance, x_dist, y_dist, _i, _ref;
+        dragged_class = this.options.draggedClass;
+        $selected = $("." + dragged_class);
+        selected_x = $selected.position().left + ($selected.outerWidth() / 2);
+        selected_y = $selected.position().top + ($selected.outerHeight() / 2);
+        positions = this.getPositions(false);
+        shortest_distance = 999999;
+        chosen_index = 0;
+        for (i = _i = 0, _ref = positions.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+          attributes = positions[i];
+          if (attributes) {
+            if (selected_x > attributes.left && selected_y > attributes.top) {
+              x_dist = selected_x - attributes.left;
+              y_dist = selected_y - attributes.top;
+              distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist));
+              if (distance < shortest_distance) {
+                shortest_distance = distance;
+                chosen_index = i;
+              }
+            }
+          }
+        }
+        return this.parsedChildren[chosen_index].el;
+      };
+
       Plugin.prototype.enableDragNDrop = function() {
-        var $curContainer, $placeholder, $selected, drag, dragRate, dragged_class, dragging, placeholder_class, selectedOffsetX, selectedOffsetY, start, stop;
+        var $curContainer, $placeholder, $selected, drag, dragRate, dragged_class, dragging, placeholder_class, selectedOffsetX, selectedOffsetY, start, stop,
+          _this = this;
         dragRate = this.options.dragRate;
         dragged_class = this.options.draggedClass;
         placeholder_class = this.options.placeholderClass;
@@ -353,7 +387,7 @@
         drag = function(e, ui) {
           var $target;
           if (!dragging) {
-            $target = $curContainer.children().first();
+            $target = _this.getDragTarget();
             $selected.insertBefore($target);
             $curContainer.trigger("ss-arrange");
             dragging = true;

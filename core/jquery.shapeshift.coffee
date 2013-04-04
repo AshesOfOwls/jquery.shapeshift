@@ -221,7 +221,6 @@
 
         if $child.hasClass(draggedClass)
           $child = $child.siblings(".ss-placeholder")
-          console.log "!", $child
 
         if @globals.animated && @parsedChildren.length <= @options.animationThreshold
           $child.stop(true, false).animate attributes, @options.animationSpeed
@@ -250,7 +249,8 @@
     # go over each child and determine which column they
     # fit into and return an array of their x/y dimensions
     # ----------------------------
-    getPositions: ->
+    getPositions: (include_dragged = true) ->
+      dragged_class = @options.draggedClass
       gutterY = @options.gutterY
       paddingY = @options.paddingY
 
@@ -378,21 +378,22 @@
         for i in [0...@parsedChildren.length]
           child = @parsedChildren[i]
 
-          # Determine the correct column
-          if child.colspan > 1
-            child.col = determineMultiposition(child)
-          else
-            child.col = @lowestCol(col_heights)
-          
-          # If col is undefined, it couldn't be placed, so save it
-          if child.col is undefined
-            savedChildren.push(child)
-          else
-            savePosition(child)
+          unless !include_dragged and child.el.hasClass(dragged_class)
+            # Determine the correct column
+            if child.colspan > 1
+              child.col = determineMultiposition(child)
+            else
+              child.col = @lowestCol(col_heights)
+            
+            # If col is undefined, it couldn't be placed, so save it
+            if child.col is undefined
+              savedChildren.push(child)
+            else
+              savePosition(child)
 
-          recalculateSavedChildren()
+            recalculateSavedChildren()
 
-          current_i++
+            current_i++
 
       # Store the container height since we already have the data
       if @options.autoHeight
@@ -401,6 +402,38 @@
 
       return positions
 
+
+    # ----------------------------
+    # getDragTarget:
+    # Determine where the currently dragged
+    # element should be inserted
+    # ----------------------------
+    getDragTarget: ->
+      dragged_class = @options.draggedClass
+      $selected = $("."+dragged_class)
+      selected_x = $selected.position().left + ($selected.outerWidth() / 2)
+      selected_y = $selected.position().top + ($selected.outerHeight() / 2)
+
+      # Get a list of positions not including the dragged item
+      positions = @getPositions(false)
+      shortest_distance = 999999
+      chosen_index = 0
+      
+      for i in [0...positions.length]
+        attributes = positions[i]
+
+        if attributes
+          if selected_x > attributes.left and selected_y > attributes.top
+            x_dist = selected_x - attributes.left
+            y_dist = selected_y - attributes.top
+
+            distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist))
+
+            if distance < shortest_distance
+              shortest_distance = distance
+              chosen_index = i
+
+      return @parsedChildren[chosen_index].el
 
     # ----------------------------
     # enableDrag:
@@ -446,10 +479,10 @@
         selectedOffsetY = $selected.outerHeight() / 2
         selectedOffsetX = $selected.outerWidth() / 2
 
-      drag = (e, ui) ->
+      drag = (e, ui) =>
         if !dragging
           # Determine the target position and arrange into place
-          $target = $curContainer.children().first()
+          $target = @getDragTarget()
           $selected.insertBefore($target)
           $curContainer.trigger("ss-arrange")
 
