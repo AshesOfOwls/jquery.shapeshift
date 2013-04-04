@@ -6,6 +6,7 @@
     pluginName = "shapeshift";
     defaults = {
       enableDrag: true,
+      enableDrop: true,
       enableResize: true,
       animated: true,
       animateOnInit: false,
@@ -22,6 +23,9 @@
       gutterY: 10,
       paddingX: 10,
       paddingY: 10,
+      dragRate: 75,
+      draggedClass: "ss-dragging",
+      placeholderClass: "ss-placeholder",
       fillerThreshold: 5,
       selector: ""
     };
@@ -82,8 +86,8 @@
         if (this.options.enableResize) {
           this.enableResize();
         }
-        if (this.options.enableDrag) {
-          return this.enableDrag();
+        if (this.options.enableDrag || this.options.enableDrop) {
+          return this.enableDragNDrop();
         }
       };
 
@@ -93,7 +97,7 @@
 
       Plugin.prototype.parseChildren = function() {
         var $child, $children, child, i, parsedChildren, _i, _ref;
-        $children = this.$container.children(this.options.selector).filter(":visible");
+        $children = this.$container.children(this.options.selector).not("." + this.options.placeholderClass).filter(":visible");
         parsedChildren = [];
         for (i = _i = 0, _ref = $children.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
           $child = $children.eq(i);
@@ -152,17 +156,20 @@
       };
 
       Plugin.prototype.arrange = function() {
-        var $child, attributes, container_height, i, maxHeight, minHeight, positions, _i, _ref;
+        var $child, attributes, container_height, draggedClass, i, maxHeight, minHeight, positions, _i, _ref;
         positions = this.getPositions();
+        draggedClass = this.options.draggedClass;
         for (i = _i = 0, _ref = positions.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
           $child = this.parsedChildren[i].el;
-          if (!$child.hasClass("ss-dragging")) {
-            attributes = positions[i];
-            if (this.globals.animated && this.parsedChildren.length <= this.options.animationThreshold) {
-              $child.stop(true, false).animate(attributes, this.options.animationSpeed);
-            } else {
-              $child.css(attributes);
-            }
+          attributes = positions[i];
+          if ($child.hasClass(draggedClass)) {
+            $child = $child.siblings(".ss-placeholder");
+            console.log("!", $child);
+          }
+          if (this.globals.animated && this.parsedChildren.length <= this.options.animationThreshold) {
+            $child.stop(true, false).animate(attributes, this.options.animationSpeed);
+          } else {
+            $child.css(attributes);
           }
         }
         if (this.options.autoHeight) {
@@ -306,14 +313,17 @@
         return positions;
       };
 
-      Plugin.prototype.enableDrag = function() {
-        var $curContainer, $selected, drag, dragRate, dragging, selectedOffsetX, selectedOffsetY, start, stop;
+      Plugin.prototype.enableDragNDrop = function() {
+        var $curContainer, $placeholder, $selected, drag, dragRate, dragged_class, dragging, placeholder_class, selectedOffsetX, selectedOffsetY, start, stop;
+        dragRate = this.options.dragRate;
+        dragged_class = this.options.draggedClass;
+        placeholder_class = this.options.placeholderClass;
         $selected = null;
+        $placeholder = null;
         $curContainer = null;
         selectedOffsetY = null;
         selectedOffsetX = null;
         dragging = false;
-        dragRate = this.options.dragRate;
         this.$container.children().draggable({
           addClasses: false,
           containment: 'document',
@@ -329,19 +339,24 @@
           }
         });
         start = function(e, ui) {
+          var selected_tag;
           $selected = $(e.target);
+          $selected.addClass(dragged_class);
           $curContainer = $selected.parent();
-          $selected.addClass("ss-dragging");
+          selected_tag = $selected.prop("tagName");
+          $placeholder = $('<' + selected_tag + ' class="' + placeholder_class + '"></' + selected_tag + '>');
+          $placeholder.height($selected.height()).width($selected.width());
+          $curContainer.prepend($placeholder);
           selectedOffsetY = $selected.outerHeight() / 2;
           return selectedOffsetX = $selected.outerWidth() / 2;
         };
         drag = function(e, ui) {
           var $target;
           if (!dragging) {
-            dragging = true;
             $target = $curContainer.children().first();
             $selected.insertBefore($target);
             $curContainer.trigger("ss-arrange");
+            dragging = true;
             window.setTimeout((function() {
               return dragging = false;
             }), dragRate);
@@ -350,8 +365,9 @@
           return ui.position.top = e.pageY - $selected.parent().offset().top - selectedOffsetY;
         };
         return stop = function() {
-          $selected.removeClass("ss-dragging");
-          $selected = null;
+          $selected.removeClass(dragged_class);
+          $placeholder.remove();
+          $selected = $placeholder = null;
           return $curContainer.trigger("ss-arrange");
         };
       };

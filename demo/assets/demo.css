@@ -25,6 +25,12 @@ ul.ss-container li.ss-dragging {
   -o-transform:rotate(2deg); /* Opera */
 }
 
+ul.ss-container li.ss-placeholder {
+  background: transparent;
+  border: 0px;
+  outline: 1px dashed red;
+}
+
 ul.ss-container li .position {
   background: #DEDEDE;
   border-radius: 4px;

@@ -13,7 +13,7 @@
         elements = [];
         for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
           colspan = weighted_colspans[Math.floor(Math.random() * weighted_colspans.length)];
-          height = Math.random() * 100 + 100;
+          height = colspan * 80 + ((colspan - 1) * 12);
           elements.push("<li data-ss-colspan=" + colspan + " style='height: " + height + "'><div class='position'><div>" + i + "</div></div></li>");
         }
         return $(this).append(elements.join(""));

@@ -9,6 +9,7 @@
   defaults =
     # Features
     enableDrag: true
+    enableDrop: true
     enableResize: true
 
     # Animation
@@ -29,6 +30,11 @@
     gutterY: 10
     paddingX: 10
     paddingY: 10
+
+    # Drag/Drop Options
+    dragRate: 75
+    draggedClass: "ss-dragging"
+    placeholderClass: "ss-placeholder"
 
     # Other Options
     fillerThreshold: 5
@@ -104,7 +110,7 @@
     # ----------------------------
     enableFeatures: ->
       @enableResize() if @options.enableResize
-      @enableDrag() if @options.enableDrag
+      @enableDragNDrop() if @options.enableDrag or @options.enableDrop
 
 
     # ----------------------------
@@ -122,7 +128,7 @@
     # for all the active children
     # ----------------------------
     parseChildren: ->
-      $children = @$container.children(@options.selector).filter(":visible")
+      $children = @$container.children(@options.selector).not("."+@options.placeholderClass).filter(":visible")
 
       parsedChildren = []
       for i in [0...$children.length]
@@ -206,18 +212,21 @@
     # ----------------------------
     arrange: ->
       positions = @getPositions()
+      draggedClass = @options.draggedClass
 
       # Arrange each child element
       for i in [0...positions.length]
         $child = @parsedChildren[i].el
+        attributes = positions[i]
 
-        if !$child.hasClass("ss-dragging")
-          attributes = positions[i]
+        if $child.hasClass(draggedClass)
+          $child = $child.siblings(".ss-placeholder")
+          console.log "!", $child
 
-          if @globals.animated && @parsedChildren.length <= @options.animationThreshold
-            $child.stop(true, false).animate attributes, @options.animationSpeed
-          else
-            $child.css attributes
+        if @globals.animated && @parsedChildren.length <= @options.animationThreshold
+          $child.stop(true, false).animate attributes, @options.animationSpeed
+        else
+          $child.css attributes
 
       # Set the container height
       if @options.autoHeight
@@ -398,14 +407,20 @@
     # Optional feature.
     # Initialize dragging.
     # ----------------------------
-    enableDrag: ->
+    enableDragNDrop: ->
+      dragRate = @options.dragRate
+      dragged_class = @options.draggedClass
+      placeholder_class = @options.placeholderClass
+
+      # Globals for DnD
       $selected = null
+      $placeholder = null
       $curContainer = null
       selectedOffsetY = null
       selectedOffsetX = null
       dragging = false
-      dragRate = @options.dragRate
 
+      # Dragging
       @$container.children().draggable
         addClasses: false
         containment: 'document'
@@ -416,32 +431,45 @@
         stop: -> stop()
 
       start = (e, ui) ->
+        # Set $selected globals
         $selected = $(e.target)
+        $selected.addClass(dragged_class)
         $curContainer = $selected.parent()
-        $selected.addClass("ss-dragging")
 
+        # Create Placeholder
+        selected_tag = $selected.prop("tagName")
+        $placeholder = $('<'+selected_tag+' class="'+placeholder_class+'"></'+selected_tag+'>')
+        $placeholder.height($selected.height()).width($selected.width())
+        $curContainer.prepend($placeholder)
+
+        # For manually centering the element with respect to mouse position
         selectedOffsetY = $selected.outerHeight() / 2
         selectedOffsetX = $selected.outerWidth() / 2
 
       drag = (e, ui) ->
         if !dragging
-          dragging = true
+          # Determine the target position and arrange into place
           $target = $curContainer.children().first()
           $selected.insertBefore($target)
-
           $curContainer.trigger("ss-arrange")
 
+          # Disallow dragging from occurring too much
+          dragging = true
           window.setTimeout ( ->
             dragging = false
           ), dragRate
 
-        # Manually override the elements position
+        # Manually center the element with respect to mouse position
         ui.position.left = e.pageX - $selected.parent().offset().left - selectedOffsetX;
         ui.position.top = e.pageY - $selected.parent().offset().top - selectedOffsetY;
 
       stop = ->
-        $selected.removeClass("ss-dragging")
-        $selected = null
+        # Clear globals
+        $selected.removeClass(dragged_class)
+        $placeholder.remove()
+        $selected = $placeholder = null
+
+        # Arrange dragged item into place
         $curContainer.trigger("ss-arrange")
 
     # ----------------------------

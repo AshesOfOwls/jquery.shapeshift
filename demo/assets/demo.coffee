@@ -14,8 +14,8 @@ $ ->
 
       for i in [0...child_count]
         colspan = weighted_colspans[Math.floor(Math.random() * weighted_colspans.length)]
-        # height = colspan * 80 + ((colspan - 1) * 12)
-        height = Math.random() * 100 + 100
+        height = colspan * 80 + ((colspan - 1) * 12)
+        # height = Math.random() * 100 + 100
         elements.push "<li data-ss-colspan="+colspan+" style='height: "+height+"'><div class='position'><div>"+i+"</div></div></li>"
 
       $(@).append(elements.join(""))
