@@ -408,7 +408,7 @@
     # Determine where the currently dragged
     # element should be inserted
     # ----------------------------
-    getDragTarget: ->
+    getDragTargetPosition: ->
       dragged_class = @options.draggedClass
       $selected = $("."+dragged_class)
       selected_x = $selected.position().left + ($selected.outerWidth() / 2)
@@ -433,7 +433,14 @@
               shortest_distance = distance
               chosen_index = i
 
-      return @parsedChildren[chosen_index].el
+            # If this is the last item, and we are below it or to the right,
+            # then we may want to insert it as the last item.
+            if i is positions.length - 1
+              $child = @parsedChildren[i].el
+              if y_dist > $child.outerHeight() * .75 or x_dist > $child.outerWidth() * .75 or x_dist < 0
+                chosen_index++
+
+      return chosen_index
 
     # ----------------------------
     # enableDrag:
@@ -482,8 +489,13 @@
       drag = (e, ui) =>
         if !dragging
           # Determine the target position and arrange into place
-          $target = @getDragTarget()
-          $selected.insertBefore($target)
+          target_position = @getDragTargetPosition()
+          if target_position is @parsedChildren.length
+            $target = @parsedChildren[target_position - 1].el
+            $selected.insertAfter($target)
+          else
+            $target = @parsedChildren[target_position].el
+            $selected.insertBefore($target)
           $curContainer.trigger("ss-arrange")
 
           # Disallow dragging from occurring too much

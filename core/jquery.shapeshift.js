@@ -320,8 +320,8 @@
         return positions;
       };
 
-      Plugin.prototype.getDragTarget = function() {
-        var $selected, attributes, chosen_index, distance, dragged_class, i, positions, selected_x, selected_y, shortest_distance, x_dist, y_dist, _i, _ref;
+      Plugin.prototype.getDragTargetPosition = function() {
+        var $child, $selected, attributes, chosen_index, distance, dragged_class, i, positions, selected_x, selected_y, shortest_distance, x_dist, y_dist, _i, _ref;
         dragged_class = this.options.draggedClass;
         $selected = $("." + dragged_class);
         selected_x = $selected.position().left + ($selected.outerWidth() / 2);
@@ -340,10 +340,16 @@
                 shortest_distance = distance;
                 chosen_index = i;
               }
+              if (i === positions.length - 1) {
+                $child = this.parsedChildren[i].el;
+                if (y_dist > $child.outerHeight() * .75 || x_dist > $child.outerWidth() * .75 || x_dist < 0) {
+                  chosen_index++;
+                }
+              }
             }
           }
         }
-        return this.parsedChildren[chosen_index].el;
+        return chosen_index;
       };
 
       Plugin.prototype.enableDragNDrop = function() {
@@ -385,10 +391,16 @@
           return selectedOffsetX = $selected.outerWidth() / 2;
         };
         drag = function(e, ui) {
-          var $target;
+          var $target, target_position;
           if (!dragging) {
-            $target = _this.getDragTarget();
-            $selected.insertBefore($target);
+            target_position = _this.getDragTargetPosition();
+            if (target_position === _this.parsedChildren.length) {
+              $target = _this.parsedChildren[target_position - 1].el;
+              $selected.insertAfter($target);
+            } else {
+              $target = _this.parsedChildren[target_position].el;
+              $selected.insertBefore($target);
+            }
             $curContainer.trigger("ss-arrange");
             dragging = true;
             window.setTimeout((function() {
