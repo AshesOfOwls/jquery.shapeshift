@@ -106,6 +106,16 @@ $ ->
   # Drag and Drop events for shapeshift
   # -------------
 
+  $containers.on "ss-arranged", (e, selected) ->
+
+    if $(@).find(".ss-dragging")[0]
+      modifier = 1
+    else
+      modifier = 0
+
+    $(@).children().each ->
+      $(@).find(".position").text($(@).index() - modifier)
+
   $containers.on "ss-event-dropped", (e, selected) ->
     $selected = $(selected)
     # console.log "The dropped item is:", $selected

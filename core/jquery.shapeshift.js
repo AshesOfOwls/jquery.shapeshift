@@ -23,7 +23,7 @@
       gutterY: 10,
       paddingX: 10,
       paddingY: 10,
-      dragRate: 75,
+      dragRate: 120,
       draggedClass: "ss-dragging",
       placeholderClass: "ss-placeholder",
       fillerThreshold: 5,
@@ -180,10 +180,11 @@
           } else if (maxHeight && container_height > maxHeight) {
             container_height = maxHeight;
           }
-          return this.$container.height(container_height);
+          this.$container.height(container_height);
         } else {
-          return this.$container.height(this.options.height);
+          this.$container.height(this.options.height);
         }
+        return this.$container.trigger("ss-arranged");
       };
 
       Plugin.prototype.getPositions = function(include_dragged) {
@@ -384,8 +385,7 @@
           $selected.addClass(dragged_class);
           $curContainer = $selected.parent();
           selected_tag = $selected.prop("tagName");
-          $placeholder = $('<' + selected_tag + ' class="' + placeholder_class + '"></' + selected_tag + '>');
-          $placeholder.height($selected.height()).width($selected.width());
+          $placeholder = $("<" + selected_tag + " class='" + placeholder_class + "' style='height: " + ($selected.height()) + "; width: " + ($selected.width()) + "'></" + selected_tag + ">");
           $curContainer.prepend($placeholder);
           selectedOffsetY = $selected.outerHeight() / 2;
           return selectedOffsetX = $selected.outerWidth() / 2;

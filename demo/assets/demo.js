@@ -102,6 +102,17 @@
       renderPlaceholders($(this).data("option"));
       return $containers.shapeshift(filter_options);
     });
+    $containers.on("ss-arranged", function(e, selected) {
+      var modifier;
+      if ($(this).find(".ss-dragging")[0]) {
+        modifier = 1;
+      } else {
+        modifier = 0;
+      }
+      return $(this).children().each(function() {
+        return $(this).find(".position").text($(this).index() - modifier);
+      });
+    });
     $containers.on("ss-event-dropped", function(e, selected) {
       var $objects, $selected;
       $selected = $(selected);

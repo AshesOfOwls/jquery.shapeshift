@@ -32,7 +32,7 @@
     paddingY: 10
 
     # Drag/Drop Options
-    dragRate: 75
+    dragRate: 120
     draggedClass: "ss-dragging"
     placeholderClass: "ss-placeholder"
 
@@ -241,6 +241,8 @@
         @$container.height container_height
       else
         @$container.height @options.height
+
+      @$container.trigger("ss-arranged");
       
 
     # ----------------------------
@@ -478,8 +480,7 @@
 
         # Create Placeholder
         selected_tag = $selected.prop("tagName")
-        $placeholder = $('<'+selected_tag+' class="'+placeholder_class+'"></'+selected_tag+'>')
-        $placeholder.height($selected.height()).width($selected.width())
+        $placeholder = $("<#{selected_tag} class='#{placeholder_class}' style='height: #{$selected.height()}; width: #{$selected.width()}'></#{selected_tag}>")
         $curContainer.prepend($placeholder)
 
         # For manually centering the element with respect to mouse position
