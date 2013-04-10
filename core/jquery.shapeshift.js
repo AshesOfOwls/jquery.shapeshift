@@ -6,6 +6,7 @@
     pluginName = "shapeshift";
     defaults = {
       enableDrag: true,
+      enableCrossDrop: true,
       enableResize: true,
       align: "center",
       autoHeight: true,
@@ -16,16 +17,22 @@
       minHeight: 100,
       gutterX: 10,
       gutterY: 10,
-      paddingX: 0,
+      paddingX: 10,
       paddingY: 10,
       animated: true,
-      animateOnInit: false,
-      animationSpeed: 150,
-      animationThreshold: 200,
+      animateOnInit: true,
+      animationSpeed: 225,
+      animationThreshold: 100,
       dragRate: 120,
+      dragWhitelist: "*",
+      crossDropWhitelist: "*",
+      cutoffStart: null,
+      cutoffEnd: null,
       activeClass: "ss-active-child",
       draggedClass: "ss-dragged-child",
       placeholderClass: "ss-placeholder-child",
+      currentContainerClass: "ss-current-container",
+      previousContainerClass: "ss-previous-container",
       selector: ""
     };
     Plugin = (function() {
@@ -82,7 +89,7 @@
         if (this.options.enableResize) {
           this.enableResize();
         }
-        if (this.options.enableDrag) {
+        if (this.options.enableDrag || this.options.enableCrossDrop) {
           return this.enableDragNDrop();
         }
       };
@@ -324,94 +331,90 @@
       };
 
       Plugin.prototype.enableDragNDrop = function() {
-        var $container, $placeholder, $selected, active_class, drag, drag_rate, dragged_class, dragging, options, over, placeholder_class, selected_offset_x, selected_offset_y, start, stop,
+        var $container, $placeholder, $selected, active_class, current_container_class, drag_rate, dragged_class, dragging, options, placeholder_class, previous_container_class, selected_offset_x, selected_offset_y,
           _this = this;
         options = this.options;
         $container = this.$container;
         active_class = options.activeClass;
         dragged_class = options.draggedClass;
         placeholder_class = options.placeholderClass;
+        current_container_class = options.currentContainerClass;
+        previous_container_class = options.previousContainerClass;
         drag_rate = options.dragRate;
         $selected = $placeholder = selected_offset_y = selected_offset_x = null;
         dragging = false;
-        $container.children("." + active_class).draggable({
-          addClasses: false,
-          containment: 'document',
-          zIndex: 9999,
-          start: function(e, ui) {
-            return start(e, ui);
-          },
-          drag: function(e, ui) {
-            return drag(e, ui);
-          },
-          stop: function() {
-            return stop();
-          }
-        });
-        start = function(e, ui) {
-          var selected_tag;
-          $selected = $(e.target);
-          $selected.addClass(dragged_class);
-          selected_tag = $selected.prop("tagName");
-          $placeholder = $("<" + selected_tag + " class='" + placeholder_class + "' style='height: " + ($selected.height()) + "; width: " + ($selected.width()) + "'></" + selected_tag + ">");
-          $selected.parent().addClass("ss-current-container");
-          selected_offset_y = $selected.outerHeight() / 2;
-          return selected_offset_x = $selected.outerWidth() / 2;
-        };
-        drag = function(e, ui) {
-          if (!dragging) {
-            $placeholder.remove().appendTo(".ss-current-container");
-            $(".ss-current-container").trigger("ss-setTargetPosition");
-            dragging = true;
-            window.setTimeout((function() {
-              return dragging = false;
-            }), drag_rate);
-          }
-          ui.position.left = e.pageX - $selected.parent().offset().left - selected_offset_x;
-          return ui.position.top = e.pageY - $selected.parent().offset().top - selected_offset_y;
-        };
-        stop = function() {
-          $selected.removeClass(dragged_class);
-          $placeholder.remove();
-          $selected = $placeholder = null;
-          $(".ss-current-container").trigger("ss-arrange").removeClass("ss-current-container");
-          return $(".ss-previous-container").trigger("ss-arrange").removeClass("ss-previous-container");
-        };
-        $container.droppable({
-          tolerance: 'intersect',
-          over: function(e) {
-            return over(e);
-          }
-        });
-        return over = function(e) {
-          $(".ss-previous-container").removeClass("ss-previous-container");
-          $(".ss-current-container").removeClass("ss-current-container").addClass("ss-previous-container");
-          return $(e.target).addClass("ss-current-container");
-        };
+        if (options.enableDrag) {
+          $container.children("." + active_class).filter(options.dragWhitelist).draggable({
+            addClasses: false,
+            containment: 'document',
+            zIndex: 9999,
+            start: function(e, ui) {
+              var selected_tag;
+              $selected = $(e.target);
+              $selected.addClass(dragged_class);
+              selected_tag = $selected.prop("tagName");
+              $placeholder = $("<" + selected_tag + " class='" + placeholder_class + "' style='height: " + ($selected.height()) + "; width: " + ($selected.width()) + "'></" + selected_tag + ">");
+              $selected.parent().addClass(current_container_class);
+              selected_offset_y = $selected.outerHeight() / 2;
+              return selected_offset_x = $selected.outerWidth() / 2;
+            },
+            drag: function(e, ui) {
+              if (!dragging) {
+                $placeholder.remove().appendTo("." + current_container_class);
+                $("." + current_container_class).trigger("ss-setTargetPosition");
+                dragging = true;
+                window.setTimeout((function() {
+                  return dragging = false;
+                }), drag_rate);
+              }
+              ui.position.left = e.pageX - $selected.parent().offset().left - selected_offset_x;
+              return ui.position.top = e.pageY - $selected.parent().offset().top - selected_offset_y;
+            },
+            stop: function() {
+              $selected.removeClass(dragged_class);
+              $placeholder.remove();
+              $selected = $placeholder = null;
+              $("." + current_container_class).trigger("ss-arrange").removeClass(current_container_class);
+              return $("." + previous_container_class).trigger("ss-arrange").removeClass(previous_container_class);
+            }
+          });
+        }
+        if (options.enableCrossDrop) {
+          return $container.droppable({
+            accept: options.crossDropWhitelist,
+            tolerance: 'intersect',
+            over: function(e) {
+              $("." + previous_container_class).removeClass(previous_container_class);
+              $("." + current_container_class).removeClass(current_container_class).addClass(previous_container_class);
+              return $(e.target).addClass(current_container_class);
+            }
+          });
+        }
       };
 
       Plugin.prototype.setTargetPosition = function() {
-        var $selected, $start_container, $target, attributes, child_positions, distance, dragged_class, parsed_children, position_i, selected_x, selected_y, shortest_distance, target_position, total_positions, x_dist, y_dist, _i;
-        dragged_class = this.options.draggedClass;
+        var $selected, $start_container, $target, attributes, child_positions, cutoff_end, cutoff_start, distance, dragged_class, options, parsed_children, position_i, previous_container_class, selected_x, selected_y, shortest_distance, target_position, total_positions, x_dist, y_dist, _i;
+        options = this.options;
+        dragged_class = options.draggedClass;
         $selected = $("." + dragged_class);
-        selected_x = $selected.position().left + $selected.width() / 2;
-        selected_y = $selected.position().top + $selected.height() / 2;
-        shortest_distance = 9999999;
         $start_container = $selected.parent();
         parsed_children = this.parsedChildren;
         child_positions = this.getPositions();
         total_positions = child_positions.length;
+        selected_x = $selected.offset().left - $start_container.offset().left + ($selected.width() / 2);
+        selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 2);
+        shortest_distance = 9999999;
         target_position = 0;
-        for (position_i = _i = 0; 0 <= total_positions ? _i < total_positions : _i > total_positions; position_i = 0 <= total_positions ? ++_i : --_i) {
+        cutoff_start = options.cutoffStart || 0;
+        cutoff_end = options.cutoffEnd || total_positions;
+        for (position_i = _i = cutoff_start; cutoff_start <= cutoff_end ? _i < cutoff_end : _i > cutoff_end; position_i = cutoff_start <= cutoff_end ? ++_i : --_i) {
           attributes = child_positions[position_i];
-          if (selected_x > attributes.left && selected_y > attributes.top) {
-            y_dist = selected_x - attributes.left;
-            x_dist = selected_y - attributes.top;
-            distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist));
-            if (distance < shortest_distance) {
-              shortest_distance = distance;
-              target_position = position_i;
-            }
+          y_dist = selected_x - attributes.left;
+          x_dist = selected_y - attributes.top;
+          distance = Math.abs(Math.sqrt((x_dist * x_dist) + (y_dist * y_dist)));
+          if (distance < shortest_distance) {
+            shortest_distance = distance;
+            target_position = position_i;
           }
         }
         if (target_position === parsed_children.length) {
@@ -423,7 +426,8 @@
         }
         this.arrange(true);
         if ($start_container[0] !== $selected.parent()[0]) {
-          return $(".ss-previous-container").trigger("ss-rearrange");
+          previous_container_class = options.previousContainerClass;
+          return $("." + previous_container_class).trigger("ss-rearrange");
         }
       };
 
@@ -438,14 +442,14 @@
             resizing = true;
             setTimeout((function() {
               return _this.render();
-            }), animation_speed / 2);
+            }), animation_speed / 3);
             setTimeout((function() {
               return _this.render();
-            }), animation_speed);
+            }), animation_speed / 3);
             return setTimeout(function() {
               resizing = false;
               return _this.render();
-            }, animation_speed * 1.5);
+            }, animation_speed / 3);
           }
         });
       };

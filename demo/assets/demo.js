@@ -33,9 +33,6 @@
         var $child, $children, background, height, i, width, _i, _results;
         $children = $(this).children().not(".credits");
         child_count = $children.length;
-        if (child_count > 50) {
-          type = "index";
-        }
         if (type === "index") {
           return $(this).find(".position").show();
         } else {

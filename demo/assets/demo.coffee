@@ -32,9 +32,6 @@ $ ->
       $children = $(this).children().not(".credits")
       child_count = $children.length
 
-      if child_count > 50
-        type = "index"
-
       if type is "index"
         $(@).find(".position").show()
       else

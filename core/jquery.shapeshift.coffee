@@ -9,6 +9,7 @@
   defaults =
     # Features
     enableDrag: true
+    enableCrossDrop: true
     enableResize: true
 
     # Grid Properties
@@ -21,20 +22,28 @@
     minHeight: 100
     gutterX: 10
     gutterY: 10
-    paddingX: 0
+    paddingX: 10
     paddingY: 10
 
     # Animation
     animated: true
-    animateOnInit: false
-    animationSpeed: 150
-    animationThreshold: 200
+    animateOnInit: true
+    animationSpeed: 225
+    animationThreshold: 100
 
     # Drag/Drop Options
     dragRate: 120
+    dragWhitelist: "*"
+    crossDropWhitelist: "*"
+    cutoffStart: null
+    cutoffEnd: null
+
+    # Customize CSS
     activeClass: "ss-active-child"
     draggedClass: "ss-dragged-child"
     placeholderClass: "ss-placeholder-child"
+    currentContainerClass: "ss-current-container"
+    previousContainerClass: "ss-previous-container"
 
     # Other Options
     selector: ""
@@ -107,7 +116,7 @@
     # ----------------------------
     enableFeatures: ->
       @enableResize() if @options.enableResize
-      @enableDragNDrop() if @options.enableDrag
+      @enableDragNDrop() if @options.enableDrag or @options.enableCrossDrop
 
     # ----------------------------
     # setActiveChildren:
@@ -407,104 +416,109 @@
       active_class = options.activeClass
       dragged_class = options.draggedClass
       placeholder_class = options.placeholderClass
+      current_container_class = options.currentContainerClass
+      previous_container_class = options.previousContainerClass
       drag_rate = options.dragRate
 
       $selected = $placeholder = selected_offset_y = selected_offset_x = null
       dragging = false
 
-      $container.children("." + active_class).draggable
-        addClasses: false
-        containment: 'document'
-        zIndex: 9999
+      if options.enableDrag
+        $container.children("." + active_class).filter(options.dragWhitelist).draggable
+          addClasses: false
+          containment: 'document'
+          zIndex: 9999
 
-        start: (e, ui) -> start(e, ui)
-        drag: (e, ui) -> drag(e, ui)
-        stop: -> stop()
+          start: (e, ui) ->
+            # Set $selected globals
+            $selected = $(e.target)
+            $selected.addClass(dragged_class)
 
-      start = (e, ui) ->
-        # Set $selected globals
-        $selected = $(e.target)
-        $selected.addClass(dragged_class)
+            # Create Placeholder
+            selected_tag = $selected.prop("tagName")
+            $placeholder = $("<#{selected_tag} class='#{placeholder_class}' style='height: #{$selected.height()}; width: #{$selected.width()}'></#{selected_tag}>")
+            
+            # Set current container
+            $selected.parent().addClass(current_container_class)
 
-        # Create Placeholder
-        selected_tag = $selected.prop("tagName")
-        $placeholder = $("<#{selected_tag} class='#{placeholder_class}' style='height: #{$selected.height()}; width: #{$selected.width()}'></#{selected_tag}>")
+            # For manually centering the element with respect to mouse position
+            selected_offset_y = $selected.outerHeight() / 2
+            selected_offset_x = $selected.outerWidth() / 2
+
+          drag: (e, ui) =>
+            if !dragging
+              # Append placeholder to container
+              $placeholder.remove().appendTo("." + current_container_class)
+
+              # Set drag target and rearrange everything
+              $("." + current_container_class).trigger("ss-setTargetPosition")
+
+              # Disallow dragging from occurring too much
+              dragging = true
+              window.setTimeout ( ->
+                dragging = false
+              ), drag_rate
+
+            # Manually center the element with respect to mouse position
+            ui.position.left = e.pageX - $selected.parent().offset().left - selected_offset_x;
+            ui.position.top = e.pageY - $selected.parent().offset().top - selected_offset_y;
+
+          stop: ->
+            # Clear globals
+            $selected.removeClass(dragged_class)
+            $placeholder.remove()
+            $selected = $placeholder = null
+
+            # Arrange dragged item into place
+            $("." + current_container_class).trigger("ss-arrange").removeClass(current_container_class)
+            $("." + previous_container_class).trigger("ss-arrange").removeClass(previous_container_class)
+
         
-        # Set current container
-        $selected.parent().addClass("ss-current-container")
 
-        # For manually centering the element with respect to mouse position
-        selected_offset_y = $selected.outerHeight() / 2
-        selected_offset_x = $selected.outerWidth() / 2
+      if options.enableCrossDrop
+        $container.droppable
+          accept: options.crossDropWhitelist
+          tolerance: 'intersect'
+          over: (e) =>
+            $("." + previous_container_class).removeClass(previous_container_class)
+            $("." + current_container_class).removeClass(current_container_class).addClass(previous_container_class)
+            $(e.target).addClass(current_container_class)
 
-      drag = (e, ui) =>
-        if !dragging
-          # Append placeholder to container
-          $placeholder.remove().appendTo(".ss-current-container")
-
-          # Set drag target and rearrange everything
-          $(".ss-current-container").trigger("ss-setTargetPosition")
-
-          # Disallow dragging from occurring too much
-          dragging = true
-          window.setTimeout ( ->
-            dragging = false
-          ), drag_rate
-
-        # Manually center the element with respect to mouse position
-        ui.position.left = e.pageX - $selected.parent().offset().left - selected_offset_x;
-        ui.position.top = e.pageY - $selected.parent().offset().top - selected_offset_y;
-
-      stop = ->
-        # Clear globals
-        $selected.removeClass(dragged_class)
-        $placeholder.remove()
-        $selected = $placeholder = null
-
-        # Arrange dragged item into place
-        $(".ss-current-container").trigger("ss-arrange").removeClass("ss-current-container")
-        $(".ss-previous-container").trigger("ss-arrange").removeClass("ss-previous-container")
-
-
-      $container.droppable
-        tolerance: 'intersect'
-        over: (e) -> over(e)
-
-      over = (e) =>
-        $(".ss-previous-container").removeClass("ss-previous-container")
-        $(".ss-current-container").removeClass("ss-current-container").addClass("ss-previous-container")
-        $(e.target).addClass("ss-current-container")
-
+        
     # ----------------------------
     # getTargetPosition:
     # Determine the target position for the selected
     # element and arrange it into place
     # ----------------------------
     setTargetPosition: ->
-      dragged_class = @options.draggedClass
-      $selected = $("." + dragged_class)
-      selected_x = $selected.position().left + $selected.width() / 2
-      selected_y = $selected.position().top + $selected.height() / 2
-      shortest_distance = 9999999
+      options = @options
+      dragged_class = options.draggedClass
 
+      $selected = $("." + dragged_class)
       $start_container = $selected.parent()
       parsed_children = @parsedChildren
       child_positions = @getPositions()
       total_positions = child_positions.length
+
+      selected_x = $selected.offset().left - $start_container.offset().left + ($selected.width() / 2)
+      selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 2)
+      shortest_distance = 9999999
       target_position = 0
 
-      for position_i in [0...total_positions]
+      cutoff_start = options.cutoffStart || 0
+      cutoff_end = options.cutoffEnd || total_positions
+
+      for position_i in [cutoff_start...cutoff_end]
         attributes = child_positions[position_i]
 
-        if selected_x > attributes.left and selected_y > attributes.top
-          y_dist = selected_x - attributes.left
-          x_dist = selected_y - attributes.top
+        y_dist = selected_x - attributes.left
+        x_dist = selected_y - attributes.top
 
-          distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist))
+        distance = Math.abs(Math.sqrt((x_dist * x_dist) + (y_dist * y_dist)))
 
-          if distance < shortest_distance
-            shortest_distance = distance
-            target_position = position_i
+        if distance < shortest_distance
+          shortest_distance = distance
+          target_position = position_i
 
       if target_position is parsed_children.length
         $target = parsed_children[target_position - 1].el
@@ -516,7 +530,8 @@
       @arrange(true)
 
       if $start_container[0] isnt $selected.parent()[0]
-        $(".ss-previous-container").trigger "ss-rearrange"
+        previous_container_class = options.previousContainerClass
+        $("." + previous_container_class).trigger "ss-rearrange"
 
     # ----------------------------
     # resize:
@@ -534,13 +549,13 @@
           resizing = true
 
           # Some funkyness to prevent too many renderings
-          setTimeout (=> @render()), animation_speed / 2
-          setTimeout (=> @render()), animation_speed
+          setTimeout (=> @render()), animation_speed / 3
+          setTimeout (=> @render()), animation_speed / 3
 
           setTimeout =>
             resizing = false
             @render()
-          , animation_speed * 1.5
+          , animation_speed / 3
 
 
     # ----------------------------
