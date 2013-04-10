@@ -23,14 +23,18 @@
       animateOnInit: true,
       animationSpeed: 225,
       animationThreshold: 100,
-      dragRate: 120,
+      dragClone: true,
+      deleteClone: false,
+      dragRate: 100,
       dragWhitelist: "*",
       crossDropWhitelist: "*",
       cutoffStart: null,
       cutoffEnd: null,
+      cloneClass: "ss-cloned-child",
       activeClass: "ss-active-child",
       draggedClass: "ss-dragged-child",
       placeholderClass: "ss-placeholder-child",
+      originalContainerClass: "ss-original-container",
       currentContainerClass: "ss-current-container",
       previousContainerClass: "ss-previous-container",
       selector: ""
@@ -331,17 +335,21 @@
       };
 
       Plugin.prototype.enableDragNDrop = function() {
-        var $container, $placeholder, $selected, active_class, current_container_class, drag_rate, dragged_class, dragging, options, placeholder_class, previous_container_class, selected_offset_x, selected_offset_y,
+        var $clone, $container, $placeholder, $selected, active_class, clone_class, current_container_class, delete_clone, drag_clone, drag_rate, dragged_class, dragging, options, original_container_class, placeholder_class, previous_container_class, selected_offset_x, selected_offset_y,
           _this = this;
         options = this.options;
         $container = this.$container;
         active_class = options.activeClass;
         dragged_class = options.draggedClass;
         placeholder_class = options.placeholderClass;
+        original_container_class = options.originalContainerClass;
         current_container_class = options.currentContainerClass;
         previous_container_class = options.previousContainerClass;
+        delete_clone = options.deleteClone;
         drag_rate = options.dragRate;
-        $selected = $placeholder = selected_offset_y = selected_offset_x = null;
+        drag_clone = options.dragClone;
+        clone_class = options.cloneClass;
+        $selected = $placeholder = $clone = selected_offset_y = selected_offset_x = null;
         dragging = false;
         if (options.enableDrag) {
           $container.children("." + active_class).filter(options.dragWhitelist).draggable({
@@ -351,10 +359,13 @@
             start: function(e, ui) {
               var selected_tag;
               $selected = $(e.target);
+              if (drag_clone) {
+                $clone = $selected.clone(true).insertBefore($selected).addClass(clone_class);
+              }
               $selected.addClass(dragged_class);
               selected_tag = $selected.prop("tagName");
               $placeholder = $("<" + selected_tag + " class='" + placeholder_class + "' style='height: " + ($selected.height()) + "; width: " + ($selected.width()) + "'></" + selected_tag + ">");
-              $selected.parent().addClass(current_container_class);
+              $selected.parent().addClass(original_container_class).addClass(current_container_class);
               selected_offset_y = $selected.outerHeight() / 2;
               return selected_offset_x = $selected.outerWidth() / 2;
             },
@@ -373,7 +384,16 @@
             stop: function() {
               $selected.removeClass(dragged_class);
               $placeholder.remove();
+              if (drag_clone) {
+                if (delete_clone && $("." + current_container_class)[0] === $("." + original_container_class)[0]) {
+                  $clone.remove();
+                  $("." + current_container_class).trigger("ss-rearrange");
+                } else {
+                  $clone.removeClass(clone_class);
+                }
+              }
               $selected = $placeholder = null;
+              $("." + original_container_class).trigger("ss-arrange").removeClass(original_container_class);
               $("." + current_container_class).trigger("ss-arrange").removeClass(current_container_class);
               return $("." + previous_container_class).trigger("ss-arrange").removeClass(previous_container_class);
             }

@@ -55,7 +55,8 @@ $ ->
   # Initial Shapeshift
   # -------------
 
-  filter_options = {}
+  filter_options =
+    minColumns: 3
 
   $containers.shapeshift(filter_options)
 

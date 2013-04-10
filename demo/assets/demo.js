@@ -58,7 +58,9 @@
         }
       });
     })("fpoimg");
-    filter_options = {};
+    filter_options = {
+      minColumns: 3
+    };
     $containers.shapeshift(filter_options);
     $(".options ul.animation li").on("click", function() {
       switch ($(this).data("option")) {

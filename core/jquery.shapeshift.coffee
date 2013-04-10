@@ -32,16 +32,20 @@
     animationThreshold: 100
 
     # Drag/Drop Options
-    dragRate: 120
+    dragClone: true
+    deleteClone: false
+    dragRate: 100
     dragWhitelist: "*"
     crossDropWhitelist: "*"
     cutoffStart: null
     cutoffEnd: null
 
     # Customize CSS
+    cloneClass: "ss-cloned-child"
     activeClass: "ss-active-child"
     draggedClass: "ss-dragged-child"
     placeholderClass: "ss-placeholder-child"
+    originalContainerClass: "ss-original-container"
     currentContainerClass: "ss-current-container"
     previousContainerClass: "ss-previous-container"
 
@@ -416,11 +420,15 @@
       active_class = options.activeClass
       dragged_class = options.draggedClass
       placeholder_class = options.placeholderClass
+      original_container_class = options.originalContainerClass
       current_container_class = options.currentContainerClass
       previous_container_class = options.previousContainerClass
+      delete_clone = options.deleteClone
       drag_rate = options.dragRate
+      drag_clone = options.dragClone
+      clone_class = options.cloneClass
 
-      $selected = $placeholder = selected_offset_y = selected_offset_x = null
+      $selected = $placeholder = $clone = selected_offset_y = selected_offset_x = null
       dragging = false
 
       if options.enableDrag
@@ -432,6 +440,10 @@
           start: (e, ui) ->
             # Set $selected globals
             $selected = $(e.target)
+
+            if drag_clone
+              $clone = $selected.clone(true).insertBefore($selected).addClass(clone_class)
+
             $selected.addClass(dragged_class)
 
             # Create Placeholder
@@ -439,7 +451,7 @@
             $placeholder = $("<#{selected_tag} class='#{placeholder_class}' style='height: #{$selected.height()}; width: #{$selected.width()}'></#{selected_tag}>")
             
             # Set current container
-            $selected.parent().addClass(current_container_class)
+            $selected.parent().addClass(original_container_class).addClass(current_container_class)
 
             # For manually centering the element with respect to mouse position
             selected_offset_y = $selected.outerHeight() / 2
@@ -467,9 +479,18 @@
             # Clear globals
             $selected.removeClass(dragged_class)
             $placeholder.remove()
+
+            if drag_clone
+              if delete_clone and $("." + current_container_class)[0] is $("." + original_container_class)[0]
+                $clone.remove()
+                $("." + current_container_class).trigger("ss-rearrange")
+              else
+                $clone.removeClass(clone_class)
+
             $selected = $placeholder = null
 
             # Arrange dragged item into place
+            $("." + original_container_class).trigger("ss-arrange").removeClass(original_container_class)
             $("." + current_container_class).trigger("ss-arrange").removeClass(current_container_class)
             $("." + previous_container_class).trigger("ss-arrange").removeClass(previous_container_class)
 
