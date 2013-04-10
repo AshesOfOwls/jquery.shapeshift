@@ -6,27 +6,26 @@
     pluginName = "shapeshift";
     defaults = {
       enableDrag: true,
-      enableDrop: true,
       enableResize: true,
-      animated: true,
-      animateOnInit: false,
-      animationSpeed: 120,
-      animationThreshold: 150,
       align: "center",
       autoHeight: true,
       columns: null,
       minColumns: 1,
-      height: 200,
+      height: 100,
       maxHeight: null,
       minHeight: 100,
       gutterX: 10,
       gutterY: 10,
-      paddingX: 10,
+      paddingX: 0,
       paddingY: 10,
+      animated: true,
+      animateOnInit: false,
+      animationSpeed: 150,
+      animationThreshold: 200,
       dragRate: 120,
-      draggedClass: "ss-dragging",
-      placeholderClass: "ss-placeholder",
-      fillerThreshold: 5,
+      activeClass: "ss-active-child",
+      draggedClass: "ss-dragged-child",
+      placeholderClass: "ss-placeholder-child",
       selector: ""
     };
     Plugin = (function() {
@@ -36,34 +35,18 @@
         this.options = $.extend({}, defaults, options);
         this.globals = {};
         this.$container = $(element);
-        this.errorDetection();
         this.init();
       }
 
-      Plugin.prototype.errorDetection = function() {
-        var message, options;
-        options = this.options;
-        message = "Shapeshift ERROR: ";
-        if (options.animated && !jQuery.ui) {
-          console.error(message + "You are trying to enable animation however jQuery UI has not loaded yet.");
-        }
-        if (!options.autoHeight && !options.height) {
-          return console.error(message + "You must specify a height if autoHeight is turned off.");
-        }
-      };
-
       Plugin.prototype.init = function() {
-        this.setIdentifier();
         this.createEvents();
-        this.enableFeatures();
         this.setGlobals();
-        this.render(true);
+        this.setIdentifier();
+        this.setActiveChildren();
+        this.enableFeatures();
+        this.gridInit();
+        this.render();
         return this.afterInit();
-      };
-
-      Plugin.prototype.setIdentifier = function() {
-        this.identifier = "shapeshifted_container_" + Math.random().toString(36).substring(7);
-        return this.$container.addClass(this.identifier);
       };
 
       Plugin.prototype.createEvents = function() {
@@ -72,39 +55,74 @@
         options = this.options;
         $container = this.$container;
         $container.off("ss-arrange").on("ss-arrange", function() {
+          return _this.render();
+        });
+        $container.off("ss-rearrange").on("ss-rearrange", function() {
           return _this.render(true);
         });
-        $container.off("ss-destroy").on("ss-destroy", function() {
-          return _this.destroy();
+        return $container.off("ss-setTargetPosition").on("ss-setTargetPosition", function() {
+          return _this.setTargetPosition();
         });
-        return $container.off("ss-destroyAll").on("ss-destroyAll", function() {
-          return _this.destroy(true);
-        });
-      };
-
-      Plugin.prototype.enableFeatures = function() {
-        if (this.options.enableResize) {
-          this.enableResize();
-        }
-        if (this.options.enableDrag || this.options.enableDrop) {
-          return this.enableDragNDrop();
-        }
       };
 
       Plugin.prototype.setGlobals = function() {
         return this.globals.animated = this.options.animateOnInit;
       };
 
-      Plugin.prototype.parseChildren = function() {
-        var $child, $children, child, i, parsedChildren, _i, _ref;
-        $children = this.$container.children(this.options.selector).not("." + this.options.placeholderClass).filter(":visible");
+      Plugin.prototype.afterInit = function() {
+        return this.globals.animated = this.options.animated;
+      };
+
+      Plugin.prototype.setIdentifier = function() {
+        this.identifier = "shapeshifted_container_" + Math.random().toString(36).substring(7);
+        return this.$container.addClass(this.identifier);
+      };
+
+      Plugin.prototype.enableFeatures = function() {
+        if (this.options.enableResize) {
+          this.enableResize();
+        }
+        if (this.options.enableDrag) {
+          return this.enableDragNDrop();
+        }
+      };
+
+      Plugin.prototype.setActiveChildren = function() {
+        var $children, active_child_class, colspan, columns, i, min_columns, options, total, _i, _j, _results;
+        options = this.options;
+        $children = this.$container.children(options.selector);
+        active_child_class = options.activeClass;
+        total = $children.length;
+        for (i = _i = 0; 0 <= total ? _i < total : _i > total; i = 0 <= total ? ++_i : --_i) {
+          $($children[i]).addClass(active_child_class);
+        }
+        this.setParsedChildren();
+        columns = options.columns;
+        _results = [];
+        for (i = _j = 0; 0 <= total ? _j < total : _j > total; i = 0 <= total ? ++_j : --_j) {
+          colspan = this.parsedChildren[i].colspan;
+          min_columns = options.minColumns;
+          if (colspan > columns && colspan > min_columns) {
+            options.minColumns = colspan;
+            _results.push(console.error("Shapeshift ERROR: There are child elements that have a larger colspan than the minimum columns set through options.\noptions.minColumns has been set to " + colspan));
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      };
+
+      Plugin.prototype.setParsedChildren = function() {
+        var $child, $children, child, i, parsedChildren, total, _i;
+        $children = this.$container.find("." + this.options.activeClass);
+        total = $children.length;
         parsedChildren = [];
-        for (i = _i = 0, _ref = $children.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-          $child = $children.eq(i);
+        for (i = _i = 0; 0 <= total ? _i < total : _i > total; i = 0 <= total ? ++_i : --_i) {
+          $child = $($children[i]);
           child = {
             i: i,
             el: $child,
-            colspan: $child.data("ss-colspan"),
+            colspan: parseInt($child.attr("data-ss-colspan")),
             height: $child.outerHeight()
           };
           parsedChildren.push(child);
@@ -112,153 +130,159 @@
         return this.parsedChildren = parsedChildren;
       };
 
-      Plugin.prototype.afterInit = function() {
-        return this.globals.animated = this.options.animated;
-      };
-
-      Plugin.prototype.render = function(full_render) {
-        if (full_render) {
-          this.parseChildren();
-        }
-        this.setGrid();
-        return this.arrange();
-      };
-
-      Plugin.prototype.setGrid = function() {
-        var children_count, col_width, columns, fc_colspan, fc_width, first_child, grid_width, gutterX, inner_width, minColumns, paddingX, single_width;
-        gutterX = this.options.gutterX;
-        paddingX = this.options.paddingX;
-        inner_width = this.$container.width() - (paddingX * 2);
+      Plugin.prototype.gridInit = function() {
+        var fc_colspan, fc_width, first_child, gutter_x, single_width;
+        gutter_x = this.options.gutterX;
         first_child = this.parsedChildren[0];
         fc_width = first_child.el.outerWidth();
         fc_colspan = first_child.colspan;
-        single_width = (fc_width - ((fc_colspan - 1) * gutterX)) / fc_colspan;
-        this.globals.col_width = col_width = single_width + gutterX;
-        minColumns = this.options.minColumns;
-        columns = this.options.columns || Math.floor((inner_width + gutterX) / col_width);
+        single_width = (fc_width - ((fc_colspan - 1) * gutter_x)) / fc_colspan;
+        return this.globals.col_width = single_width + gutter_x;
+      };
+
+      Plugin.prototype.render = function(reparse) {
+        if (reparse == null) {
+          reparse = false;
+        }
+        this.setGridColumns();
+        return this.arrange(reparse);
+      };
+
+      Plugin.prototype.setGridColumns = function() {
+        var children_count, col_width, columns, globals, grid_width, gutter_x, inner_width, minColumns, options, padding_x;
+        globals = this.globals;
+        options = this.options;
+        col_width = globals.col_width;
+        gutter_x = options.gutterX;
+        padding_x = options.paddingX;
+        inner_width = this.$container.innerWidth() - (padding_x * 2);
+        minColumns = options.minColumns;
+        columns = options.columns || Math.floor((inner_width + gutter_x) / col_width);
         if (minColumns && minColumns > columns) {
           columns = minColumns;
         }
-        this.globals.columns = columns;
+        globals.columns = columns;
         children_count = this.parsedChildren.length;
         if (columns > children_count) {
           columns = children_count;
         }
-        this.globals.child_offset = paddingX;
-        switch (this.options.align) {
+        globals.child_offset = padding_x;
+        switch (options.align) {
           case "center":
-            grid_width = (columns * col_width) - gutterX;
-            return this.globals.child_offset += (inner_width - grid_width) / 2;
+            grid_width = (columns * col_width) - gutter_x;
+            return globals.child_offset += (inner_width - grid_width) / 2;
           case "right":
-            grid_width = (columns * col_width) - gutterX;
-            return this.globals.child_offset += inner_width - grid_width;
+            grid_width = (columns * col_width) - gutter_x;
+            return globals.child_offset += inner_width - grid_width;
         }
       };
 
-      Plugin.prototype.arrange = function() {
-        var $child, attributes, container_height, draggedClass, i, maxHeight, minHeight, positions, _i, _ref;
-        positions = this.getPositions();
-        draggedClass = this.options.draggedClass;
-        for (i = _i = 0, _ref = positions.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-          $child = this.parsedChildren[i].el;
-          attributes = positions[i];
-          if ($child.hasClass(draggedClass)) {
-            $child = $child.siblings(".ss-placeholder");
+      Plugin.prototype.arrange = function(reparse) {
+        var $child, $container, animated, animation_speed, attributes, child_positions, container_height, dragged_class, globals, i, is_dragged_child, max_height, min_height, options, parsed_children, placeholder_class, total_children, _i;
+        if (reparse) {
+          this.setParsedChildren();
+        }
+        globals = this.globals;
+        options = this.options;
+        $container = this.$container;
+        child_positions = this.getPositions();
+        parsed_children = this.parsedChildren;
+        total_children = parsed_children.length;
+        animated = globals.animated && total_children <= options.animationThreshold;
+        animation_speed = options.animationSpeed;
+        dragged_class = options.draggedClass;
+        for (i = _i = 0; 0 <= total_children ? _i < total_children : _i > total_children; i = 0 <= total_children ? ++_i : --_i) {
+          $child = parsed_children[i].el;
+          attributes = child_positions[i];
+          is_dragged_child = $child.hasClass(dragged_class);
+          if (is_dragged_child) {
+            placeholder_class = options.placeholderClass;
+            $child = $child.siblings("." + placeholder_class);
           }
-          if (this.globals.animated && this.parsedChildren.length <= this.options.animationThreshold) {
-            $child.stop(true, false).animate(attributes, this.options.animationSpeed);
+          if (animated && !is_dragged_child) {
+            $child.stop(true, false).animate(attributes, animation_speed);
           } else {
             $child.css(attributes);
           }
         }
-        if (this.options.autoHeight) {
-          container_height = this.globals.container_height;
-          maxHeight = this.options.maxHeight;
-          minHeight = this.options.minHeight;
-          if (minHeight && container_height < minHeight) {
-            container_height = minHeight;
-          } else if (maxHeight && container_height > maxHeight) {
-            container_height = maxHeight;
+        if (options.autoHeight) {
+          container_height = globals.container_height;
+          max_height = options.maxHeight;
+          min_height = options.minHeight;
+          if (min_height && container_height < min_height) {
+            container_height = min_height;
+          } else if (max_height && container_height > max_height) {
+            container_height = max_height;
           }
-          this.$container.height(container_height);
+          $container.height(container_height);
         } else {
-          this.$container.height(this.options.height);
+          $container.height(options.height);
         }
-        return this.$container.trigger("ss-arranged");
+        return $container.trigger("ss-arranged");
       };
 
-      Plugin.prototype.getPositions = function(include_dragged) {
-        var col_heights, current_i, determineMultiposition, determinePositions, dragged_class, grid_height, gutterY, i, paddingY, positions, recalculateSavedChildren, savePosition, savedChildren, _i, _ref,
+      Plugin.prototype.getPositions = function() {
+        var col_heights, determineMultiposition, determinePositions, globals, grid_height, gutter_y, i, options, padding_y, parsed_children, positions, recalculateSavedChildren, savePosition, saved_children, total_children, _i, _ref,
           _this = this;
-        if (include_dragged == null) {
-          include_dragged = true;
-        }
-        dragged_class = this.options.draggedClass;
-        gutterY = this.options.gutterY;
-        paddingY = this.options.paddingY;
+        globals = this.globals;
+        options = this.options;
+        gutter_y = options.gutterY;
+        padding_y = options.paddingY;
+        parsed_children = this.parsedChildren;
+        total_children = parsed_children.length;
         col_heights = [];
-        for (i = _i = 0, _ref = this.globals.columns; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-          col_heights.push(paddingY);
+        for (i = _i = 0, _ref = globals.columns; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+          col_heights.push(padding_y);
         }
-        positions = [];
-        savedChildren = [];
-        current_i = 0;
+        savePosition = function(child) {
+          var col, colspan, j, offset_x, offset_y, _j, _results;
+          col = child.col;
+          colspan = child.colspan;
+          offset_x = (child.col * globals.col_width) + globals.child_offset;
+          offset_y = col_heights[col];
+          positions[child.i] = {
+            left: offset_x,
+            top: offset_y
+          };
+          col_heights[col] += child.height + gutter_y;
+          if (colspan >= 1) {
+            _results = [];
+            for (j = _j = 1; 1 <= colspan ? _j < colspan : _j > colspan; j = 1 <= colspan ? ++_j : --_j) {
+              _results.push(col_heights[col + j] = col_heights[col]);
+            }
+            return _results;
+          }
+        };
         determineMultiposition = function(child) {
-          var chosen_col, col, difference, filler_child, filler_cutoff, filler_i, filler_threshold, height, highest, kosher, next_height, offset, possible_col_heights, possible_cols, span, total_children, _j, _k, _l, _m, _n, _ref1, _ref2, _ref3, _ref4, _ref5;
+          var chosen_col, col, colspan, height, kosher, next_height, offset, possible_col_heights, possible_cols, span, _j, _k;
           possible_cols = col_heights.length - child.colspan + 1;
           possible_col_heights = col_heights.slice(0).splice(0, possible_cols);
-          total_children = _this.parsedChildren.length;
-          filler_threshold = _this.options.fillerThreshold;
-          filler_cutoff = child.i + filler_threshold;
-          if (filler_cutoff > total_children) {
-            filler_cutoff = total_children;
-          }
           chosen_col = void 0;
-          if (current_i <= filler_cutoff) {
-            for (offset = _j = 0, _ref1 = possible_cols - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; offset = 0 <= _ref1 ? ++_j : --_j) {
-              col = _this.lowestCol(possible_col_heights, offset);
-              height = col_heights[col];
-              kosher = true;
-              for (span = _k = 1, _ref2 = child.colspan; 1 <= _ref2 ? _k < _ref2 : _k > _ref2; span = 1 <= _ref2 ? ++_k : --_k) {
-                next_height = col_heights[col + span];
-                if (height < next_height) {
-                  kosher = false;
-                  break;
-                }
-                difference = height - next_height;
-                for (filler_i = _l = _ref3 = current_i + 1; _ref3 <= filler_cutoff ? _l < filler_cutoff : _l > filler_cutoff; filler_i = _ref3 <= filler_cutoff ? ++_l : --_l) {
-                  filler_child = _this.parsedChildren[filler_i];
-                  if (difference >= filler_child.height) {
-                    kosher = false;
-                    break;
-                  }
-                }
-              }
-              if (kosher) {
-                chosen_col = col;
+          for (offset = _j = 0; 0 <= possible_cols ? _j < possible_cols : _j > possible_cols; offset = 0 <= possible_cols ? ++_j : --_j) {
+            col = _this.lowestCol(possible_col_heights, offset);
+            colspan = child.colspan;
+            height = col_heights[col];
+            kosher = true;
+            for (span = _k = 1; 1 <= colspan ? _k < colspan : _k > colspan; span = 1 <= colspan ? ++_k : --_k) {
+              next_height = col_heights[col + span];
+              if (height < next_height) {
+                kosher = false;
                 break;
               }
             }
-          } else {
-            chosen_col = _this.lowestCol(possible_col_heights);
-            highest = 0;
-            for (span = _m = 1, _ref4 = child.colspan; 1 <= _ref4 ? _m < _ref4 : _m > _ref4; span = 1 <= _ref4 ? ++_m : --_m) {
-              next_height = col_heights[chosen_col + span];
-              if (next_height > highest) {
-                highest = next_height;
-              }
-            }
-            for (span = _n = 0, _ref5 = child.colspan; 0 <= _ref5 ? _n < _ref5 : _n > _ref5; span = 0 <= _ref5 ? ++_n : --_n) {
-              col_heights[chosen_col + span] = highest;
+            if (kosher) {
+              chosen_col = col;
+              break;
             }
           }
           return chosen_col;
         };
+        saved_children = [];
         recalculateSavedChildren = function() {
           var index, pop_i, saved_child, saved_i, to_pop, _j, _k, _ref1, _ref2, _results;
           to_pop = [];
-          for (saved_i = _j = 0, _ref1 = savedChildren.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; saved_i = 0 <= _ref1 ? ++_j : --_j) {
-            saved_child = savedChildren[saved_i];
+          for (saved_i = _j = 0, _ref1 = saved_children.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; saved_i = 0 <= _ref1 ? ++_j : --_j) {
+            saved_child = saved_children[saved_i];
             saved_child.col = determineMultiposition(saved_child);
             if (saved_child.col >= 0) {
               savePosition(saved_child);
@@ -268,104 +292,49 @@
           _results = [];
           for (pop_i = _k = _ref2 = to_pop.length - 1; _k >= 0; pop_i = _k += -1) {
             index = to_pop[pop_i];
-            _results.push(savedChildren.splice(index, 1));
+            _results.push(saved_children.splice(index, 1));
           }
           return _results;
         };
-        savePosition = function(child) {
-          var col, j, offsetX, offsetY, _j, _ref1, _results;
-          col = child.col;
-          offsetX = (child.col * _this.globals.col_width) + _this.globals.child_offset;
-          offsetY = col_heights[col];
-          positions[child.i] = {
-            left: offsetX,
-            top: offsetY
-          };
-          col_heights[col] += child.height + gutterY;
-          if (child.colspan >= 1) {
-            _results = [];
-            for (j = _j = 1, _ref1 = child.colspan; 1 <= _ref1 ? _j < _ref1 : _j > _ref1; j = 1 <= _ref1 ? ++_j : --_j) {
-              _results.push(col_heights[col + j] = col_heights[col]);
-            }
-            return _results;
-          }
-        };
+        positions = [];
         (determinePositions = function() {
-          var child, _j, _ref1, _results;
+          var child, _j, _results;
           _results = [];
-          for (i = _j = 0, _ref1 = _this.parsedChildren.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
-            child = _this.parsedChildren[i];
-            if (!(!include_dragged && child.el.hasClass(dragged_class))) {
-              if (child.colspan > 1) {
-                child.col = determineMultiposition(child);
-              } else {
-                child.col = _this.lowestCol(col_heights);
-              }
-              if (child.col === void 0) {
-                savedChildren.push(child);
-              } else {
-                savePosition(child);
-              }
-              recalculateSavedChildren();
-              _results.push(current_i++);
+          for (i = _j = 0; 0 <= total_children ? _j < total_children : _j > total_children; i = 0 <= total_children ? ++_j : --_j) {
+            child = parsed_children[i];
+            if (child.colspan > 1) {
+              child.col = determineMultiposition(child);
             } else {
-              _results.push(void 0);
+              child.col = _this.lowestCol(col_heights);
             }
+            if (child.col === void 0) {
+              saved_children.push(child);
+            } else {
+              savePosition(child);
+            }
+            _results.push(recalculateSavedChildren());
           }
           return _results;
         })();
-        if (this.options.autoHeight) {
-          grid_height = col_heights[this.highestCol(col_heights)] - gutterY;
-          this.globals.container_height = grid_height + paddingY;
+        if (options.autoHeight) {
+          grid_height = col_heights[this.highestCol(col_heights)] - gutter_y;
+          globals.container_height = grid_height + padding_y;
         }
         return positions;
       };
 
-      Plugin.prototype.getDragTargetPosition = function() {
-        var $child, $selected, attributes, chosen_index, distance, dragged_class, i, positions, selected_x, selected_y, shortest_distance, x_dist, y_dist, _i, _ref;
-        dragged_class = this.options.draggedClass;
-        $selected = $("." + dragged_class);
-        selected_x = $selected.position().left + ($selected.outerWidth() / 2);
-        selected_y = $selected.position().top + ($selected.outerHeight() / 2);
-        positions = this.getPositions(false);
-        shortest_distance = 999999;
-        chosen_index = 0;
-        for (i = _i = 0, _ref = positions.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-          attributes = positions[i];
-          if (attributes) {
-            if (selected_x > attributes.left && selected_y > attributes.top) {
-              x_dist = selected_x - attributes.left;
-              y_dist = selected_y - attributes.top;
-              distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist));
-              if (distance < shortest_distance) {
-                shortest_distance = distance;
-                chosen_index = i;
-              }
-              if (i === positions.length - 1) {
-                $child = this.parsedChildren[i].el;
-                if (y_dist > $child.outerHeight() * .75 || x_dist > $child.outerWidth() * .75 || x_dist < 0) {
-                  chosen_index++;
-                }
-              }
-            }
-          }
-        }
-        return chosen_index;
-      };
-
       Plugin.prototype.enableDragNDrop = function() {
-        var $curContainer, $placeholder, $selected, drag, dragRate, dragged_class, dragging, placeholder_class, selectedOffsetX, selectedOffsetY, start, stop,
+        var $container, $placeholder, $selected, active_class, drag, drag_rate, dragged_class, dragging, options, over, placeholder_class, selected_offset_x, selected_offset_y, start, stop,
           _this = this;
-        dragRate = this.options.dragRate;
-        dragged_class = this.options.draggedClass;
-        placeholder_class = this.options.placeholderClass;
-        $selected = null;
-        $placeholder = null;
-        $curContainer = null;
-        selectedOffsetY = null;
-        selectedOffsetX = null;
+        options = this.options;
+        $container = this.$container;
+        active_class = options.activeClass;
+        dragged_class = options.draggedClass;
+        placeholder_class = options.placeholderClass;
+        drag_rate = options.dragRate;
+        $selected = $placeholder = selected_offset_y = selected_offset_x = null;
         dragging = false;
-        this.$container.children().draggable({
+        $container.children("." + active_class).draggable({
           addClasses: false,
           containment: 'document',
           zIndex: 9999,
@@ -383,39 +352,79 @@
           var selected_tag;
           $selected = $(e.target);
           $selected.addClass(dragged_class);
-          $curContainer = $selected.parent();
           selected_tag = $selected.prop("tagName");
           $placeholder = $("<" + selected_tag + " class='" + placeholder_class + "' style='height: " + ($selected.height()) + "; width: " + ($selected.width()) + "'></" + selected_tag + ">");
-          $curContainer.prepend($placeholder);
-          selectedOffsetY = $selected.outerHeight() / 2;
-          return selectedOffsetX = $selected.outerWidth() / 2;
+          $selected.parent().addClass("ss-current-container");
+          selected_offset_y = $selected.outerHeight() / 2;
+          return selected_offset_x = $selected.outerWidth() / 2;
         };
         drag = function(e, ui) {
-          var $target, target_position;
           if (!dragging) {
-            target_position = _this.getDragTargetPosition();
-            if (target_position === _this.parsedChildren.length) {
-              $target = _this.parsedChildren[target_position - 1].el;
-              $selected.insertAfter($target);
-            } else {
-              $target = _this.parsedChildren[target_position].el;
-              $selected.insertBefore($target);
-            }
-            $curContainer.trigger("ss-arrange");
+            $placeholder.remove().appendTo(".ss-current-container");
+            $(".ss-current-container").trigger("ss-setTargetPosition");
             dragging = true;
             window.setTimeout((function() {
               return dragging = false;
-            }), dragRate);
+            }), drag_rate);
           }
-          ui.position.left = e.pageX - $selected.parent().offset().left - selectedOffsetX;
-          return ui.position.top = e.pageY - $selected.parent().offset().top - selectedOffsetY;
+          ui.position.left = e.pageX - $selected.parent().offset().left - selected_offset_x;
+          return ui.position.top = e.pageY - $selected.parent().offset().top - selected_offset_y;
         };
-        return stop = function() {
+        stop = function() {
           $selected.removeClass(dragged_class);
           $placeholder.remove();
           $selected = $placeholder = null;
-          return $curContainer.trigger("ss-arrange");
+          $(".ss-current-container").trigger("ss-arrange").removeClass("ss-current-container");
+          return $(".ss-previous-container").trigger("ss-arrange").removeClass("ss-previous-container");
         };
+        $container.droppable({
+          tolerance: 'intersect',
+          over: function(e) {
+            return over(e);
+          }
+        });
+        return over = function(e) {
+          $(".ss-previous-container").removeClass("ss-previous-container");
+          $(".ss-current-container").removeClass("ss-current-container").addClass("ss-previous-container");
+          return $(e.target).addClass("ss-current-container");
+        };
+      };
+
+      Plugin.prototype.setTargetPosition = function() {
+        var $selected, $start_container, $target, attributes, child_positions, distance, dragged_class, parsed_children, position_i, selected_x, selected_y, shortest_distance, target_position, total_positions, x_dist, y_dist, _i;
+        dragged_class = this.options.draggedClass;
+        $selected = $("." + dragged_class);
+        selected_x = $selected.position().left + $selected.width() / 2;
+        selected_y = $selected.position().top + $selected.height() / 2;
+        shortest_distance = 9999999;
+        $start_container = $selected.parent();
+        parsed_children = this.parsedChildren;
+        child_positions = this.getPositions();
+        total_positions = child_positions.length;
+        target_position = 0;
+        for (position_i = _i = 0; 0 <= total_positions ? _i < total_positions : _i > total_positions; position_i = 0 <= total_positions ? ++_i : --_i) {
+          attributes = child_positions[position_i];
+          if (selected_x > attributes.left && selected_y > attributes.top) {
+            y_dist = selected_x - attributes.left;
+            x_dist = selected_y - attributes.top;
+            distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist));
+            if (distance < shortest_distance) {
+              shortest_distance = distance;
+              target_position = position_i;
+            }
+          }
+        }
+        if (target_position === parsed_children.length) {
+          $target = parsed_children[target_position - 1].el;
+          $selected.insertAfter($target);
+        } else {
+          $target = parsed_children[target_position].el;
+          $selected.insertBefore($target);
+        }
+        this.arrange(true);
+        if ($start_container[0] !== $selected.parent()[0]) {
+          return $(".ss-previous-container").trigger("ss-rearrange");
+        }
       };
 
       Plugin.prototype.enableResize = function() {
@@ -462,26 +471,6 @@
 
       Plugin.prototype.highestCol = function(array) {
         return $.inArray(Math.max.apply(window, array), array);
-      };
-
-      Plugin.prototype.destroy = function(revertChildren) {
-        var bound_indentifier, old_class, _ref;
-        this.$container.off("ss-arrange");
-        this.$container.off("ss-destroy");
-        this.$container.off("ss-destroyAll");
-        if (revertChildren) {
-          this.$container.children().each(function() {
-            return $(this).css({
-              left: 0,
-              top: 0
-            });
-          });
-        }
-        old_class = (_ref = $(this).attr("class").match(/shapeshifted_container_\w+/)) != null ? _ref[0] : void 0;
-        bound_indentifier = "resize." + old_class;
-        $(window).off(bound_indentifier);
-        $(this).removeClass(old_class);
-        return console.info("Shapeshift has been successfully destroyed on container:", this.$container);
       };
 
       return Plugin;

@@ -9,61 +9,43 @@
   defaults =
     # Features
     enableDrag: true
-    enableDrop: true
     enableResize: true
-
-    # Animation
-    animated: true
-    animateOnInit: false
-    animationSpeed: 120
-    animationThreshold: 150
 
     # Grid Properties
     align: "center"
     autoHeight: true
     columns: null
     minColumns: 1
-    height: 200
+    height: 100
     maxHeight: null
     minHeight: 100
     gutterX: 10
     gutterY: 10
-    paddingX: 10
+    paddingX: 0
     paddingY: 10
+
+    # Animation
+    animated: true
+    animateOnInit: false
+    animationSpeed: 150
+    animationThreshold: 200
 
     # Drag/Drop Options
     dragRate: 120
-    draggedClass: "ss-dragging"
-    placeholderClass: "ss-placeholder"
+    activeClass: "ss-active-child"
+    draggedClass: "ss-dragged-child"
+    placeholderClass: "ss-placeholder-child"
 
     # Other Options
-    fillerThreshold: 5
     selector: ""
 
   class Plugin
     constructor: (@element, options) ->
       @options = $.extend {}, defaults, options
       @globals = {}
-      @$container = $ element
+      @$container = $(element)
 
-      @errorDetection()
       @init()
-
-
-    # ----------------------------
-    # errorDetection:
-    # Alerts the user via the console if there
-    # are confliction options
-    # ----------------------------
-    errorDetection: ->
-      options = @options
-      message = "Shapeshift ERROR: "
-
-      if options.animated and !jQuery.ui
-        console.error message + "You are trying to enable animation however jQuery UI has not loaded yet."
-        
-      if !options.autoHeight and !options.height
-        console.error message + "You must specify a height if autoHeight is turned off."
 
 
     # ----------------------------
@@ -72,23 +54,14 @@
     # then call a full render of the elements
     # ----------------------------
     init: ->
-      @setIdentifier()
       @createEvents()
-      @enableFeatures()
       @setGlobals()
-      @render(true)
+      @setIdentifier()
+      @setActiveChildren()
+      @enableFeatures()
+      @gridInit()
+      @render()
       @afterInit()
-
-    
-    # ----------------------------
-    # setIdentifier
-    # Create a random identifier to tie to this container so that
-    # it is easy to unbind the specific resize event from the browser
-    # ----------------------------
-    setIdentifier: ->
-      @identifier = "shapeshifted_container_" + Math.random().toString(36).substring(7)
-      @$container.addClass(@identifier)
-
 
     # ----------------------------
     # createEvents:
@@ -99,19 +72,9 @@
       options = @options
       $container = @$container
 
-      $container.off("ss-arrange").on "ss-arrange", => @render(true)
-      $container.off("ss-destroy").on "ss-destroy", => @destroy()
-      $container.off("ss-destroyAll").on "ss-destroyAll", => @destroy(true)
-
-
-    # ----------------------------
-    # enableFeatures:
-    # Enables options features
-    # ----------------------------
-    enableFeatures: ->
-      @enableResize() if @options.enableResize
-      @enableDragNDrop() if @options.enableDrag or @options.enableDrop
-
+      $container.off("ss-arrange").on "ss-arrange", => @render()
+      $container.off("ss-rearrange").on "ss-rearrange", => @render(true)
+      $container.off("ss-setTargetPosition").on "ss-setTargetPosition", => @setTargetPosition()
 
     # ----------------------------
     # setGlobals:
@@ -121,28 +84,6 @@
       # Prevent initial animation if applicable
       @globals.animated = @options.animateOnInit
 
-
-    # ----------------------------
-    # parseChildren:
-    # Collects commonly used attributes 
-    # for all the active children
-    # ----------------------------
-    parseChildren: ->
-      $children = @$container.children(@options.selector).not("."+@options.placeholderClass).filter(":visible")
-
-      parsedChildren = []
-      for i in [0...$children.length]
-        $child = $children.eq(i)
-        child =
-          i: i
-          el: $child
-          colspan: $child.data("ss-colspan")
-          height: $child.outerHeight()
-        parsedChildren.push child
-
-      @parsedChildren = parsedChildren
-
-
     # ----------------------------
     # afterInit:
     # Take care of some dirty business
@@ -150,44 +91,117 @@
     afterInit: ->
       # Return animation to normal
       @globals.animated = @options.animated
-
+    
+    # ----------------------------
+    # setIdentifier
+    # Create a random identifier to tie to this container so that
+    # it is easy to unbind the specific resize event from the browser
+    # ----------------------------
+    setIdentifier: ->
+      @identifier = "shapeshifted_container_" + Math.random().toString(36).substring(7)
+      @$container.addClass(@identifier)
 
     # ----------------------------
-    # render:
-    # Determine the active children and
-    # arrange them to the calculated grid
+    # enableFeatures:
+    # Enables options features
     # ----------------------------
-    render: (full_render) ->
-      if full_render
-        @parseChildren()
+    enableFeatures: ->
+      @enableResize() if @options.enableResize
+      @enableDragNDrop() if @options.enableDrag
 
-      @setGrid()
-      @arrange()
+    # ----------------------------
+    # setActiveChildren:
+    # Make sure that only the children set by the
+    # selector option can be affected by Shapeshifting
+    # ----------------------------
+    setActiveChildren: ->
+      options = @options
 
+      # Add active child class to each available child element
+      $children = @$container.children(options.selector)
+      active_child_class = options.activeClass
+      total = $children.length
+
+      for i in [0...total]
+        $($children[i]).addClass(active_child_class)
+
+      @setParsedChildren()
+
+      # Detect if there are any colspans wider than
+      # the column options that were set
+      columns = options.columns
+      for i in [0...total]
+        colspan = @parsedChildren[i].colspan
+
+        min_columns = options.minColumns
+        if colspan > columns and colspan > min_columns
+          options.minColumns = colspan
+          console.error "Shapeshift ERROR: There are child elements that have a larger colspan than the minimum columns set through options.\noptions.minColumns has been set to #{colspan}"
+
+    # ----------------------------
+    # setParsedChildren:
+    # Calculates and returns commonly used 
+    # attributes for all the active children
+    # ----------------------------
+    setParsedChildren: ->
+      $children = @$container.find("." + @options.activeClass)
+      total = $children.length
+
+      parsedChildren = []
+      for i in [0...total]
+        $child = $($children[i])
+        child =
+          i: i
+          el: $child
+          colspan: parseInt($child.attr("data-ss-colspan"))
+          height: $child.outerHeight()
+        parsedChildren.push child
+      @parsedChildren = parsedChildren
 
     # ----------------------------
     # setGrid:
     # Calculates the dimensions of each column
     # and determines to total number of columns
     # ----------------------------
-    setGrid: ->
-      gutterX = @options.gutterX
-      paddingX = @options.paddingX
-      inner_width = @$container.width() - (paddingX * 2)
+    gridInit: ->
+      gutter_x = @options.gutterX
 
       # Determine single item / col width
       first_child = @parsedChildren[0]
       fc_width = first_child.el.outerWidth()
       fc_colspan = first_child.colspan
-      single_width = (fc_width - ((fc_colspan - 1) * gutterX)) / fc_colspan
-      @globals.col_width = col_width = single_width + gutterX
+      single_width = (fc_width - ((fc_colspan - 1) * gutter_x)) / fc_colspan
+      @globals.col_width = single_width + gutter_x
+
+    # ----------------------------
+    # render:
+    # Determine the active children and
+    # arrange them to the calculated grid
+    # ----------------------------
+    render: (reparse = false) ->
+      @setGridColumns()
+      @arrange(reparse)
+
+    # ----------------------------
+    # setGrid:
+    # Calculates the dimensions of each column
+    # and determines to total number of columns
+    # ----------------------------
+    setGridColumns: ->
+      # Common
+      globals = @globals
+      options = @options
+      col_width = globals.col_width
+      gutter_x = options.gutterX
+      padding_x = options.paddingX
+      inner_width = @$container.innerWidth() - (padding_x * 2)
 
       # Determine how many columns there currently can be
-      minColumns = @options.minColumns
-      columns = @options.columns || Math.floor (inner_width + gutterX) / col_width
+      minColumns = options.minColumns
+      columns = options.columns || Math.floor (inner_width + gutter_x) / col_width
       if minColumns and minColumns > columns
         columns = minColumns
-      @globals.columns = columns
+      globals.columns = columns
 
       # Columns cannot exceed children
       children_count = @parsedChildren.length
@@ -195,82 +209,106 @@
         columns = children_count
 
       # Calculate the child offset from the left
-      @globals.child_offset = paddingX
-      switch @options.align
+      globals.child_offset = padding_x
+      switch options.align
         when "center"
-          grid_width = (columns * col_width) - gutterX
-          @globals.child_offset += (inner_width - grid_width) / 2
+          grid_width = (columns * col_width) - gutter_x
+          globals.child_offset += (inner_width - grid_width) / 2
 
         when "right"
-          grid_width = (columns * col_width) - gutterX
-          @globals.child_offset += (inner_width - grid_width)
-
+          grid_width = (columns * col_width) - gutter_x
+          globals.child_offset += (inner_width - grid_width)
 
     # ----------------------------
     # arrange:
     # Animates the elements into their calcluated positions
     # ----------------------------
-    arrange: ->
-      positions = @getPositions()
-      draggedClass = @options.draggedClass
+    arrange: (reparse) ->
+      @setParsedChildren() if reparse
+
+      globals = @globals
+      options = @options
+
+      # Common
+      $container = @$container
+      child_positions = @getPositions()
+
+      parsed_children = @parsedChildren
+      total_children = parsed_children.length
+      
+      animated = globals.animated and total_children <= options.animationThreshold
+      animation_speed = options.animationSpeed
+      dragged_class = options.draggedClass
 
       # Arrange each child element
-      for i in [0...positions.length]
-        $child = @parsedChildren[i].el
-        attributes = positions[i]
+      for i in [0...total_children]
+        $child = parsed_children[i].el
+        attributes = child_positions[i]
+        is_dragged_child = $child.hasClass(dragged_class)
 
-        if $child.hasClass(draggedClass)
-          $child = $child.siblings(".ss-placeholder")
+        if is_dragged_child
+          placeholder_class = options.placeholderClass
+          $child = $child.siblings("." + placeholder_class)
 
-        if @globals.animated && @parsedChildren.length <= @options.animationThreshold
-          $child.stop(true, false).animate attributes, @options.animationSpeed
+        if animated and !is_dragged_child
+          $child.stop(true, false).animate attributes, animation_speed
         else
           $child.css attributes
 
       # Set the container height
-      if @options.autoHeight
-        container_height = @globals.container_height
-        maxHeight = @options.maxHeight
-        minHeight = @options.minHeight
+      if options.autoHeight
+        container_height = globals.container_height
+        max_height = options.maxHeight
+        min_height = options.minHeight
 
-        if minHeight and container_height < minHeight
-          container_height = minHeight
-        else if maxHeight and container_height > maxHeight
-          container_height = maxHeight
+        if min_height and container_height < min_height
+          container_height = min_height
+        else if max_height and container_height > max_height
+          container_height = max_height
 
-        @$container.height container_height
+        $container.height container_height
       else
-        @$container.height @options.height
+        $container.height options.height
 
-      @$container.trigger("ss-arranged");
-      
+      $container.trigger("ss-arranged");
+
 
     # ----------------------------
     # getPositions:
-    # Using the grid dimensions that have been calculated,
-    # go over each child and determine which column they
+    # Go over each child and determine which column they
     # fit into and return an array of their x/y dimensions
     # ----------------------------
-    getPositions: (include_dragged = true) ->
-      dragged_class = @options.draggedClass
-      gutterY = @options.gutterY
-      paddingY = @options.paddingY
+    getPositions: ->
+      globals = @globals
+      options = @options
+      gutter_y = options.gutterY
+      padding_y = options.paddingY
+
+      parsed_children = @parsedChildren
+      total_children = parsed_children.length
 
       # Store the height for each column
       col_heights = []
-      for i in [0...@globals.columns]
-        col_heights.push paddingY
-
-      # Determine the columns children fit in
-      positions = []
-      savedChildren = []
-      current_i = 0
+      for i in [0...globals.columns]
+        col_heights.push padding_y
 
       # ----------------------------
+      # savePosition
+      # Takes a child which has been correctly placed in a
+      # column and saves it to that final x/y position.
       # ----------------------------
-      # Positioning Helper Functions
-      # ----------------------------
-      # ----------------------------
+      savePosition = (child) =>
+        col = child.col
+        colspan = child.colspan
+        offset_x = (child.col * globals.col_width) + globals.child_offset
+        offset_y = col_heights[col]
+
+        positions[child.i] = left: offset_x, top: offset_y
+        col_heights[col] += child.height + gutter_y
+
+        if colspan >= 1
+          for j in [1...colspan]
+            col_heights[col + j] = col_heights[col]
 
       # ----------------------------
       # determineMultiposition
@@ -283,66 +321,39 @@
         possible_cols = col_heights.length - child.colspan + 1
         possible_col_heights = col_heights.slice(0).splice(0, possible_cols)
 
-        # Determine the filler thresholds / cutoff
-        total_children = @parsedChildren.length
-        filler_threshold = @options.fillerThreshold
-        filler_cutoff = child.i + filler_threshold
-        filler_cutoff = total_children if filler_cutoff > total_children
-
-        # Go over each column, lowest to highest, left to right,
-        # and determine if the child is able to fit there
         chosen_col = undefined
-        if current_i <= filler_cutoff
-          for offset in [0..possible_cols - 1]
-            col = @lowestCol(possible_col_heights, offset)
-            height = col_heights[col]
+        for offset in [0...possible_cols]
+          col = @lowestCol(possible_col_heights, offset)
+          colspan = child.colspan
+          height = col_heights[col]
 
-            kosher = true
+          kosher = true
 
-            # Determine if it is able to be placed at this col
-            for span in [1...child.colspan]
-              next_height = col_heights[col + span]
+          # Determine if it is able to be placed at this col
+          for span in [1...colspan]
+            next_height = col_heights[col + span]
 
-              # The next height must not be higher
-              if height < next_height
-                kosher = false
-                break
-
-              difference = height - next_height
-              for filler_i in [current_i + 1...filler_cutoff]
-                filler_child = @parsedChildren[filler_i]
-
-                if difference >= filler_child.height
-                  kosher = false
-                  break
-
-            if kosher
-              chosen_col = col
+            # The next height must not be higher
+            if height < next_height
+              kosher = false
               break
-        else
-          # Force it into position
-          chosen_col = @lowestCol(possible_col_heights)
-          
-          highest = 0
-          for span in [1...child.colspan]
-            next_height = col_heights[chosen_col + span]
-            if next_height > highest
-              highest = next_height
 
-          for span in [0...child.colspan]
-            col_heights[chosen_col + span] = highest
+          if kosher
+            chosen_col = col
+            break
 
-        chosen_col
+        return chosen_col
 
       # ----------------------------
       # recalculateSavedChildren
       # Sometimes child elements cannot save the first time around,
       # iterate over those children and determine if its ok to place now.
       # ----------------------------
+      saved_children = []
       recalculateSavedChildren = =>
         to_pop = []
-        for saved_i in [0...savedChildren.length]
-          saved_child = savedChildren[saved_i]
+        for saved_i in [0...saved_children.length]
+          saved_child = saved_children[saved_i]
           saved_child.col = determineMultiposition(saved_child)
 
           if saved_child.col >= 0
@@ -352,97 +363,37 @@
         # Popeye. Lol.
         for pop_i in [to_pop.length - 1..0] by -1
           index = to_pop[pop_i]
-          savedChildren.splice(index,1)
-
-      # ----------------------------
-      # savePosition
-      # Takes a child which has been correctly placed in a
-      # column and saves it to that final x/y position.
-      # ----------------------------
-      savePosition = (child) =>
-        col = child.col
-        offsetX = (child.col * @globals.col_width) + @globals.child_offset
-        offsetY = col_heights[col]
-
-        positions[child.i] = left: offsetX, top: offsetY
-        col_heights[col] += child.height + gutterY
-
-        if child.colspan >= 1
-          for j in [1...child.colspan]
-            col_heights[col + j] = col_heights[col]
+          saved_children.splice(index,1)
 
       # ----------------------------
       # determinePositions
       # Iterate over all the parsed children and determine
       # the calculations needed to get its x/y value.
       # ----------------------------
+      positions = []
       do determinePositions = =>
-        for i in [0...@parsedChildren.length]
-          child = @parsedChildren[i]
+        for i in [0...total_children]
+          child = parsed_children[i]
 
-          unless !include_dragged and child.el.hasClass(dragged_class)
-            # Determine the correct column
-            if child.colspan > 1
-              child.col = determineMultiposition(child)
-            else
-              child.col = @lowestCol(col_heights)
-            
-            # If col is undefined, it couldn't be placed, so save it
-            if child.col is undefined
-              savedChildren.push(child)
-            else
-              savePosition(child)
+          if child.colspan > 1
+            child.col = determineMultiposition(child)
+          else
+            child.col = @lowestCol(col_heights)
 
-            recalculateSavedChildren()
+          if child.col is undefined
+            saved_children.push child
+          else
+            savePosition(child)
 
-            current_i++
+          recalculateSavedChildren()
 
       # Store the container height since we already have the data
-      if @options.autoHeight
-        grid_height = col_heights[@highestCol(col_heights)] - gutterY
-        @globals.container_height = grid_height + paddingY
+      if options.autoHeight
+        grid_height = col_heights[@highestCol(col_heights)] - gutter_y
+        globals.container_height = grid_height + padding_y
 
       return positions
 
-
-    # ----------------------------
-    # getDragTarget:
-    # Determine where the currently dragged
-    # element should be inserted
-    # ----------------------------
-    getDragTargetPosition: ->
-      dragged_class = @options.draggedClass
-      $selected = $("."+dragged_class)
-      selected_x = $selected.position().left + ($selected.outerWidth() / 2)
-      selected_y = $selected.position().top + ($selected.outerHeight() / 2)
-
-      # Get a list of positions not including the dragged item
-      positions = @getPositions(false)
-      shortest_distance = 999999
-      chosen_index = 0
-      
-      for i in [0...positions.length]
-        attributes = positions[i]
-
-        if attributes
-          if selected_x > attributes.left and selected_y > attributes.top
-            x_dist = selected_x - attributes.left
-            y_dist = selected_y - attributes.top
-
-            distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist))
-
-            if distance < shortest_distance
-              shortest_distance = distance
-              chosen_index = i
-
-            # If this is the last item, and we are below it or to the right,
-            # then we may want to insert it as the last item.
-            if i is positions.length - 1
-              $child = @parsedChildren[i].el
-              if y_dist > $child.outerHeight() * .75 or x_dist > $child.outerWidth() * .75 or x_dist < 0
-                chosen_index++
-
-      return chosen_index
 
     # ----------------------------
     # enableDrag:
@@ -450,20 +401,18 @@
     # Initialize dragging.
     # ----------------------------
     enableDragNDrop: ->
-      dragRate = @options.dragRate
-      dragged_class = @options.draggedClass
-      placeholder_class = @options.placeholderClass
+      options = @options
 
-      # Globals for DnD
-      $selected = null
-      $placeholder = null
-      $curContainer = null
-      selectedOffsetY = null
-      selectedOffsetX = null
+      $container = @$container
+      active_class = options.activeClass
+      dragged_class = options.draggedClass
+      placeholder_class = options.placeholderClass
+      drag_rate = options.dragRate
+
+      $selected = $placeholder = selected_offset_y = selected_offset_x = null
       dragging = false
 
-      # Dragging
-      @$container.children().draggable
+      $container.children("." + active_class).draggable
         addClasses: false
         containment: 'document'
         zIndex: 9999
@@ -476,38 +425,35 @@
         # Set $selected globals
         $selected = $(e.target)
         $selected.addClass(dragged_class)
-        $curContainer = $selected.parent()
 
         # Create Placeholder
         selected_tag = $selected.prop("tagName")
         $placeholder = $("<#{selected_tag} class='#{placeholder_class}' style='height: #{$selected.height()}; width: #{$selected.width()}'></#{selected_tag}>")
-        $curContainer.prepend($placeholder)
+        
+        # Set current container
+        $selected.parent().addClass("ss-current-container")
 
         # For manually centering the element with respect to mouse position
-        selectedOffsetY = $selected.outerHeight() / 2
-        selectedOffsetX = $selected.outerWidth() / 2
+        selected_offset_y = $selected.outerHeight() / 2
+        selected_offset_x = $selected.outerWidth() / 2
 
       drag = (e, ui) =>
         if !dragging
-          # Determine the target position and arrange into place
-          target_position = @getDragTargetPosition()
-          if target_position is @parsedChildren.length
-            $target = @parsedChildren[target_position - 1].el
-            $selected.insertAfter($target)
-          else
-            $target = @parsedChildren[target_position].el
-            $selected.insertBefore($target)
-          $curContainer.trigger("ss-arrange")
+          # Append placeholder to container
+          $placeholder.remove().appendTo(".ss-current-container")
+
+          # Set drag target and rearrange everything
+          $(".ss-current-container").trigger("ss-setTargetPosition")
 
           # Disallow dragging from occurring too much
           dragging = true
           window.setTimeout ( ->
             dragging = false
-          ), dragRate
+          ), drag_rate
 
         # Manually center the element with respect to mouse position
-        ui.position.left = e.pageX - $selected.parent().offset().left - selectedOffsetX;
-        ui.position.top = e.pageY - $selected.parent().offset().top - selectedOffsetY;
+        ui.position.left = e.pageX - $selected.parent().offset().left - selected_offset_x;
+        ui.position.top = e.pageY - $selected.parent().offset().top - selected_offset_y;
 
       stop = ->
         # Clear globals
@@ -516,7 +462,61 @@
         $selected = $placeholder = null
 
         # Arrange dragged item into place
-        $curContainer.trigger("ss-arrange")
+        $(".ss-current-container").trigger("ss-arrange").removeClass("ss-current-container")
+        $(".ss-previous-container").trigger("ss-arrange").removeClass("ss-previous-container")
+
+
+      $container.droppable
+        tolerance: 'intersect'
+        over: (e) -> over(e)
+
+      over = (e) =>
+        $(".ss-previous-container").removeClass("ss-previous-container")
+        $(".ss-current-container").removeClass("ss-current-container").addClass("ss-previous-container")
+        $(e.target).addClass("ss-current-container")
+
+    # ----------------------------
+    # getTargetPosition:
+    # Determine the target position for the selected
+    # element and arrange it into place
+    # ----------------------------
+    setTargetPosition: ->
+      dragged_class = @options.draggedClass
+      $selected = $("." + dragged_class)
+      selected_x = $selected.position().left + $selected.width() / 2
+      selected_y = $selected.position().top + $selected.height() / 2
+      shortest_distance = 9999999
+
+      $start_container = $selected.parent()
+      parsed_children = @parsedChildren
+      child_positions = @getPositions()
+      total_positions = child_positions.length
+      target_position = 0
+
+      for position_i in [0...total_positions]
+        attributes = child_positions[position_i]
+
+        if selected_x > attributes.left and selected_y > attributes.top
+          y_dist = selected_x - attributes.left
+          x_dist = selected_y - attributes.top
+
+          distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist))
+
+          if distance < shortest_distance
+            shortest_distance = distance
+            target_position = position_i
+
+      if target_position is parsed_children.length
+        $target = parsed_children[target_position - 1].el
+        $selected.insertAfter($target)
+      else
+        $target = parsed_children[target_position].el
+        $selected.insertBefore($target)
+      
+      @arrange(true)
+
+      if $start_container[0] isnt $selected.parent()[0]
+        $(".ss-previous-container").trigger "ss-rearrange"
 
     # ----------------------------
     # resize:
@@ -567,28 +567,7 @@
     # array column with the highest number
     # ----------------------------
     highestCol: (array) ->
-      $.inArray Math.max.apply(window,array), array 
-
-
-    # ----------------------------
-    # destroy:
-    # Destroys all the things
-    # ----------------------------
-    destroy: (revertChildren) ->
-      @$container.off "ss-arrange"
-      @$container.off "ss-destroy"
-      @$container.off "ss-destroyAll"
-
-      if revertChildren
-        @$container.children().each -> $(@).css({left: 0, top: 0})
-
-      # Remove window resize binding
-      old_class = $(@).attr("class").match(/shapeshifted_container_\w+/)?[0]
-      bound_indentifier = "resize." + old_class
-      $(window).off(bound_indentifier)
-      $(@).removeClass(old_class)
-
-      console.info "Shapeshift has been successfully destroyed on container:", @$container 
+      $.inArray Math.max.apply(window,array), array
 
 
   $.fn[pluginName] = (options) ->

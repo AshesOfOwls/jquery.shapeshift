@@ -14,7 +14,7 @@ ul.ss-container li {
   width: 80px;
 }
 
-ul.ss-container li.ss-dragging {
+ul.ss-container li.ss-dragged-child {
   cursor: move;
   z-index: 9999;
   opacity: .7;
@@ -25,7 +25,7 @@ ul.ss-container li.ss-dragging {
   -o-transform:rotate(2deg); /* Opera */
 }
 
-ul.ss-container li.ss-placeholder {
+ul.ss-container li.ss-placeholder-child {
   background: transparent;
   border: 0px;
   outline: 1px dashed red;

@@ -7,7 +7,7 @@ $ ->
   # -------------
 
   do renderChildren = ->
-    weighted_colspans = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,3,3]
+    weighted_colspans = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,3,3]
 
     $containers.each ->
       elements = []
@@ -48,6 +48,7 @@ $ ->
               background = 'url("http://fpoimg.com/'+width+'x'+height+'?bg_color='+getRandomColor()+'&text_color=444444")'
             when "placekittens"
               background = 'url("http://www.placekitten.com/'+width+'/'+height+'")'
+          background = ''
 
           $child.css
             backgroundImage: background
@@ -57,8 +58,7 @@ $ ->
   # Initial Shapeshift
   # -------------
 
-  filter_options =
-    minColumns: 3
+  filter_options = {}
 
   $containers.shapeshift(filter_options)
 
@@ -107,11 +107,7 @@ $ ->
   # -------------
 
   $containers.on "ss-arranged", (e, selected) ->
-
-    if $(@).find(".ss-dragging")[0]
-      modifier = 1
-    else
-      modifier = 0
+    modifier = if $(@).find(".ss-dragging")[0] then 1 else 0
 
     $(@).children().each ->
       $(@).find(".position").text($(@).index() - modifier)

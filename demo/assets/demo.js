@@ -7,7 +7,7 @@
     child_count = 30;
     (renderChildren = function() {
       var weighted_colspans;
-      weighted_colspans = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3];
+      weighted_colspans = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3];
       return $containers.each(function() {
         var colspan, elements, height, i, _i;
         elements = [];
@@ -51,6 +51,7 @@
               case "placekittens":
                 background = 'url("http://www.placekitten.com/' + width + '/' + height + '")';
             }
+            background = '';
             _results.push($child.css({
               backgroundImage: background,
               height: height
@@ -60,9 +61,7 @@
         }
       });
     })("fpoimg");
-    filter_options = {
-      minColumns: 3
-    };
+    filter_options = {};
     $containers.shapeshift(filter_options);
     $(".options ul.animation li").on("click", function() {
       switch ($(this).data("option")) {
@@ -104,11 +103,7 @@
     });
     $containers.on("ss-arranged", function(e, selected) {
       var modifier;
-      if ($(this).find(".ss-dragging")[0]) {
-        modifier = 1;
-      } else {
-        modifier = 0;
-      }
+      modifier = $(this).find(".ss-dragging")[0] ? 1 : 0;
       return $(this).children().each(function() {
         return $(this).find(".position").text($(this).index() - modifier);
       });
