@@ -24,7 +24,7 @@
       animationSpeed: 225,
       animationThreshold: 100,
       dragClone: true,
-      deleteClone: false,
+      deleteClone: true,
       dragRate: 100,
       dragWhitelist: "*",
       crossDropWhitelist: "*",
@@ -370,7 +370,7 @@
               return selected_offset_x = $selected.outerWidth() / 2;
             },
             drag: function(e, ui) {
-              if (!dragging) {
+              if (!dragging && !(drag_clone && delete_clone && $("." + current_container_class)[0] === $("." + original_container_class)[0])) {
                 $placeholder.remove().appendTo("." + current_container_class);
                 $("." + current_container_class).trigger("ss-setTargetPosition");
                 dragging = true;

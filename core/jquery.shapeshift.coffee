@@ -33,7 +33,7 @@
 
     # Drag/Drop Options
     dragClone: true
-    deleteClone: false
+    deleteClone: true
     dragRate: 100
     dragWhitelist: "*"
     crossDropWhitelist: "*"
@@ -458,7 +458,7 @@
             selected_offset_x = $selected.outerWidth() / 2
 
           drag: (e, ui) =>
-            if !dragging
+            if !dragging and !(drag_clone and delete_clone and $("." + current_container_class)[0] is $("." + original_container_class)[0])
               # Append placeholder to container
               $placeholder.remove().appendTo("." + current_container_class)
 
