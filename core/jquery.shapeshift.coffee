@@ -7,6 +7,9 @@
 (($, window, document) ->
   pluginName = "shapeshift"
   defaults =
+    # The Basics
+    selector: ""
+
     # Features
     enableDrag: true
     enableCrossDrop: true
@@ -32,8 +35,8 @@
     animationThreshold: 100
 
     # Drag/Drop Options
-    dragClone: true
-    deleteClone: true
+    dragClone: false
+    deleteClone: false
     dragRate: 100
     dragWhitelist: "*"
     crossDropWhitelist: "*"
@@ -48,9 +51,6 @@
     originalContainerClass: "ss-original-container"
     currentContainerClass: "ss-current-container"
     previousContainerClass: "ss-previous-container"
-
-    # Other Options
-    selector: ""
 
   class Plugin
     constructor: (@element, options) ->
@@ -285,17 +285,17 @@
 
       $container.trigger("ss-arranged");
 
-
     # ----------------------------
     # getPositions:
     # Go over each child and determine which column they
     # fit into and return an array of their x/y dimensions
     # ----------------------------
-    getPositions: ->
+    getPositions: (include_dragged = true) ->
       globals = @globals
       options = @options
       gutter_y = options.gutterY
       padding_y = options.paddingY
+      dragged_class = options.draggedClass
 
       parsed_children = @parsedChildren
       total_children = parsed_children.length
@@ -388,17 +388,18 @@
         for i in [0...total_children]
           child = parsed_children[i]
 
-          if child.colspan > 1
-            child.col = determineMultiposition(child)
-          else
-            child.col = @lowestCol(col_heights)
+          unless !include_dragged and child.el.hasClass(dragged_class)
+            if child.colspan > 1
+              child.col = determineMultiposition(child)
+            else
+              child.col = @lowestCol(col_heights)
 
-          if child.col is undefined
-            saved_children.push child
-          else
-            savePosition(child)
+            if child.col is undefined
+              saved_children.push child
+            else
+              savePosition(child)
 
-          recalculateSavedChildren()
+            recalculateSavedChildren()
 
       # Store the container height since we already have the data
       if options.autoHeight
@@ -406,7 +407,6 @@
         globals.container_height = grid_height + padding_y
 
       return positions
-
 
     # ----------------------------
     # enableDrag:
@@ -505,7 +505,6 @@
             $("." + current_container_class).removeClass(current_container_class).addClass(previous_container_class)
             $(e.target).addClass(current_container_class)
 
-        
     # ----------------------------
     # getTargetPosition:
     # Determine the target position for the selected
@@ -518,11 +517,11 @@
       $selected = $("." + dragged_class)
       $start_container = $selected.parent()
       parsed_children = @parsedChildren
-      child_positions = @getPositions()
+      child_positions = @getPositions(false)
       total_positions = child_positions.length
 
-      selected_x = $selected.offset().left - $start_container.offset().left + ($selected.width() / 2)
-      selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 2)
+      selected_x = $selected.offset().left - $start_container.offset().left + (@globals.col_width / 2)
+      selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 3)
       shortest_distance = 9999999
       target_position = 0
 
@@ -532,14 +531,15 @@
       for position_i in [cutoff_start...cutoff_end]
         attributes = child_positions[position_i]
 
-        y_dist = selected_x - attributes.left
-        x_dist = selected_y - attributes.top
+        if attributes
+          y_dist = selected_x - attributes.left
+          x_dist = selected_y - attributes.top
 
-        distance = Math.abs(Math.sqrt((x_dist * x_dist) + (y_dist * y_dist)))
+          distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist))
 
-        if distance < shortest_distance
-          shortest_distance = distance
-          target_position = position_i
+          if distance > 0 and distance < shortest_distance
+            shortest_distance = distance
+            target_position = position_i
 
       if target_position is parsed_children.length
         $target = parsed_children[target_position - 1].el
@@ -578,7 +578,6 @@
             @render()
           , animation_speed / 3
 
-
     # ----------------------------
     # lowestCol:
     # Helper
@@ -594,7 +593,6 @@
           ret
 
       augmented_array[offset][1]
-
 
     # ----------------------------
     # highestCol:

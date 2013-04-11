@@ -5,6 +5,7 @@
     var Plugin, defaults, pluginName;
     pluginName = "shapeshift";
     defaults = {
+      selector: "",
       enableDrag: true,
       enableCrossDrop: true,
       enableResize: true,
@@ -23,8 +24,8 @@
       animateOnInit: true,
       animationSpeed: 225,
       animationThreshold: 100,
-      dragClone: true,
-      deleteClone: true,
+      dragClone: false,
+      deleteClone: false,
       dragRate: 100,
       dragWhitelist: "*",
       crossDropWhitelist: "*",
@@ -36,8 +37,7 @@
       placeholderClass: "ss-placeholder-child",
       originalContainerClass: "ss-original-container",
       currentContainerClass: "ss-current-container",
-      previousContainerClass: "ss-previous-container",
-      selector: ""
+      previousContainerClass: "ss-previous-container"
     };
     Plugin = (function() {
 
@@ -232,13 +232,17 @@
         return $container.trigger("ss-arranged");
       };
 
-      Plugin.prototype.getPositions = function() {
-        var col_heights, determineMultiposition, determinePositions, globals, grid_height, gutter_y, i, options, padding_y, parsed_children, positions, recalculateSavedChildren, savePosition, saved_children, total_children, _i, _ref,
+      Plugin.prototype.getPositions = function(include_dragged) {
+        var col_heights, determineMultiposition, determinePositions, dragged_class, globals, grid_height, gutter_y, i, options, padding_y, parsed_children, positions, recalculateSavedChildren, savePosition, saved_children, total_children, _i, _ref,
           _this = this;
+        if (include_dragged == null) {
+          include_dragged = true;
+        }
         globals = this.globals;
         options = this.options;
         gutter_y = options.gutterY;
         padding_y = options.paddingY;
+        dragged_class = options.draggedClass;
         parsed_children = this.parsedChildren;
         total_children = parsed_children.length;
         col_heights = [];
@@ -313,17 +317,21 @@
           _results = [];
           for (i = _j = 0; 0 <= total_children ? _j < total_children : _j > total_children; i = 0 <= total_children ? ++_j : --_j) {
             child = parsed_children[i];
-            if (child.colspan > 1) {
-              child.col = determineMultiposition(child);
+            if (!(!include_dragged && child.el.hasClass(dragged_class))) {
+              if (child.colspan > 1) {
+                child.col = determineMultiposition(child);
+              } else {
+                child.col = _this.lowestCol(col_heights);
+              }
+              if (child.col === void 0) {
+                saved_children.push(child);
+              } else {
+                savePosition(child);
+              }
+              _results.push(recalculateSavedChildren());
             } else {
-              child.col = _this.lowestCol(col_heights);
+              _results.push(void 0);
             }
-            if (child.col === void 0) {
-              saved_children.push(child);
-            } else {
-              savePosition(child);
-            }
-            _results.push(recalculateSavedChildren());
           }
           return _results;
         })();
@@ -419,22 +427,24 @@
         $selected = $("." + dragged_class);
         $start_container = $selected.parent();
         parsed_children = this.parsedChildren;
-        child_positions = this.getPositions();
+        child_positions = this.getPositions(false);
         total_positions = child_positions.length;
-        selected_x = $selected.offset().left - $start_container.offset().left + ($selected.width() / 2);
-        selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 2);
+        selected_x = $selected.offset().left - $start_container.offset().left + (this.globals.col_width / 2);
+        selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 3);
         shortest_distance = 9999999;
         target_position = 0;
         cutoff_start = options.cutoffStart || 0;
         cutoff_end = options.cutoffEnd || total_positions;
         for (position_i = _i = cutoff_start; cutoff_start <= cutoff_end ? _i < cutoff_end : _i > cutoff_end; position_i = cutoff_start <= cutoff_end ? ++_i : --_i) {
           attributes = child_positions[position_i];
-          y_dist = selected_x - attributes.left;
-          x_dist = selected_y - attributes.top;
-          distance = Math.abs(Math.sqrt((x_dist * x_dist) + (y_dist * y_dist)));
-          if (distance < shortest_distance) {
-            shortest_distance = distance;
-            target_position = position_i;
+          if (attributes) {
+            y_dist = selected_x - attributes.left;
+            x_dist = selected_y - attributes.top;
+            distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist));
+            if (distance > 0 && distance < shortest_distance) {
+              shortest_distance = distance;
+              target_position = position_i;
+            }
           }
         }
         if (target_position === parsed_children.length) {
