@@ -79,7 +79,7 @@ To make a child element multiwidth, simply add the data attribute "data-ss-colsp
 For example, assuming the default gutter value of 10px, multiwidth elements can be created as such:
 
 ```css
-.container div { width: 80px; } # When no colspan is set, it is one colspan
+.container div { width: 80px; } // When no colspan is set, it is one colspan
 .container div[data-ss-colspan="2"] { width: 170px; }
 .container div[data-ss-colspan="3"] { width: 260px; }
 .container div[data-ss-colspan="4"] { width: 350px; }
