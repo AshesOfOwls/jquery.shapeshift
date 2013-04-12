@@ -1,14 +1,13 @@
-[Shapeshift](http://mcpants.github.com/jquery.shapeshift/)
+[Shapeshift](http://mcpants.github.com/jquery.shapeshift/) [![Build 2.0]]
 ==========================================================
+
+[Check out a demo here.](http://mcpants.github.com/jquery.shapeshift/)
 
 Column Grid System + Drag and Drop
 ----------------------------------
 
-Inspired heavily by the jQuery Masonry plugin (http://masonry.desandro.com/), Shapeshift is a plugin which will dynamically arrange a collection of elements into a grid in their parent container. An example of this behavior is what you can find at sites like http://www.pinterest.com.
+Inspired heavily by the [jQuery Masonry plugin](http://masonry.desandro.com/), Shapeshift is a plugin which will dynamically arrange a collection of elements into a column grid system similar to [Pinterest](http://www.pinterest.com). What sets it apart is the ability to drag and drop items within the grid while still maintaining a logical index position for each item. This allows for the grid to be rendered exactly the same every time Shapeshift is used, as long as the child elements are in the correct order.
 
-Shapeshift is intended to be a very bare bones version of these grid systems, however the drag and drop is what sets it apart from the other similar plugins.
-
-[Check out a demo here.](http://mcpants.github.com/jquery.shapeshift/)
 
 ## Responsive Grid
 
