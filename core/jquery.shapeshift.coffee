@@ -36,7 +36,7 @@
 
     # Drag/Drop Options
     dragClone: false
-    deleteClone: false
+    deleteClone: true
     dragRate: 100
     dragWhitelist: "*"
     crossDropWhitelist: "*"
@@ -525,7 +525,7 @@
       shortest_distance = 9999999
       target_position = total_positions
 
-      cutoff_start = options.cutoffStart || 0
+      cutoff_start = options.cutoffStart + 1 || 0
       cutoff_end = options.cutoffEnd || total_positions
 
       for position_i in [cutoff_start...cutoff_end]

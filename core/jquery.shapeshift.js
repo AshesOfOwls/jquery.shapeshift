@@ -25,7 +25,7 @@
       animationSpeed: 225,
       animationThreshold: 100,
       dragClone: false,
-      deleteClone: false,
+      deleteClone: true,
       dragRate: 100,
       dragWhitelist: "*",
       crossDropWhitelist: "*",
@@ -434,7 +434,7 @@
         selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 2);
         shortest_distance = 9999999;
         target_position = total_positions;
-        cutoff_start = options.cutoffStart || 0;
+        cutoff_start = options.cutoffStart + 1 || 0;
         cutoff_end = options.cutoffEnd || total_positions;
         for (position_i = _i = cutoff_start; cutoff_start <= cutoff_end ? _i < cutoff_end : _i > cutoff_end; position_i = cutoff_start <= cutoff_end ? ++_i : --_i) {
           attributes = child_positions[position_i];

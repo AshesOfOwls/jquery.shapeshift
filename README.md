@@ -143,7 +143,7 @@ $('.container').shapeshift({
 
   // Drag/Drop Options
   dragClone: false,
-  deleteClone: false,
+  deleteClone: true,
   dragRate: 100,
   dragWhitelist: "*",
   crossDropWhitelist: "*",
@@ -175,7 +175,7 @@ $('.container').shapeshift({
     <td>Selector</td>
     <td>Use a CSS selector to specify which child elements should be Shapeshifted.</td>
     <td>String</td>
-    <td>Any CSS selector, such as ".doctor" or "#who"</td>
+    <td>Any CSS selector, such as ".amelia" or "#pond"</td>
     <td>"*"</td>
   </tr>
 </table>
@@ -307,6 +307,118 @@ $('.container').shapeshift({
     <td>100</td>
   </tr>
 </table>
+
+### Drag and Drop Settings
+<table>
+  <tr>
+    <th>Option</th>
+    <th>Description</th>
+    <th>Acceptable Values</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>dragClone</td>
+    <td>When an element is dragged it will create a clone instead.</td>
+    <td>true, false</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>deleteClone</td>
+    <td>If a cloned item is dropped into its original container, delete the clone that was made.</td>
+    <td>true, false</td>
+    <td>true</td>
+  </tr>
+  <tr>
+    <td>dragRate</td>
+    <td>The number of milliseconds that Shapeshift will attempt to find a target pisition for a dragged item.</td>
+    <td>Any Integer >= 0</td>
+    <td>100</td>
+  </tr>
+  <tr>
+    <td>dragRate</td>
+    <td>The number of milliseconds that Shapeshift will attempt to find a target pisition for a dragged item.</td>
+    <td>Any Integer >= 0</td>
+    <td>100</td>
+  </tr>
+  <tr>
+    <td>dragWhitelist</td>
+    <td>A CSS selector specifying the elements which can be dragged.</td>
+    <td>Any CSS selector, such as ".river" or "#song"</td>
+    <td>"*"</td>
+  </tr>
+  <tr>
+    <td>crossDropWhitelist</td>
+    <td>A CSS selector specifying the elements which can be dropped into this container from *other* containers.</td>
+    <td>Any CSS selector, such as ".martha" or "#jones"</td>
+    <td>"*"</td>
+  </tr>
+  <tr>
+    <td>cutoffStart</td>
+    <td>Items cannot be dragged to an index position below this number.</td>
+    <td>Any Integer >= 0</td>
+    <td>null</td>
+  </tr>
+  <tr>
+    <td>cutoffEnd</td>
+    <td>Items cannot be dragged to an index position past this number.</td>
+    <td>Any Integer >= 0</td>
+    <td>null</td>
+  </tr>
+</table>
+
+### Customize CSS
+Certain elements will have CSS classes attached to them for specific events. Customize those CSS classes if needed.
+<table>
+  <tr>
+    <th>Option</th>
+    <th>Affected Element</th>
+    <th>Description</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>activeClass</td>
+    <td>Child Elements</td>
+    <td>Every active Shapeshift child item will have this class applied to them.</td>
+    <td>ss-active-child</td>
+  </tr>
+  <tr>
+    <td>cloneClass</td>
+    <td>Cloned Child Element</td>
+    <td>If the "dragClone" option is used, this is the CSS class applied to the clone that is created.</td>
+    <td>ss-cloned-child</td>
+  </tr>
+  <tr>
+    <td>draggedClass</td>
+    <td>Dragged Child Element</td>
+    <td>The class applied to an element while it is being dragged.</td>
+    <td>ss-dragged-child</td>
+  </tr>
+  <tr>
+    <td>placeholderClass</td>
+    <td>Placeholder Element</td>
+    <td>When an item is dragged, a placeholder element is created to show the new target position.</td>
+    <td>ss-placeholder-child</td>
+  </tr>
+  <tr>
+    <td>originalContainerClass</td>
+    <td>Container Element</td>
+    <td>When an item is dragged, this is the class applied to the container it originated from.</td>
+    <td>ss-original-container</td>
+  </tr>
+  <tr>
+    <td>currentContainerClass</td>
+    <td>Container Element</td>
+    <td>When an item is dragged, this is the class applied to the container it currently is in.</td>
+    <td>ss-current-container</td>
+  </tr>
+  <tr>
+    <td>previousContainerClass</td>
+    <td>Container Element</td>
+    <td>When an item is dragged between containers, this is the class applied to the container it was previously in.</td>
+    <td>ss-previous-container</td>
+  </tr>
+</table>
+
 
 ### Styling the Dragged Element
 
