@@ -168,15 +168,15 @@ $('.container').shapeshift({
     <th>Option</th>
     <th>Description</th>
     <th>Type</th>
+    <th>Acceptable Values</th>
     <th>Default</th>
-    <th>Values</th>
   </tr>
   <tr>
     <td>Selector</td>
     <td>Use a CSS selector to specify which child elements should be Shapeshifted.</td>
     <td>String</td>
-    <td>"*"</td>
     <td>Any CSS selector, such as ".doctor" or "#who"</td>
+    <td>"*"</td>
   </tr>
 </table>
 
