@@ -8,12 +8,17 @@
     (renderChildren = function() {
       var weighted_colspans;
       weighted_colspans = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3];
-      return $containers.each(function() {
+      return $containers.each(function(container_i) {
         var colspan, elements, height, i, _i;
         elements = [];
         for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
-          colspan = weighted_colspans[Math.floor(Math.random() * weighted_colspans.length)];
-          height = colspan * 80 + ((colspan - 1) * 12);
+          if (container_i === 0) {
+            colspan = weighted_colspans[Math.floor(Math.random() * weighted_colspans.length)];
+            height = colspan * 80 + ((colspan - 1) * 12);
+          } else {
+            height = Math.random() * 100 + 100;
+            colspan = 1;
+          }
           elements.push("<li data-ss-colspan=" + colspan + " style='height: " + height + "'><div class='position'></div></li>");
         }
         return $(this).append(elements.join(""));
@@ -48,7 +53,6 @@
               case "placekittens":
                 background = 'url("http://www.placekitten.com/' + width + '/' + height + '")';
             }
-            background = '';
             _results.push($child.css({
               backgroundImage: background,
               height: height

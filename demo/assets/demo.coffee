@@ -9,13 +9,16 @@ $ ->
   do renderChildren = ->
     weighted_colspans = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,3,3]
 
-    $containers.each ->
+    $containers.each (container_i) ->
       elements = []
 
       for i in [0...child_count]
-        colspan = weighted_colspans[Math.floor(Math.random() * weighted_colspans.length)]
-        height = colspan * 80 + ((colspan - 1) * 12)
-        # height = Math.random() * 100 + 100
+        if container_i is 0
+          colspan = weighted_colspans[Math.floor(Math.random() * weighted_colspans.length)]
+          height = colspan * 80 + ((colspan - 1) * 12)
+        else
+          height = Math.random() * 100 + 100
+          colspan = 1
         elements.push "<li data-ss-colspan="+colspan+" style='height: "+height+"'><div class='position'></div></li>"
 
       $(@).append(elements.join(""))
@@ -45,7 +48,6 @@ $ ->
               background = 'url("http://fpoimg.com/'+width+'x'+height+'?bg_color='+getRandomColor()+'&text_color=444444")'
             when "placekittens"
               background = 'url("http://www.placekitten.com/'+width+'/'+height+'")'
-          background = ''
 
           $child.css
             backgroundImage: background
