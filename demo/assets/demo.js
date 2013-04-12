@@ -14,7 +14,7 @@
         for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
           colspan = weighted_colspans[Math.floor(Math.random() * weighted_colspans.length)];
           height = colspan * 80 + ((colspan - 1) * 12);
-          elements.push("<li data-ss-colspan=" + colspan + " style='height: " + height + "'><div class='position'><div>" + i + "</div></div></li>");
+          elements.push("<li data-ss-colspan=" + colspan + " style='height: " + height + "'><div class='position'></div></li>");
         }
         return $(this).append(elements.join(""));
       });
@@ -73,13 +73,17 @@
       return $containers.shapeshift(filter_options);
     });
     $(".options ul.dragndrop li").on("click", function() {
+      console.log("!");
       switch ($(this).data("option")) {
         case "enable":
-          filter_options.animated = true;
+          filter_options.enableDrag = true;
+          filter_options.enableDrop = true;
           break;
         default:
-          filter_options.animated = false;
+          filter_options.enableDrag = false;
+          filter_options.enableDrop = false;
       }
+      $containers.trigger('ss-destroy');
       return $containers.shapeshift(filter_options);
     });
     $(".options ul.filtering li").on("click", function() {
@@ -92,9 +96,9 @@
         default:
           $containers.children(":hidden").sort(function() {
             return Math.round(Math.random()) - 0.5;
-          }).first().hide();
+          }).first().show();
       }
-      return $containers.trigger("ss-arrange");
+      return $containers.trigger("ss-rearrange");
     });
     $(".options ul.placeholders li").on("click", function() {
       renderPlaceholders($(this).data("option"));

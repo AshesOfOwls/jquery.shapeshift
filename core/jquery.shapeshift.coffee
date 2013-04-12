@@ -14,6 +14,7 @@
     enableDrag: true
     enableCrossDrop: true
     enableResize: true
+    enableTrash: true
 
     # Grid Properties
     align: "center"
@@ -88,6 +89,7 @@
       $container.off("ss-arrange").on "ss-arrange", => @render()
       $container.off("ss-rearrange").on "ss-rearrange", => @render(true)
       $container.off("ss-setTargetPosition").on "ss-setTargetPosition", => @setTargetPosition()
+      $container.off("ss-destroy").on "ss-destroy", => @destroy()
 
     # ----------------------------
     # setGlobals:
@@ -157,7 +159,7 @@
     # attributes for all the active children
     # ----------------------------
     setParsedChildren: ->
-      $children = @$container.find("." + @options.activeClass)
+      $children = @$container.find("." + @options.activeClass).filter(":visible")
       total = $children.length
 
       parsedChildren = []
@@ -521,9 +523,10 @@
       total_positions = child_positions.length
 
       selected_x = $selected.offset().left - $start_container.offset().left + (@globals.col_width / 2)
-      selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 3)
+      selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 2)
+
       shortest_distance = 9999999
-      target_position = 0
+      target_position = total_positions
 
       cutoff_start = options.cutoffStart || 0
       cutoff_end = options.cutoffEnd || total_positions
@@ -535,11 +538,12 @@
           y_dist = selected_x - attributes.left
           x_dist = selected_y - attributes.top
 
-          distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist))
+          if y_dist > 0 and x_dist > 0
+            distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist))
 
-          if distance > 0 and distance < shortest_distance
-            shortest_distance = distance
-            target_position = position_i
+            if distance < shortest_distance
+              shortest_distance = distance
+              target_position = position_i
 
       if target_position is parsed_children.length
         $target = parsed_children[target_position - 1].el
@@ -602,6 +606,22 @@
     # ----------------------------
     highestCol: (array) ->
       $.inArray Math.max.apply(window,array), array
+
+    # ----------------------------
+    # destroy:
+    # ----------------------------
+    destroy: ->
+      $container = @$container
+      
+      $container.off("ss-arrange")
+      $container.off("ss-rearrange")
+      $container.off("ss-setTargetPosition")
+      $container.off("ss-destroy")
+      
+      if @options.enableDrag
+        $container.children().draggable().draggable('destroy')
+      if @options.enableDrop
+        $container.droppable('destroy')
 
 
   $.fn[pluginName] = (options) ->

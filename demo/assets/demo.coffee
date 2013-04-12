@@ -16,7 +16,7 @@ $ ->
         colspan = weighted_colspans[Math.floor(Math.random() * weighted_colspans.length)]
         height = colspan * 80 + ((colspan - 1) * 12)
         # height = Math.random() * 100 + 100
-        elements.push "<li data-ss-colspan="+colspan+" style='height: "+height+"'><div class='position'><div>"+i+"</div></div></li>"
+        elements.push "<li data-ss-colspan="+colspan+" style='height: "+height+"'><div class='position'></div></li>"
 
       $(@).append(elements.join(""))
 
@@ -74,12 +74,16 @@ $ ->
     $containers.shapeshift filter_options
 
   $(".options ul.dragndrop li").on "click", ->
+    console.log "!"
     switch $(this).data "option"
       when "enable"
-        filter_options.animated = true
+        filter_options.enableDrag = true
+        filter_options.enableDrop = true
       else
-        filter_options.animated = false
+        filter_options.enableDrag = false
+        filter_options.enableDrop = false
 
+    $containers.trigger 'ss-destroy'
     $containers.shapeshift filter_options
 
   $(".options ul.filtering li").on "click", ->
@@ -91,9 +95,9 @@ $ ->
       else
         $containers.children(":hidden").sort( ->
           Math.round(Math.random())-0.5
-        ).first().hide()
+        ).first().show()
 
-    $containers.trigger "ss-arrange"
+    $containers.trigger "ss-rearrange"
 
   $(".options ul.placeholders li").on "click", ->
     renderPlaceholders $(this).data("option")

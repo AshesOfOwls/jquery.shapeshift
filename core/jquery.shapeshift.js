@@ -9,6 +9,7 @@
       enableDrag: true,
       enableCrossDrop: true,
       enableResize: true,
+      enableTrash: true,
       align: "center",
       autoHeight: true,
       columns: null,
@@ -71,8 +72,11 @@
         $container.off("ss-rearrange").on("ss-rearrange", function() {
           return _this.render(true);
         });
-        return $container.off("ss-setTargetPosition").on("ss-setTargetPosition", function() {
+        $container.off("ss-setTargetPosition").on("ss-setTargetPosition", function() {
           return _this.setTargetPosition();
+        });
+        return $container.off("ss-destroy").on("ss-destroy", function() {
+          return _this.destroy();
         });
       };
 
@@ -125,7 +129,7 @@
 
       Plugin.prototype.setParsedChildren = function() {
         var $child, $children, child, i, parsedChildren, total, _i;
-        $children = this.$container.find("." + this.options.activeClass);
+        $children = this.$container.find("." + this.options.activeClass).filter(":visible");
         total = $children.length;
         parsedChildren = [];
         for (i = _i = 0; 0 <= total ? _i < total : _i > total; i = 0 <= total ? ++_i : --_i) {
@@ -430,9 +434,9 @@
         child_positions = this.getPositions(false);
         total_positions = child_positions.length;
         selected_x = $selected.offset().left - $start_container.offset().left + (this.globals.col_width / 2);
-        selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 3);
+        selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 2);
         shortest_distance = 9999999;
-        target_position = 0;
+        target_position = total_positions;
         cutoff_start = options.cutoffStart || 0;
         cutoff_end = options.cutoffEnd || total_positions;
         for (position_i = _i = cutoff_start; cutoff_start <= cutoff_end ? _i < cutoff_end : _i > cutoff_end; position_i = cutoff_start <= cutoff_end ? ++_i : --_i) {
@@ -440,10 +444,12 @@
           if (attributes) {
             y_dist = selected_x - attributes.left;
             x_dist = selected_y - attributes.top;
-            distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist));
-            if (distance > 0 && distance < shortest_distance) {
-              shortest_distance = distance;
-              target_position = position_i;
+            if (y_dist > 0 && x_dist > 0) {
+              distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist));
+              if (distance < shortest_distance) {
+                shortest_distance = distance;
+                target_position = position_i;
+              }
             }
           }
         }
@@ -505,6 +511,21 @@
 
       Plugin.prototype.highestCol = function(array) {
         return $.inArray(Math.max.apply(window, array), array);
+      };
+
+      Plugin.prototype.destroy = function() {
+        var $container;
+        $container = this.$container;
+        $container.off("ss-arrange");
+        $container.off("ss-rearrange");
+        $container.off("ss-setTargetPosition");
+        $container.off("ss-destroy");
+        if (this.options.enableDrag) {
+          $container.children().draggable().draggable('destroy');
+        }
+        if (this.options.enableDrop) {
+          return $container.droppable('destroy');
+        }
       };
 
       return Plugin;
