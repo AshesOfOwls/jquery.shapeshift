@@ -11,7 +11,7 @@ Inspired heavily by the [jQuery Masonry plugin](http://masonry.desandro.com/), S
 
 Index
 -----
-[Getting Started](#getting-started)
+#### [Getting Started](#getting-started)
 * [Dependencies](#dependencies)
 * [Setting up the Parent Container](#setting-up-the-parent-container)
 * [Setting up the Child Elements](#setting-up-the-child-elements)
