@@ -209,77 +209,66 @@ $('.container').shapeshift({
   <tr>
     <th>Option</th>
     <th>Description</th>
-    <th>Type</th>
     <th>Default</th>
     <th>Acceptable Values</th>
   </tr>
   <tr>
     <td>align</td>
     <td>Align / justify the grid.</td>
-    <td>String</td>
     <td>"center"</td>
     <td>"left", "center", "right"</td>
   </tr>
   <tr>
     <td>columns</td>
     <td>Force the grid to have a specific number of columns. Setting this to null will automatically determine the maximum columns for the width of the container.</td>
-    <td>Integer</td>
     <td>null</td>
     <td>Any Integer >= 1</td>
   </tr>
   <tr>
     <td>minColumns</td>
     <td>This will prevent the grid from ever going below a set number of columns. If using multiwidth then this must be set to the highest colspan child element.</td>
-    <td>Integer</td>
     <td>1</td>
     <td>Any Integer >= 1</td>
   </tr>
   <tr>
     <td>autoHeight</td>
     <td>Automatically sets the height of the container according to the height of the contents within it. If set to false, then the "height" option must also be specified.</td>
-    <td>Boolean</td>
     <td>true</td>
     <td>true, false</td>
   </tr>
   <tr>
     <td>maxHeight</td>
     <td>If "autoHeight" is turned on, maxHeight will never allow the container height to go above this number.</td>
-    <td>Integer</td>
     <td>null</td>
     <td>Any Integer >= 1</td>
   </tr>
   <tr>
     <td>minHeight</td>
     <td>If "autoHeight" is turned on, minHeight will never allow the container height to go below this number.</td>
-    <td>Integer</td>
     <td>100</td>
     <td>Any Integer >= 1</td>
   </tr>
   <tr>
     <td>gutterX</td>
     <td>The number of pixels horizontally between each column.</td>
-    <td>Integer</td>
     <td>10</td>
     <td>Any Integer >= 0</td>
   </tr>
   <tr>
     <td>gutterY</td>
     <td>The number of pixels vertically between each element.</td>
-    <td>Integer</td>
     <td>10</td>
     <td>Any Integer >= 0</td>
   </tr>
   <tr>
     <td>paddingX</td>
     <td>Sets the horizontal padding of the grid between the left and right sides of the container.</td>
-    <td>Integer</td>
     <td>10</td>
     <td>Any Integer >= 0</td>
   </tr>
   <tr>
     <td>paddingY</td>
     <td>Sets the vertical padding of the grid between the top and bottom sides of the container.</td>
-    <td>Integer</td>
     <td>10</td>
     <td>Any Integer >= 0</td>
   </tr>
