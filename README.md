@@ -9,6 +9,14 @@ Column Grid System + Drag and Drop
 Inspired heavily by the [jQuery Masonry plugin](http://masonry.desandro.com/), Shapeshift is a plugin which will dynamically arrange a collection of elements into a column grid system similar to [Pinterest](http://www.pinterest.com). What sets it apart is the ability to drag and drop items within the grid while still maintaining a logical index position for each item. This allows for the grid to be rendered exactly the same every time Shapeshift is used, as long as the child elements are in the correct order.
 
 
+Index
+-----
+* [Getting Started](#getting-started)
+** [Dependencies](#dependencies)
+** [Setting up the Parent Container](#setting-up-the-parent-container)
+** [Setting up the Child Elements](#setting-up-the-child-elements)
+
+
 Features
 --------
 
@@ -418,18 +426,6 @@ Certain elements will have CSS classes attached to them for specific events. Cus
     <td>ss-previous-container</td>
   </tr>
 </table>
-
-
-### Styling the Dragged Element
-
-When an element is picked up it the ".ss-moving" class will be appended to it. Just target it in your own CSS file. For example,
-
-```css
-.container .ss-moving {
-  opacity: .7;
-  transform: rotate(3deg);
-}
-```
 
 ### Detecting Changes
 
