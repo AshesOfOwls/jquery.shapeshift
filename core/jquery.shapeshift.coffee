@@ -8,7 +8,7 @@
   pluginName = "shapeshift"
   defaults =
     # The Basics
-    selector: ""
+    selector: "*"
 
     # Features
     enableDrag: true

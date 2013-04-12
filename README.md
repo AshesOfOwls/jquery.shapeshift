@@ -105,52 +105,107 @@ $('.container').shapeshift();
 ```
 
 
-Advanced Options
+Options
 ---------------
 
 ### Shapeshift Options
 
-There are several options that can be passed into the plugin through the objects hash, which also includes turning core features on or off. Here is an example of those options and then descriptions of each attribute.
-
-***All of these attributes are the defaults.***
+Customize your grid even further. All of these are the default options and more in depth information can be found further down the page.
 
 ```javascript
 $('.container').shapeshift({
-  // Features
-  centerGrid: true,
-  enableAnimation: true,
-  enableAnimationOnInit: false,
-  enableAutoHeight: true,
-  enableDrag: true,
-  enableDragAnimation: true,
-  enableRearrange: true,
-  enableResize: true,
-  enableTrash: false,
+  // The Basics
+  selector: "*",
 
-  // Options
-  animateSpeed: 150,
+  // Features
+  enableDrag: true,
+  enableCrossDrop: true,
+  enableResize: true,
+  enableTrash: true,
+
+  // Grid Properties
+  align: "center",
+  autoHeight: true,
   columns: null,
-  dragClone: false,
-  dragRate: 100,
-  dragWhitelist: "*",
-  dropCutoff: 0,
-  dropWhitelist: "*",
+  minColumns: 1,
+  height: 100,
+  maxHeight: null,
+  minHeight: 100,
   gutterX: 10,
   gutterY: 10,
-  minHeight: 100,
-  paddingY: 0,
-  paddingX: 0,
-  selector: ""
+  paddingX: 10,
+  paddingY: 10,
+
+  // Animation
+  animated: true,
+  animateOnInit: false,
+  animationSpeed: 225,
+  animationThreshold: 100,
+
+  // Drag/Drop Options
+  dragClone: false,
+  deleteClone: false,
+  dragRate: 100,
+  dragWhitelist: "*",
+  crossDropWhitelist: "*",
+  cutoffStart: null,
+  cutoffEnd: null,
+
+  // Customize CSS
+  cloneClass: "ss-cloned-child",
+  activeClass: "ss-active-child",
+  draggedClass: "ss-dragged-child",
+  placeholderClass: "ss-placeholder-child",
+  originalContainerClass: "ss-original-container",
+  currentContainerClass: "ss-current-container",
+  previousContainerClass: "ss-previous-container"
 });
 ```
 
+### The Basics
+
 <table>
   <tr>
-    <th>Feature</th>
+    <th>Option</th>
     <th>Description</th>
     <th>Type</th>
     <th>Default</th>
-    <th>Example</th>
+    <th>Values</th>
+  </tr>
+  <tr>
+    <td>Selector</td>
+    <td>Use a CSS selector to specify which child elements should be Shapeshifted.</td>
+    <td>String</td>
+    <td>"*"</td>
+    <td>Any CSS selector, such as ".doctor" or "#who"</td>
+  </tr>
+</table>
+
+### Extra Features
+<table>
+  <tr>
+    <th>Option</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+    <th>Values</th>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <th>Option</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+    <th>Values</th>
   </tr>
   <tr>
     <td>centerGrid</td>

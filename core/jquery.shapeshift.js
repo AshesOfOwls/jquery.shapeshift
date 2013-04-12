@@ -5,7 +5,7 @@
     var Plugin, defaults, pluginName;
     pluginName = "shapeshift";
     defaults = {
-      selector: "",
+      selector: "*",
       enableDrag: true,
       enableCrossDrop: true,
       enableResize: true,
