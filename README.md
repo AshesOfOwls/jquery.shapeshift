@@ -121,7 +121,6 @@ $('.container').shapeshift({
   enableDrag: true,
   enableCrossDrop: true,
   enableResize: true,
-  enableTrash: true,
 
   // Grid Properties
   align: "center",
@@ -184,192 +183,63 @@ $('.container').shapeshift({
 ### Extra Features
 <table>
   <tr>
-    <th>Option</th>
+    <th>Feature</th>
     <th>Description</th>
-    <th>Type</th>
     <th>Default</th>
-    <th>Values</th>
   </tr>
   <tr>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>enableDrag</td>
+    <td>Allows for the child items to be dragged in the container and to other containers that have drop enabled. See Drag and Drop options for more customization.</td>
+    <td>true</td>
+  </tr>
+  <tr>
+    <td>enableCrossDrop</td>
+    <td>Allows for children to be dropped from *other* containers into this one.</td>
+    <td>true</td>
+  </tr>
+  <tr>
+    <td>enableResize</td>
+    <td>Shapeshift will listen for the window resize event and rearrange the child elements if the parent container has also changed.</td>
+    <td>true</td>
   </tr>
 </table>
 
+### Grid Properties
 <table>
   <tr>
     <th>Option</th>
     <th>Description</th>
     <th>Type</th>
     <th>Default</th>
-    <th>Values</th>
+    <th>Acceptable Values</th>
   </tr>
   <tr>
-    <td>centerGrid</td>
-    <td>Center the grid inside the container. This is mainly helpful for when using a responsive container width.</td>
+    <td>align</td>
+    <td>Align / justify the grid.</td>
+    <td>String</td>
+    <td>"center"</td>
+    <td>"left", "center", "right"</td>
+  </tr>
+  <tr>
+    <td>autoHeight</td>
+    <td>Automatically sets the height of the container according to the height of the contents within it. If set to false, then the "height" option must also be specified.</td>
     <td>Boolean</td>
     <td>true</td>
-    <td>false</td>
-  </tr>
-  <tr>
-    <td>enableAnimation</td>
-    <td>Objects will animate into their new position when shapeshift() is initialized, or when the container is resized.</td>
-    <td>Boolean</td>
-    <td>true</td>
-    <td>false</td>
-  </tr>
-  <tr>
-    <td>enableAnimationOnInit</td>
-    <td>Determines if objects will be animated into position when the page initially loads.</td>
-    <td>Boolean</td>
-    <td>false</td>
-    <td>true</td>
-  </tr>
-  <tr>
-    <td>enableAutoHeight</td>
-    <td>If this is set to true the parent containers height will be automatically be adjusted to compensate for all of the child elements.</td>
-    <td>Boolean</td>
-    <td>true</td>
-    <td>false</td>
-  </tr>
-  <tr>
-    <td>enableDrag</td>
-    <td>Enables objects in this container to be drag and dropped.</td>
-    <td>Boolean</td>
-    <td>true</td>
-    <td>false</td>
-  </tr>
-  <tr>
-    <td>enableDragAnimation</td>
-    <td>Turn off the object animations of other elements when an element is being dragged.</td>
-    <td>Boolean</td>
-    <td>true</td>
-    <td>false</td>
-  </tr>
-  <tr>
-    <td>enableRearrange</td>
-    <td>Setting this to false will disable any rearrangement via drag & drop in the current container.</td>
-    <td>Boolean</td>
-    <td>true</td>
-    <td>false</td>
-  </tr>
-  <tr>
-    <td>enableResize</td>
-    <td>The elements will dynamically adjust to the width of their parent container.</td>
-    <td>Boolean</td>
-    <td>true</td>
-    <td>false</td>
-  </tr>
-  <tr>
-    <td>enableTrash</td>
-    <td>Any element dropped on this container will be removed from the DOM.</td>
-    <td>Boolean</td>
-    <td>false</td>
-    <td>true</td>
-  </tr>
-  <tr>
-    <th>Option</th>
-    <th>Description</th>
-    <th>Type</th>
-    <th>Default</th>
-    <th>Example</th>
-  </tr>
-  <tr>
-    <td>animateSpeed</td>
-    <td>The speed in milliseconds that the animations will transition using. This currently will also determine how often the drag function gets called, which is the animation speed divided by three (i.e. for the default speed, 100, the drag function will run every 33.3 milliseconds).</td>
-    <td>Integer</td>
-    <td>150</td>
-    <td>276</td>
+    <td>true, false</td>
   </tr>
   <tr>
     <td>columns</td>
-    <td>Manually specify the number of columns to render. It will automatically detect the maximum amount of columns by default.</td>
+    <td>Force the grid to have a specific number of columns. Setting this to null will automatically determine the maximum columns for the width of the container.</td>
     <td>Integer</td>
-    <td>null (Auto)</td>
-    <td>5</td>
+    <td>null</td>
+    <td>Any Integer >= 1</td>
   </tr>
   <tr>
-    <td>dragClone</td>
-    <td>If set to true, the item that is dragged will be a clone and therefore will not remove the item from the original container upon drop. This would be analogous to "copy and paste", instead of the default "cut and paste".</td>
-    <td>Boolean</td>
-    <td>false</td>
-    <td>true</td>
-  </tr>
-  <tr>
-    <td>dragRate</td>
-    <td>Determines how often the program will detect a position for the currently dragged item to be dropped, in milliseconds. The faster the speed then the more the computer will have to process, but the slower the speed the less responsive it is to items being dragged around.</td>
+    <td>minColumns</td>
+    <td>This will prevent the grid from ever going below a set number of columns. If using multiwidth then this must be set to the highest colspan child element.</td>
     <td>Integer</td>
-    <td>100</td>
-    <td>55</td>
-  </tr>
-  <tr>
-    <td>dragWhitelist</td>
-    <td>Specify a string which contains the elements that ***can*** be dropped into this container. This defaults to any element being draggable.</td>
-    <td>String</td>
-    <td>"*"</td>
-    <td>".comment, .post, div, #taco"</td>
-  </tr>
-  <tr>
-    <td>dropCutoff</td>
-    <td>Prevents a user from dropping an item X amount from the end of the objects list. For example, if you have 20 items in your container, and you set the dropCutoff to be 3, then you would not be able to drop after the 17th item.</td>
-    <td>Integer</td>
-    <td>0</td>
-    <td>3</td>
-  </tr>
-  <tr>
-    <td>dropWhitelist</td>
-    <td>Specify a string which contains the elements that ***can*** be dropped into this container. This defaults to any element being droppable.
-
-    ***If a white list is set, only items listed with it can be draggable.***</td>
-    <td>String</td>
-    <td>"*"</td>
-    <td>".comment, .post, div, #taco"</td>
-  </tr>
-  <tr>
-    <td>gutterX</td>
-    <td>Sets the amount of padding horizontally between columns.</td>
-    <td>Integer</td>
-    <td>10</td>
-    <td>25</td>
-  </tr>
-  <tr>
-    <td>gutterY</td>
-    <td>Sets the amount of padding vertically between objects.</td>
-    <td>Integer</td>
-    <td>10</td>
-    <td>25</td>
-  </tr>
-  <tr>
-    <td>minHeight</td>
-    <td>Set a minimum height that the container element will be. ***This is only helpful if you have enableAutoHeight turned on.***</td>
-    <td>Integer</td>
-    <td>100</td>
-    <td>550</td>
-  </tr>
-  <tr>
-    <td>paddingX</td>
-    <td>Offset the entire grid from the left side of the container element with this attribute.</td>
-    <td>Integer</td>
-    <td>0</td>
-    <td>42</td>
-  </tr>
-  <tr>
-    <td>paddingY</td>
-    <td>Offset the entire grid from the top of the container element with this attribute.</td>
-    <td>Integer</td>
-    <td>0</td>
-    <td>42</td>
-  </tr>
-  <tr>
-    <td>selector</td>
-    <td>Shapeshift will by default try to rearrange all of the child elements within the parent element. Setting a selector will target only the children with the class, ID, or element name that the selector describes.
-</td>
-    <td>String</td>
-    <td>""</td>
-    <td>".gallery_image"</td>
+    <td>1</td>
+    <td>Any Integer >= 1</td>
   </tr>
 </table>
 
