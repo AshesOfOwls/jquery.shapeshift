@@ -1,4 +1,4 @@
-[Shapeshift](http://mcpants.github.com/jquery.shapeshift/) [![Build 2.0]]
+Shapeshift v2.0
 ==========================================================
 
 [Check out a demo here.](http://mcpants.github.com/jquery.shapeshift/)
