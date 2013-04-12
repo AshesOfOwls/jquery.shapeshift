@@ -279,31 +279,31 @@ $('.container').shapeshift({
   <tr>
     <th>Option</th>
     <th>Description</th>
-    <th>Type</th>
+    <th>Acceptable Values</th>
     <th>Default</th>
   </tr>
   <tr>
     <td>animated</td>
     <td>When children shift around via the resize or drag and drop features, they will animate into place.</td>
-    <td>Boolean</td>
+    <td>true, false</td>
     <td>true</td>
   </tr>
   <tr>
     <td>animateOnInit</td>
     <td>Animates the children into position upon page load.</td>
-    <td>Boolean</td>
+    <td>true, false</td>
     <td>false</td>
   </tr>
   <tr>
     <td>animationSpeed</td>
     <td>The speed at which the children will animate into place.</td>
-    <td>Integer</td>
+    <td>Any Integer >= 0</td>
     <td>225</td>
   </tr>
   <tr>
     <td>animationThreshold</td>
     <td>If there are too many elements on a page then it can get very laggy during animation. If the number of children exceed this threshold then they will not animate when changing positions.</td>
-    <td>Integer</td>
+    <td>Any Integer >= 0</td>
     <td>100</td>
   </tr>
 </table>
