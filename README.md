@@ -8,6 +8,7 @@ Column Grid System + Drag and Drop
 
 Inspired heavily by the [jQuery Masonry plugin](http://masonry.desandro.com/), Shapeshift is a plugin which will dynamically arrange a collection of elements into a column grid system similar to [Pinterest](http://www.pinterest.com). What sets it apart is the ability to drag and drop items within the grid while still maintaining a logical index position for each item. This allows for the grid to be rendered exactly the same every time Shapeshift is used, as long as the child elements are in the correct order.
 
+
 Features
 --------
 
@@ -17,11 +18,15 @@ Features
 * **Works on Touch Devices**
   Shapeshift uses jQuery UI Draggable/Droppable for help with the drag and drop system. Luckily there is already a plugin called [jQuery Touch Punch](http://touchpunch.furf.com/) which provides touch support for jQuery UI D/D. It can be found in the vendor folder.
 
+* **Multiwidth Elements**
+  A new feature in 2.0 is the ability to add elements that can span across multiple columns as long as their width is correctly set through CSS.
+
 * **Responsive Grid**
   Enabled by default, Shapeshift will listen for window resize events and arrange the elements within it according to the space provided by their parent container.
 
 
-## Credits
+Credits
+-------
 
 A big thanks to all of our [contributors](https://github.com/McPants/jquery.shapeshift/graphs/contributors)!
 
@@ -29,19 +34,23 @@ A big thanks to all of our [contributors](https://github.com/McPants/jquery.shap
 
 Shapeshift is maintained by [We The Media, inc.](http://wtmworldwide.com/)
 
-## Sites Using Shapeshift
+
+Sites Using Shapeshift
+----------------------
 
 Got a project that you are using shapeshift on? Let us know and we will happily throw a link to your page here!
 
-## Getting Started
+
+Getting Started
+---------------
 
 ### Dependencies
 
-Shapeshift requires the latest version of jQuery, and the drag and drop functionality requires jQuery UI Draggable/Droppable libraries. It also requires [jQuery Touch Punch](http://touchpunch.furf.com/) to work on touch devices.
+Shapeshift requires the latest version of jQuery, and drag and drop feature (enabled by default) requires jQuery UI Draggable/Droppable libraries. It also requires [jQuery Touch Punch](http://touchpunch.furf.com/) to work on touch devices.
 
 ### Setting Up the Parent Container
 
-Objects that get shapeshifted will be absolutely positioned in their parent container. Therefore the parent container must be set to position: relative for the objects to position themselves correctly.
+Shapeshift arranges child elements by absolutely positioning them in their parent container which must be set to "position: relative". The container does not have to be a div and can be substituted for any element that can have child elements, such as an unordered list.
 
 ```html
 <div class="container" style="position: relative;"></div>
@@ -49,9 +58,7 @@ Objects that get shapeshifted will be absolutely positioned in their parent cont
 
 ### Setting up the Child Elements
 
-The direct children of the parent element are what gets rearranged into the grid system. As mentioned before, each child element will be absolutely positions and obviously must then have a position: absolute attached to them.
-
-**note**: All child elements **must** be the same width. Heights can be dynamic, however.
+By default all child elements within the parent container will be Shapeshifted. Just make sure that they are set to "position: absolute" in your CSS file.
 
 ```html
 <div class="container" style="position: relative;">
@@ -59,10 +66,35 @@ The direct children of the parent element are what gets rearranged into the grid
   <div style="position: absolute;">Child Element 2</div>
   <div style="position: absolute;">Child Element 3</div>
   <div style="position: absolute;">Child Element 4</div>
+  ...
 </div>
 ```
 
-The class name and type of elements you can use are completely changable. The only real requirement is the parent must be relative and the children absolute. You can even call shapeshift on multiple elements that have the same class name.
+### Multiwidth Children
+
+Shapeshift relies on a column grid system, this means that every time Shapeshift is initialized on a container it will determine the column width based on the width of the first child in that container. If no column width is set on a child element then Shapeshift will assume it will use it to set the single column width for the grid.
+
+To make a child element multiwidth, simply add the data attribute "data-ss-colspan=X", where X is the amount of columns it should span. Shapeshift does not automatically set their width though so the childs width must already be set to the correct width. The calculated width must be set to: "single column width * columns to span + the gutter space in between".
+
+For example, assuming the default gutter value of 10px, multiwidth elements can be created as such:
+
+```css
+.container div { width: 80px; } # When no colspan is set, it is one colspan
+.container div[data-ss-colspan="2"] { width: 170px; }
+.container div[data-ss-colspan="3"] { width: 260px; }
+.container div[data-ss-colspan="4"] { width: 350px; }
+```
+
+```html
+<div class="container" style="position: relative;">
+  <div style="position: absolute;">1 Column Width</div>
+  <div style="position: absolute;" data-ss-colspan="2">2 Column Width</div>
+  <div style="position: absolute;" data-ss-colspan="3">3 Column Width</div>
+  <div style="position: absolute;" data-ss-colspan="4">4 Column Width</div>
+  ...
+</div>
+```
+
 
 ### Shapeshift Everything!
 
@@ -71,6 +103,10 @@ Now that we have our setup complete, simply call .shapeshift() on the parent ele
 ```javascript
 $('.container').shapeshift();
 ```
+
+
+Advanced Options
+---------------
 
 ### Shapeshift Options
 
