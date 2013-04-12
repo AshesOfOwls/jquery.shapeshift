@@ -18,10 +18,9 @@
 
     # Grid Properties
     align: "center"
-    autoHeight: true
     columns: null
     minColumns: 1
-    height: 100
+    autoHeight: true
     maxHeight: null
     minHeight: 100
     gutterX: 10
@@ -282,8 +281,6 @@
           container_height = max_height
 
         $container.height container_height
-      else
-        $container.height options.height
 
       $container.trigger("ss-arranged");
 
