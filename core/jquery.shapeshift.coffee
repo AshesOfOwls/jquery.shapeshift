@@ -31,7 +31,7 @@
 
     # Animation
     animated: true
-    animateOnInit: true
+    animateOnInit: false
     animationSpeed: 225
     animationThreshold: 100
 
@@ -612,7 +612,6 @@
     # ----------------------------
     destroy: ->
       $container = @$container
-      
       $container.off("ss-arrange")
       $container.off("ss-rearrange")
       $container.off("ss-setTargetPosition")

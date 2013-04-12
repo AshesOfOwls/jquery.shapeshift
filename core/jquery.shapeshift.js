@@ -22,7 +22,7 @@
       paddingX: 10,
       paddingY: 10,
       animated: true,
-      animateOnInit: true,
+      animateOnInit: false,
       animationSpeed: 225,
       animationThreshold: 100,
       dragClone: false,
