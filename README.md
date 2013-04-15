@@ -82,7 +82,7 @@ By default all child elements within the parent container will be Shapeshifted. 
 
 ### Multiwidth Children
 
-Shapeshift relies on a column grid system, this means that every time Shapeshift is initialized on a container it will determine the column width based on the width of the first child in that container. If no column width is set on a child element then Shapeshift will assume it will use it to set the single column width for the grid.
+Shapeshift relies on a column grid system, this means that every time Shapeshift is initialized on a container it will determine the column width based on the width of the first child in that container. If no column width is specified on a child element then Shapeshift will assume it will use it to set the single column width for the grid.
 
 To make a child element multiwidth, simply add the data attribute "data-ss-colspan=X", where X is the amount of columns it should span. Shapeshift does not automatically set their width though so the childs width must already be set to the correct width. The calculated width must be set to: "single column width * columns to span + the gutter space in between".
 
@@ -227,6 +227,12 @@ $('.container').shapeshift({
     <td>Align / justify the grid.</td>
     <td>"left", "center", "right"</td>
     <td>"center"</td>
+  </tr>
+  <tr>
+    <td>colWidth</td>
+    <td>Manually set the column width. Column width is automatically determined by Shapeshift, however it is required to be set if the container has no initial children to calculate it from.</td>
+    <td>Any Integer >= 1</td>
+    <td>1</td>
   </tr>
   <tr>
     <td>columns</td>

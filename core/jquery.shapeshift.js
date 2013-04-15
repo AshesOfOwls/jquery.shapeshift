@@ -11,7 +11,7 @@
       enableResize: true,
       enableTrash: true,
       align: "center",
-      colWidth: 82,
+      colWidth: null,
       columns: null,
       minColumns: 1,
       autoHeight: true,
@@ -396,8 +396,9 @@
               return ui.position.top = e.pageY - $selected.parent().offset().top - selected_offset_y;
             },
             stop: function() {
+              console.log("!");
               $selected.removeClass(dragged_class);
-              $placeholder.remove();
+              $("." + placeholder_class).remove();
               if (drag_clone) {
                 if (delete_clone && $("." + current_container_class)[0] === $("." + original_container_class)[0]) {
                   $clone.remove();
@@ -421,69 +422,82 @@
               $("." + previous_container_class).removeClass(previous_container_class);
               $("." + current_container_class).removeClass(current_container_class).addClass(previous_container_class);
               return $(e.target).addClass(current_container_class);
+            },
+            drop: function(e, selected) {
+              if (_this.options.enableTrash) {
+                $(selected.helper).remove();
+                $("." + original_container_class).trigger("ss-rearrange").removeClass(original_container_class);
+                $("." + current_container_class).trigger("ss-rearrange").removeClass(current_container_class);
+                return $("." + previous_container_class).trigger("ss-arrange").removeClass(previous_container_class);
+              }
             }
           });
         }
       };
 
       Plugin.prototype.setTargetPosition = function() {
-        var $selected, $start_container, $target, attributes, child_positions, cutoff_end, cutoff_start, distance, dragged_class, options, parsed_children, position_i, previous_container_class, selected_x, selected_y, shortest_distance, target_position, total_positions, x_dist, y_dist, _i;
+        var $selected, $start_container, $target, attributes, child_positions, cutoff_end, cutoff_start, distance, dragged_class, options, parsed_children, placeholder_class, position_i, previous_container_class, selected_x, selected_y, shortest_distance, target_position, total_positions, x_dist, y_dist, _i;
         options = this.options;
-        dragged_class = options.draggedClass;
-        $selected = $("." + dragged_class);
-        $start_container = $selected.parent();
-        parsed_children = this.parsedChildren;
-        child_positions = this.getPositions(false);
-        total_positions = child_positions.length;
-        selected_x = $selected.offset().left - $start_container.offset().left + (this.globals.col_width / 2);
-        selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 2);
-        shortest_distance = 9999999;
-        target_position = 0;
-        if (total_positions > 1) {
-          cutoff_start = options.cutoffStart + 1 || 0;
-          cutoff_end = options.cutoffEnd || total_positions;
-          for (position_i = _i = cutoff_start; cutoff_start <= cutoff_end ? _i < cutoff_end : _i > cutoff_end; position_i = cutoff_start <= cutoff_end ? ++_i : --_i) {
-            attributes = child_positions[position_i];
-            if (attributes) {
-              y_dist = selected_x - attributes.left;
-              x_dist = selected_y - attributes.top;
-              if (y_dist > 0 && x_dist > 0) {
-                distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist));
-                if (distance < shortest_distance) {
-                  shortest_distance = distance;
-                  target_position = position_i;
-                  if (position_i === total_positions - 1) {
-                    if (y_dist > parsed_children[position_i].height / 2) {
-                      target_position++;
+        if (!options.enableTrash) {
+          dragged_class = options.draggedClass;
+          $selected = $("." + dragged_class);
+          $start_container = $selected.parent();
+          parsed_children = this.parsedChildren;
+          child_positions = this.getPositions(false);
+          total_positions = child_positions.length;
+          selected_x = $selected.offset().left - $start_container.offset().left + (this.globals.col_width / 2);
+          selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 2);
+          shortest_distance = 9999999;
+          target_position = 0;
+          if (total_positions > 1) {
+            cutoff_start = options.cutoffStart + 1 || 0;
+            cutoff_end = options.cutoffEnd || total_positions;
+            for (position_i = _i = cutoff_start; cutoff_start <= cutoff_end ? _i < cutoff_end : _i > cutoff_end; position_i = cutoff_start <= cutoff_end ? ++_i : --_i) {
+              attributes = child_positions[position_i];
+              if (attributes) {
+                y_dist = selected_x - attributes.left;
+                x_dist = selected_y - attributes.top;
+                if (y_dist > 0 && x_dist > 0) {
+                  distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist));
+                  if (distance < shortest_distance) {
+                    shortest_distance = distance;
+                    target_position = position_i;
+                    if (position_i === total_positions - 1) {
+                      if (y_dist > parsed_children[position_i].height / 2) {
+                        target_position++;
+                      }
                     }
                   }
                 }
               }
             }
-          }
-          if (target_position === parsed_children.length) {
-            $target = parsed_children[target_position - 1].el;
-            $selected.insertAfter($target);
-          } else {
-            $target = parsed_children[target_position].el;
-            $selected.insertBefore($target);
-          }
-        } else {
-          if (total_positions === 1) {
-            attributes = child_positions[0];
-            if (attributes.left < selected_x) {
-              this.$container.append($selected);
+            if (target_position === parsed_children.length) {
+              $target = parsed_children[target_position - 1].el;
+              $selected.insertAfter($target);
             } else {
-              this.$container.prepend($selected);
+              $target = parsed_children[target_position].el;
+              $selected.insertBefore($target);
             }
           } else {
-            this.$container.append($selected);
+            if (total_positions === 1) {
+              attributes = child_positions[0];
+              if (attributes.left < selected_x) {
+                this.$container.append($selected);
+              } else {
+                this.$container.prepend($selected);
+              }
+            } else {
+              this.$container.append($selected);
+            }
           }
-        }
-        this.arrange(true);
-        if ($start_container[0] !== $selected.parent()[0]) {
-          previous_container_class = options.previousContainerClass;
-          return $("." + previous_container_class).trigger("ss-rearrange");
+          this.arrange(true);
+          if ($start_container[0] !== $selected.parent()[0]) {
+            previous_container_class = options.previousContainerClass;
+            return $("." + previous_container_class).trigger("ss-rearrange");
+          }
+        } else {
+          placeholder_class = this.options.placeholderClass;
+          return $("." + placeholder_class).remove();
         }
       };
 

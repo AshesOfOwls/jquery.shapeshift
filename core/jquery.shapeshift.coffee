@@ -18,7 +18,7 @@
 
     # Grid Properties
     align: "center"
-    colWidth: 82
+    colWidth: null
     columns: null
     minColumns: 1
     autoHeight: true
@@ -480,8 +480,9 @@
 
           stop: ->
             # Clear globals
+            console.log "!"
             $selected.removeClass(dragged_class)
-            $placeholder.remove()
+            $("." + placeholder_class).remove()
 
             if drag_clone
               if delete_clone and $("." + current_container_class)[0] is $("." + original_container_class)[0]
@@ -508,6 +509,13 @@
             $("." + current_container_class).removeClass(current_container_class).addClass(previous_container_class)
             $(e.target).addClass(current_container_class)
 
+          drop: (e, selected) =>
+            if @options.enableTrash
+              $(selected.helper).remove()
+              $("." + original_container_class).trigger("ss-rearrange").removeClass(original_container_class)
+              $("." + current_container_class).trigger("ss-rearrange").removeClass(current_container_class)
+              $("." + previous_container_class).trigger("ss-arrange").removeClass(previous_container_class)
+
     # ----------------------------
     # getTargetPosition:
     # Determine the target position for the selected
@@ -515,66 +523,71 @@
     # ----------------------------
     setTargetPosition: ->
       options = @options
-      dragged_class = options.draggedClass
 
-      $selected = $("." + dragged_class)
-      $start_container = $selected.parent()
-      parsed_children = @parsedChildren
-      child_positions = @getPositions(false)
-      total_positions = child_positions.length
+      unless options.enableTrash
+        dragged_class = options.draggedClass
 
-      selected_x = $selected.offset().left - $start_container.offset().left + (@globals.col_width / 2)
-      selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 2)
+        $selected = $("." + dragged_class)
+        $start_container = $selected.parent()
+        parsed_children = @parsedChildren
+        child_positions = @getPositions(false)
+        total_positions = child_positions.length
 
-      shortest_distance = 9999999
-      target_position = 0
+        selected_x = $selected.offset().left - $start_container.offset().left + (@globals.col_width / 2)
+        selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 2)
 
-      if total_positions > 1
-        cutoff_start = options.cutoffStart + 1 || 0
-        cutoff_end = options.cutoffEnd || total_positions
+        shortest_distance = 9999999
+        target_position = 0
 
-        for position_i in [cutoff_start...cutoff_end]
-          attributes = child_positions[position_i]
+        if total_positions > 1
+          cutoff_start = options.cutoffStart + 1 || 0
+          cutoff_end = options.cutoffEnd || total_positions
 
-          if attributes
-            y_dist = selected_x - attributes.left
-            x_dist = selected_y - attributes.top
+          for position_i in [cutoff_start...cutoff_end]
+            attributes = child_positions[position_i]
 
-            if y_dist > 0 and x_dist > 0
-              distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist))
+            if attributes
+              y_dist = selected_x - attributes.left
+              x_dist = selected_y - attributes.top
 
-              if distance < shortest_distance
-                shortest_distance = distance
-                target_position = position_i
+              if y_dist > 0 and x_dist > 0
+                distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist))
 
-                if position_i is total_positions - 1
-                  if y_dist > parsed_children[position_i].height / 2
-                    target_position++
+                if distance < shortest_distance
+                  shortest_distance = distance
+                  target_position = position_i
+
+                  if position_i is total_positions - 1
+                    if y_dist > parsed_children[position_i].height / 2
+                      target_position++
 
 
 
-        if target_position is parsed_children.length
-          $target = parsed_children[target_position - 1].el
-          $selected.insertAfter($target)
-        else
-          $target = parsed_children[target_position].el
-          $selected.insertBefore($target)
-      else
-        if total_positions is 1
-          attributes = child_positions[0]
-
-          if attributes.left < selected_x
-            @$container.append $selected
+          if target_position is parsed_children.length
+            $target = parsed_children[target_position - 1].el
+            $selected.insertAfter($target)
           else
-            @$container.prepend $selected
+            $target = parsed_children[target_position].el
+            $selected.insertBefore($target)
         else
-          @$container.append $selected
-      
-      @arrange(true)
+          if total_positions is 1
+            attributes = child_positions[0]
 
-      if $start_container[0] isnt $selected.parent()[0]
-        previous_container_class = options.previousContainerClass
-        $("." + previous_container_class).trigger "ss-rearrange"
+            if attributes.left < selected_x
+              @$container.append $selected
+            else
+              @$container.prepend $selected
+          else
+            @$container.append $selected
+        
+        @arrange(true)
+
+        if $start_container[0] isnt $selected.parent()[0]
+          previous_container_class = options.previousContainerClass
+          $("." + previous_container_class).trigger "ss-rearrange"
+      else
+        placeholder_class = @options.placeholderClass
+        $("." + placeholder_class).remove()
 
     # ----------------------------
     # resize:
