@@ -523,7 +523,7 @@
       selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 2)
 
       shortest_distance = 9999999
-      target_position = total_positions
+      target_position = 0
 
       cutoff_start = options.cutoffStart + 1 || 0
       cutoff_end = options.cutoffEnd || total_positions
@@ -541,6 +541,12 @@
             if distance < shortest_distance
               shortest_distance = distance
               target_position = position_i
+
+              if position_i is total_positions - 1
+                if y_dist > parsed_children[position_i].height / 2
+                  target_position++
+
+
 
       if target_position is parsed_children.length
         $target = parsed_children[target_position - 1].el
