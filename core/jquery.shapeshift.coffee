@@ -18,6 +18,7 @@
 
     # Grid Properties
     align: "center"
+    colWidth: 82
     columns: null
     minColumns: 1
     autoHeight: true
@@ -180,12 +181,15 @@
     gridInit: ->
       gutter_x = @options.gutterX
 
-      # Determine single item / col width
-      first_child = @parsedChildren[0]
-      fc_width = first_child.el.outerWidth()
-      fc_colspan = first_child.colspan
-      single_width = (fc_width - ((fc_colspan - 1) * gutter_x)) / fc_colspan
-      @globals.col_width = single_width + gutter_x
+      unless @options.colWidth >= 1
+        # Determine single item / col width
+        first_child = @parsedChildren[0]
+        fc_width = first_child.el.outerWidth()
+        fc_colspan = first_child.colspan
+        single_width = (fc_width - ((fc_colspan - 1) * gutter_x)) / fc_colspan
+        @globals.col_width = single_width + gutter_x
+      else
+        @globals.col_width = @options.colWidth + gutter_x
 
     # ----------------------------
     # render:
@@ -525,35 +529,46 @@
       shortest_distance = 9999999
       target_position = 0
 
-      cutoff_start = options.cutoffStart + 1 || 0
-      cutoff_end = options.cutoffEnd || total_positions
+      if total_positions > 1
+        cutoff_start = options.cutoffStart + 1 || 0
+        cutoff_end = options.cutoffEnd || total_positions
 
-      for position_i in [cutoff_start...cutoff_end]
-        attributes = child_positions[position_i]
+        for position_i in [cutoff_start...cutoff_end]
+          attributes = child_positions[position_i]
 
-        if attributes
-          y_dist = selected_x - attributes.left
-          x_dist = selected_y - attributes.top
+          if attributes
+            y_dist = selected_x - attributes.left
+            x_dist = selected_y - attributes.top
 
-          if y_dist > 0 and x_dist > 0
-            distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist))
+            if y_dist > 0 and x_dist > 0
+              distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist))
 
-            if distance < shortest_distance
-              shortest_distance = distance
-              target_position = position_i
+              if distance < shortest_distance
+                shortest_distance = distance
+                target_position = position_i
 
-              if position_i is total_positions - 1
-                if y_dist > parsed_children[position_i].height / 2
-                  target_position++
+                if position_i is total_positions - 1
+                  if y_dist > parsed_children[position_i].height / 2
+                    target_position++
 
 
 
-      if target_position is parsed_children.length
-        $target = parsed_children[target_position - 1].el
-        $selected.insertAfter($target)
+        if target_position is parsed_children.length
+          $target = parsed_children[target_position - 1].el
+          $selected.insertAfter($target)
+        else
+          $target = parsed_children[target_position].el
+          $selected.insertBefore($target)
       else
-        $target = parsed_children[target_position].el
-        $selected.insertBefore($target)
+        if total_positions is 1
+          attributes = child_positions[0]
+
+          if attributes.left < selected_x
+            @$container.append $selected
+          else
+            @$container.prepend $selected
+        else
+          @$container.append $selected
       
       @arrange(true)
 

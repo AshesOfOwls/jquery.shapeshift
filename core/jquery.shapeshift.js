@@ -11,6 +11,7 @@
       enableResize: true,
       enableTrash: true,
       align: "center",
+      colWidth: 82,
       columns: null,
       minColumns: 1,
       autoHeight: true,
@@ -147,11 +148,15 @@
       Plugin.prototype.gridInit = function() {
         var fc_colspan, fc_width, first_child, gutter_x, single_width;
         gutter_x = this.options.gutterX;
-        first_child = this.parsedChildren[0];
-        fc_width = first_child.el.outerWidth();
-        fc_colspan = first_child.colspan;
-        single_width = (fc_width - ((fc_colspan - 1) * gutter_x)) / fc_colspan;
-        return this.globals.col_width = single_width + gutter_x;
+        if (!(this.options.colWidth >= 1)) {
+          first_child = this.parsedChildren[0];
+          fc_width = first_child.el.outerWidth();
+          fc_colspan = first_child.colspan;
+          single_width = (fc_width - ((fc_colspan - 1) * gutter_x)) / fc_colspan;
+          return this.globals.col_width = single_width + gutter_x;
+        } else {
+          return this.globals.col_width = this.options.colWidth + gutter_x;
+        }
       };
 
       Plugin.prototype.render = function(reparse) {
@@ -434,33 +439,46 @@
         selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 2);
         shortest_distance = 9999999;
         target_position = 0;
-        cutoff_start = options.cutoffStart + 1 || 0;
-        cutoff_end = options.cutoffEnd || total_positions;
-        for (position_i = _i = cutoff_start; cutoff_start <= cutoff_end ? _i < cutoff_end : _i > cutoff_end; position_i = cutoff_start <= cutoff_end ? ++_i : --_i) {
-          attributes = child_positions[position_i];
-          if (attributes) {
-            y_dist = selected_x - attributes.left;
-            x_dist = selected_y - attributes.top;
-            if (y_dist > 0 && x_dist > 0) {
-              distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist));
-              if (distance < shortest_distance) {
-                shortest_distance = distance;
-                target_position = position_i;
-                if (position_i === total_positions - 1) {
-                  if (y_dist > parsed_children[position_i].height / 2) {
-                    target_position++;
+        if (total_positions > 1) {
+          cutoff_start = options.cutoffStart + 1 || 0;
+          cutoff_end = options.cutoffEnd || total_positions;
+          for (position_i = _i = cutoff_start; cutoff_start <= cutoff_end ? _i < cutoff_end : _i > cutoff_end; position_i = cutoff_start <= cutoff_end ? ++_i : --_i) {
+            attributes = child_positions[position_i];
+            if (attributes) {
+              y_dist = selected_x - attributes.left;
+              x_dist = selected_y - attributes.top;
+              if (y_dist > 0 && x_dist > 0) {
+                distance = Math.sqrt((x_dist * x_dist) + (y_dist * y_dist));
+                if (distance < shortest_distance) {
+                  shortest_distance = distance;
+                  target_position = position_i;
+                  if (position_i === total_positions - 1) {
+                    if (y_dist > parsed_children[position_i].height / 2) {
+                      target_position++;
+                    }
                   }
                 }
               }
             }
           }
-        }
-        if (target_position === parsed_children.length) {
-          $target = parsed_children[target_position - 1].el;
-          $selected.insertAfter($target);
+          if (target_position === parsed_children.length) {
+            $target = parsed_children[target_position - 1].el;
+            $selected.insertAfter($target);
+          } else {
+            $target = parsed_children[target_position].el;
+            $selected.insertBefore($target);
+          }
         } else {
-          $target = parsed_children[target_position].el;
-          $selected.insertBefore($target);
+          if (total_positions === 1) {
+            attributes = child_positions[0];
+            if (attributes.left < selected_x) {
+              this.$container.append($selected);
+            } else {
+              this.$container.prepend($selected);
+            }
+          } else {
+            this.$container.append($selected);
+          }
         }
         this.arrange(true);
         if ($start_container[0] !== $selected.parent()[0]) {

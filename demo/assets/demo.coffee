@@ -19,7 +19,7 @@ $ ->
         else
           height = Math.random() * 100 + 100
           colspan = 1
-        elements.push "<li data-ss-colspan="+colspan+" style='height: "+height+"'><div class='position'></div></li>"
+          elements.push "<li data-ss-colspan="+colspan+" style='height: "+height+"'><div class='position'></div></li>"
 
       $(@).append(elements.join(""))
 
