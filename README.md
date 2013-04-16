@@ -1,7 +1,7 @@
 Shapeshift v2.0
 ===============
 
-** Version 2.0 released. There may be bugs and we are still browser testing. Please report any bugs you find through issues. **
+**Version 2.0 released. There may be bugs and we are still browser testing. Please report any bugs you find through issues.**
 
 [Check out a demo here.](http://mcpants.github.com/jquery.shapeshift/)
 
