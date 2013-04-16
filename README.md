@@ -126,54 +126,53 @@ Options
 
 Customize your grid even further. All of these are the default options and more in depth information can be found further down the page.
 
-```javascript
-$('.container').shapeshift({
-  // The Basics
-  selector: "*",
+```coffeescript
+$('.container').shapeshift
+    # The Basics
+    selector: "*"
 
-  // Features
-  enableDrag: true,
-  enableCrossDrop: true,
-  enableResize: true,
-  enableTrash: false,
+    # Features
+    enableDrag: true
+    enableCrossDrop: true
+    enableResize: true
+    enableTrash: false
 
-  // Grid Properties
-  align: "center",
-  colWidth: null,
-  columns: null,
-  minColumns: 1,
-  autoHeight: true,
-  maxHeight: null,
-  minHeight: 100,
-  gutterX: 10,
-  gutterY: 10,
-  paddingX: 10,
-  paddingY: 10,
+    # Grid Properties
+    align: "center"
+    colWidth: null
+    columns: null
+    minColumns: 1
+    autoHeight: true
+    maxHeight: null
+    minHeight: 100
+    gutterX: 10
+    gutterY: 10
+    paddingX: 10
+    paddingY: 10
 
-  // Animation
-  animated: true,
-  animateOnInit: false,
-  animationSpeed: 225,
-  animationThreshold: 100,
+    # Animation
+    animated: true
+    animateOnInit: false
+    animationSpeed: 225
+    animationThreshold: 100
 
-  // Drag/Drop Options
-  dragClone: false,
-  deleteClone: true,
-  dragRate: 100,
-  dragWhitelist: "*",
-  crossDropWhitelist: "*",
-  cutoffStart: null,
-  cutoffEnd: null,
+    # Drag/Drop Options
+    dragClone: false
+    deleteClone: true
+    dragRate: 100
+    dragWhitelist: "*"
+    crossDropWhitelist: "*"
+    cutoffStart: null
+    cutoffEnd: null
 
-  // Customize CSS
-  cloneClass: "ss-cloned-child",
-  activeClass: "ss-active-child",
-  draggedClass: "ss-dragged-child",
-  placeholderClass: "ss-placeholder-child",
-  originalContainerClass: "ss-original-container",
-  currentContainerClass: "ss-current-container",
-  previousContainerClass: "ss-previous-container"
-});
+    # Customize CSS
+    cloneClass: "ss-cloned-child"
+    activeClass: "ss-active-child"
+    draggedClass: "ss-dragged-child"
+    placeholderClass: "ss-placeholder-child"
+    originalContainerClass: "ss-original-container"
+    currentContainerClass: "ss-current-container"
+    previousContainerClass: "ss-previous-container"
 ```
 
 ### The Basics
