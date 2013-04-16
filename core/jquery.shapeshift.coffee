@@ -532,7 +532,6 @@
               $current_container.trigger("ss-added", $selected)
 
             # Arrange dragged item into place and clear container classes
-            console.log "stop"
             $original_container.trigger("ss-arrange").removeClass(original_container_class)
             $current_container.trigger("ss-arrange", true).removeClass(current_container_class)
             $previous_container.trigger("ss-arrange").removeClass(previous_container_class)

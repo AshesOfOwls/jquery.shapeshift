@@ -78,7 +78,6 @@
       return $containers.shapeshift(filter_options);
     });
     $(".options ul.dragndrop li").on("click", function() {
-      console.log("!");
       switch ($(this).data("option")) {
         case "enable":
           filter_options.enableDrag = true;

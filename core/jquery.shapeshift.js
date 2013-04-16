@@ -447,7 +447,6 @@
                 $original_container.trigger("ss-removed", $selected);
                 $current_container.trigger("ss-added", $selected);
               }
-              console.log("stop");
               $original_container.trigger("ss-arrange").removeClass(original_container_class);
               $current_container.trigger("ss-arrange", true).removeClass(current_container_class);
               $previous_container.trigger("ss-arrange").removeClass(previous_container_class);

@@ -77,7 +77,6 @@ $ ->
     $containers.shapeshift filter_options
 
   $(".options ul.dragndrop li").on "click", ->
-    console.log "!"
     switch $(this).data "option"
       when "enable"
         filter_options.enableDrag = true
