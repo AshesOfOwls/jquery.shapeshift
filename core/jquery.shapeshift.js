@@ -9,7 +9,7 @@
       enableDrag: true,
       enableCrossDrop: true,
       enableResize: true,
-      enableTrash: true,
+      enableTrash: false,
       align: "center",
       colWidth: null,
       columns: null,
@@ -47,8 +47,25 @@
         this.options = $.extend({}, defaults, options);
         this.globals = {};
         this.$container = $(element);
-        this.init();
+        if (this.errorCheck()) {
+          this.init();
+        }
       }
+
+      Plugin.prototype.errorCheck = function() {
+        var $children, error_msg, errors, options;
+        options = this.options;
+        errors = false;
+        error_msg = "Shapeshift ERROR:";
+        if (options.colWidth === null) {
+          $children = this.$container.children(options.selector);
+          if ($children.length === 0) {
+            errors = true;
+            console.error("" + error_msg + " option colWidth must be specified if Shapeshift is initialized with no active children.");
+          }
+        }
+        return !errors;
+      };
 
       Plugin.prototype.init = function() {
         this.createEvents();

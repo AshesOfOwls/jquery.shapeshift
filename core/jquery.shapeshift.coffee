@@ -14,7 +14,7 @@
     enableDrag: true
     enableCrossDrop: true
     enableResize: true
-    enableTrash: true
+    enableTrash: false
 
     # Grid Properties
     align: "center"
@@ -59,8 +59,28 @@
       @globals = {}
       @$container = $(element)
 
-      @init()
+      if @errorCheck()
+        @init()
 
+
+    # ----------------------------
+    # errorCheck:
+    # Determine if there are any conflicting options
+    # ----------------------------
+    errorCheck: ->
+      options = @options
+      errors = false
+      error_msg = "Shapeshift ERROR:"
+
+      # If there are no available children, a colWidth must be set
+      if options.colWidth is null
+        $children = @$container.children(options.selector)
+
+        if $children.length is 0
+          errors = true
+          console.error "#{error_msg} option colWidth must be specified if Shapeshift is initialized with no active children."
+
+      return !errors
 
     # ----------------------------
     # Init:

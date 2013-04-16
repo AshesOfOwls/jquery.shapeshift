@@ -131,13 +131,14 @@ $('.container').shapeshift({
   enableDrag: true,
   enableCrossDrop: true,
   enableResize: true,
+  enableTrash: false,
 
   // Grid Properties
   align: "center",
+  colWidth: null,
   columns: null,
   minColumns: 1,
   autoHeight: true,
-  height: 100,
   maxHeight: null,
   minHeight: 100,
   gutterX: 10,
@@ -172,7 +173,6 @@ $('.container').shapeshift({
 ```
 
 ### The Basics
-
 <table>
   <tr>
     <th>Option</th>
@@ -211,6 +211,11 @@ $('.container').shapeshift({
     <td>enableResize</td>
     <td>Shapeshift will listen for the window resize event and rearrange the child elements if the parent container has also changed.</td>
     <td>true</td>
+  </tr>
+  <tr>
+    <td>enableTrash</td>
+    <td>When an item is dropped into a container that has trash enabled, it will destroy the dropped element.</td>
+    <td>false</td>
   </tr>
 </table>
 
