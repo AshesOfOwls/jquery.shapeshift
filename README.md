@@ -3,7 +3,7 @@ Shapeshift v2.0
 
 [Check out a demo here.](http://mcpants.github.com/jquery.shapeshift/)
 
-**April 15th, 2013: Version 2.0 released.**
+**April 16th, 2013: Version 2.0 released.**
 **There may be bugs and we are still browser testing. Please report any bugs you find through issues.**
 
 
