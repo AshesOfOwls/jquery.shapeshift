@@ -21,6 +21,17 @@ Index
 * [Dependencies](#dependencies)
 * [Setting up the Parent Container](#setting-up-the-parent-container)
 * [Setting up the Child Elements](#setting-up-the-child-elements)
+* [Multiwidth Elements](#multiwidth-elements)
+#### [Shapeshift Options](#shapeshift-options)
+* [The Basics](#the-basics)
+* [Extra Features](#extra-features)
+* [Grid Properties](#grid-properties)
+* [Animation Settings](#animation-settings)
+* [Drag and Drop Settings](#drag-and-drop-settings)
+* [Customize CSS](#customize-css)
+#### [Detecting Changes](#detecting-changes)
+* [Event Listening Examples](#event-listening-examples)
+#### [For Contributors](#for-contributors)
 
 
 Features
@@ -517,6 +528,6 @@ When an item has begun being dragged, it will trigger the "ss-event-dragged" on 
 
 ```
 
-## For contributors
+## For Contributors
 
 Feel like you've got an idea on how to optimize the code and want to share it? We are totally open to new changes, however this is one of the first publically available plugins that I am offering and therefore do not have an exact process on pull requests. Feel free to fork the project all you want, but be aware any pull requests that are made may take a while to get implemented (if at all).
