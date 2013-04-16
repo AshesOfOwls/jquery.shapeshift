@@ -84,6 +84,7 @@ Shapeshift arranges child elements by absolutely positioning them in their paren
 ```html
 <div class="container"></div>
 ```
+
 ###### CSS:
 ```css
 .container {
@@ -96,14 +97,29 @@ Shapeshift arranges child elements by absolutely positioning them in their paren
 
 By default all child elements within the parent container will be Shapeshifted. Just make sure that they are set to "position: absolute" in your CSS file. The children also must have a height/width specified.
 
+###### HTML:
 ```html
-<div class="container" style="position: relative;">
-  <div style="height: 50px; position: absolute; width: 50px;">Child Element 1</div>
-  <div style="height: 50px; position: absolute; width: 50px;">Child Element 2</div>
-  <div style="height: 50px; position: absolute; width: 50px;">Child Element 3</div>
-  <div style="height: 50px; position: absolute; width: 50px;">Child Element 4</div>
+<div class="container">
+  <div>Child Element 1</div>
+  <div>Child Element 2</div>
+  <div>Child Element 3</div>
+  <div>Child Element 4</div>
   ...
 </div>
+```
+
+###### CSS:
+```css
+.container {
+  position: relative;
+  width: 100%;
+}
+
+.container div {
+  height: 50px;
+  position: absolute;
+  width: 50px;
+}
 ```
 
 ### Multiwidth Children
