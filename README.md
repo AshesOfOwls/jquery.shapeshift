@@ -50,7 +50,6 @@ Index
   * [Setting up the Parent Container](#setting-up-the-parent-container)
   * [Setting up the Child Elements](#setting-up-the-child-elements)
   * [Multiwidth Elements](#multiwidth-elements)
-
 2. [Shapeshift Options](#shapeshift-options)
   * [The Basics](#the-basics)
   * [Extra Features](#extra-features)
@@ -58,14 +57,10 @@ Index
   * [Animation Settings](#animation-settings)
   * [Drag and Drop Settings](#drag-and-drop-settings)
   * [Customize CSS](#customize-css)
-
 3. [Detecting Changes](#detecting-changes)
   * [Event Listening Examples](#event-listening-examples)
-
 4. [Triggering a Rearrange](#triggering-a-rearrange)
-
 5. [Destroying Shapeshift](#destroying-shapeshift)
-
 6. [For Contributors](#for-contributors)
 
 
