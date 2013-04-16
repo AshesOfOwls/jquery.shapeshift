@@ -80,8 +80,16 @@ Shapeshift requires the latest version of jQuery, and drag and drop feature (ena
 
 Shapeshift arranges child elements by absolutely positioning them in their parent container which must be set to "position: relative". The container does not have to be a div and can be substituted for any element that can have child elements, such as an unordered list. The container also must have a width specified.
 
+##### HTML:
 ```html
-<div class="container" style="position: relative; width: 100%;"></div>
+<div class="container"></div>
+```
+##### CSS:
+```css
+.container {
+  position: relative;
+  width: 100%;
+}
 ```
 
 ### Setting up the Child Elements
