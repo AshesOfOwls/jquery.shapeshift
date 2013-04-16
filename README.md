@@ -451,7 +451,7 @@ Changes to the grid will trigger several different events on the container eleme
 <table>
   <tr>
     <th>Event</th>
-    <th>Triggered When<th>
+    <th>Triggered When</th>
     <th>Triggered On</th>
     <th>Variables Returned</th>
   </tr>
