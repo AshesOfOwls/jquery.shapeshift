@@ -476,45 +476,46 @@ Changes to the grid will trigger several different events on the container eleme
   <tr>
     <td>ss-trashed</td>
     <td>When an item is dropped into a container that has trash enabled and therefore is removed from the DOM.</td>
+    <td>trash enabled container element</td>
+    <td>selected element</td>
+  </tr>
+  <tr>
+    <td>ss-drop-complete</td>
+    <td>When an item is dropped into a container, this gets called when it has stopped moving to its new position.</td>
     <td>new container element</td>
     <td>none</td>
   </tr>
 </table>
 
-#### Examples for listening to events
+#### Event Listening Examples
 
 When an item has begun being dragged, it will trigger the "ss-event-dragged" on the container element. You can then write out some code to be fired off when that event occurs. The object that was just selected is also passed back to you. For example,
 
-```javascript
-$containers.on("ss-event-dragged", function(e, selected) {
-  var $selected = $(selected);
-  console.log("This is the item being dragged:", $selected);
-});
-```
+```coffeescript
 
-Another event that you can watch for is the dropped event. This will also return the selected element, and is useful for getting the final index positions for all the elements in the container. For example,
+  $containers = $(".ss-container")
 
-```javascript
-$containers.on("ss-event-dropped", function(e, selected) {
-  var $selected = $(selected)
-  console.log("The dropped item is:", $selected)
+  $containers.on "ss-rearranged", (e, selected) ->
+    console.log "This container:", $(this)
+    console.log "Has rearranged this item:", $(selected)
+    console.log "Into this position:", $(selected).index()
 
-  // Get the index position of each object
-  $objects = $(this).children();
-  $objects.each(function(i) {
-    console.log("Get the index position:", i)
-    console.log("Get the current element:", $(this))
-  });
-});
-```
+  $containers.on "ss-removed", (e, selected) ->
+    console.log "This item:", $(selected)
+    console.log "Has been removed from this container:", $(this)
 
-Similarly, when an item is destroyed by being dropped in a container that has the enableTrash attribute turned on, that item will trigger the "ss-event-destroyed" event on the last container it was placed in.
+  $containers.on "ss-added", (e, selected) ->
+    console.log "This item:", $(selected)
+    console.log "Has been added to this container:", $(this)
 
-```javascript
-$containers.on("ss-event-destroyed", function(e, selected) {
-  var $selected = $(selected);
-  console.log("This is the item being destroyed:", $selected);
-});
+  $containers.on "ss-trashed", (e, selected) ->
+    console.log "This item:", $(selected)
+    console.log "Has been removed from the DOM"
+
+  $containers.on "ss-drop-finished", (e) ->
+    console.log "This container:", $(this)
+    console.log "Has finished rearrangement after a drop."
+
 ```
 
 ## For contributors
