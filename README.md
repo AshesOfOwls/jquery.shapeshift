@@ -546,6 +546,14 @@ When an item has begun being dragged, it will trigger the "ss-event-dragged" on 
 
 ```
 
+### Triggering a Rearrange
+
+If you add, remove, hide, or show elements through your own code then you may need to rearrange the items into their new positions. Triggering "ss-rearrange" on the target container will do so.
+
+```coffeescript
+  $(".ss-container").trigger("ss-rearrange")
+```
+
 ### Destroying Shapeshift
 
 Simply trigger the event "ss-destroy" on the container.

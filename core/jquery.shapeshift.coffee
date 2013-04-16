@@ -166,7 +166,7 @@
       # Detect if there are any colspans wider than
       # the column options that were set
       columns = options.columns
-      for i in [0...total]
+      for i in [0...@parsedChildren.length]
         colspan = @parsedChildren[i].colspan
 
         min_columns = options.minColumns

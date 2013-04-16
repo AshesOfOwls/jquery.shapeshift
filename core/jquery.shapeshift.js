@@ -124,7 +124,7 @@
       };
 
       Plugin.prototype.setActiveChildren = function() {
-        var $children, active_child_class, colspan, columns, i, min_columns, options, total, _i, _j, _results;
+        var $children, active_child_class, colspan, columns, i, min_columns, options, total, _i, _j, _ref, _results;
         options = this.options;
         $children = this.$container.children(options.selector);
         active_child_class = options.activeClass;
@@ -135,7 +135,7 @@
         this.setParsedChildren();
         columns = options.columns;
         _results = [];
-        for (i = _j = 0; 0 <= total ? _j < total : _j > total; i = 0 <= total ? ++_j : --_j) {
+        for (i = _j = 0, _ref = this.parsedChildren.length; 0 <= _ref ? _j < _ref : _j > _ref; i = 0 <= _ref ? ++_j : --_j) {
           colspan = this.parsedChildren[i].colspan;
           min_columns = options.minColumns;
           if (colspan > columns && colspan > min_columns) {
