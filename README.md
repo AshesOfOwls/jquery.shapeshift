@@ -1,25 +1,35 @@
-[Shapeshift](http://mcpants.github.com/jquery.shapeshift/)
-==========
-
-Inspired heavily by the jQuery Masonry plugin (http://masonry.desandro.com/), Shapeshift is a plugin which will dynamically arrange a collection of elements into a grid in their parent container. An example of this behavior is what you can find at sites like http://www.pinterest.com.
-
-Shapeshift is intended to be a very bare bones version of these grid systems, however the drag and drop is what sets it apart from the other similar plugins.
+Shapeshift v2.0
+===============
 
 [Check out a demo here.](http://mcpants.github.com/jquery.shapeshift/)
 
-## Responsive Grid
+**April 16th, 2013: Version 2.0 released.**
+**There may be bugs and we are still browser testing. Please report any bugs you find through issues.**
 
-Resizing the grid to accomodate for more or less space is automatically turned on in Shapeshift, so if your parent container has a 100% grid resizing the window will shapeshift the child objects around to accomodate for the new layout. You can even set CSS3 media queries on your objects and watch as they get shapeshifted around their new size!
 
-## Drag and Drop
+Column Grid System + Drag and Drop
+----------------------------------
 
-Position any item within the grid by dragging and dropping them into place. Shapeshift will try to find a logical place for it and display that to you. Coming soon is the ability to drag and drop between multiple containers.
+Inspired heavily by the [jQuery Masonry plugin](http://masonry.desandro.com/), Shapeshift is a plugin which will dynamically arrange a collection of elements into a column grid system similar to [Pinterest](http://www.pinterest.com). What sets it apart is the ability to drag and drop items within the grid while still maintaining a logical index position for each item. This allows for the grid to be rendered exactly the same every time Shapeshift is used, as long as the child elements are in the correct order.
 
-## Works on Touch Devices
+Features
+--------
 
-To have the drag and drop functionality on touch devices you must include the "jquery.ui.touch-punch.min.js" file within the vendor folder. [jQuery touch punch](http://touchpunch.furf.com/) extends the jQuery UI Draggable library with touch support, so it must be included before Shapeshift and after the jQuery ui library.
+* **Drag and Drop**
+  Rearrange items within a container or even drag items between multiple Shapeshift enabled containers. Dragging elements around will physically change their index position within their parent container. When a page reloads, as long as the child elements are placed in the correct order then the grid will look exactly the same.
 
-## Credits
+* **Works on Touch Devices**
+  Shapeshift uses jQuery UI Draggable/Droppable for help with the drag and drop system. Luckily there is already a plugin called [jQuery Touch Punch](http://touchpunch.furf.com/) which provides touch support for jQuery UI D/D. It can be found in the vendor folder.
+
+* **Multiwidth Elements**
+  A new feature in 2.0 is the ability to add elements that can span across multiple columns as long as their width is correctly set through CSS.
+
+* **Responsive Grid**
+  Enabled by default, Shapeshift will listen for window resize events and arrange the elements within it according to the space provided by their parent container.
+
+
+Credits
+-------
 
 A big thanks to all of our [contributors](https://github.com/McPants/jquery.shapeshift/graphs/contributors)!
 
@@ -27,19 +37,48 @@ A big thanks to all of our [contributors](https://github.com/McPants/jquery.shap
 
 Shapeshift is maintained by [We The Media, inc.](http://wtmworldwide.com/)
 
-## Sites Using Shapeshift
+
+Sites Using Shapeshift
+----------------------
 
 Got a project that you are using shapeshift on? Let us know and we will happily throw a link to your page here!
 
-## Getting Started
+Index
+-----
+1 [Getting Started](#getting-started)
+  * [Dependencies](#dependencies)
+  * [Setting up the Parent Container](#setting-up-the-parent-container)
+  * [Setting up the Child Elements](#setting-up-the-child-elements)
+  * [Multiwidth Elements](#multiwidth-elements)
+
+2 [Shapeshift Options](#shapeshift-options)
+  * [The Basics](#the-basics)
+  * [Extra Features](#extra-features)
+  * [Grid Properties](#grid-properties)
+  * [Animation Settings](#animation-settings)
+  * [Drag and Drop Settings](#drag-and-drop-settings)
+  * [Customize CSS](#customize-css)
+
+3 [Detecting Changes](#detecting-changes)
+  * [Event Listening Examples](#event-listening-examples)
+
+4 [Triggering a Rearrange](#triggering-a-rearrange)
+
+5 [Destroying Shapeshift](#destroying-shapeshift)
+
+6 [For Contributors](#for-contributors)
+
+
+Getting Started
+---------------
 
 ### Dependencies
 
-Shapeshift requires the latest version of jQuery, and the drag and drop functionality requires jQuery UI Draggable/Droppable libraries. It also requires [jQuery Touch Punch](http://touchpunch.furf.com/) to work on touch devices.
+Shapeshift requires the latest version of jQuery, and drag and drop feature (enabled by default) requires jQuery UI Draggable/Droppable libraries. It also requires [jQuery Touch Punch](http://touchpunch.furf.com/) to work on touch devices.
 
 ### Setting Up the Parent Container
 
-Objects that get shapeshifted will be absolutely positioned in their parent container. Therefore the parent container must be set to position: relative for the objects to position themselves correctly.
+Shapeshift arranges child elements by absolutely positioning them in their parent container which must be set to "position: relative". The container does not have to be a div and can be substituted for any element that can have child elements, such as an unordered list.
 
 ```html
 <div class="container" style="position: relative;"></div>
@@ -47,9 +86,7 @@ Objects that get shapeshifted will be absolutely positioned in their parent cont
 
 ### Setting up the Child Elements
 
-The direct children of the parent element are what gets rearranged into the grid system. As mentioned before, each child element will be absolutely positions and obviously must then have a position: absolute attached to them.
-
-**note**: All child elements **must** be the same width. Heights can be dynamic, however.
+By default all child elements within the parent container will be Shapeshifted. Just make sure that they are set to "position: absolute" in your CSS file.
 
 ```html
 <div class="container" style="position: relative;">
@@ -57,10 +94,35 @@ The direct children of the parent element are what gets rearranged into the grid
   <div style="position: absolute;">Child Element 2</div>
   <div style="position: absolute;">Child Element 3</div>
   <div style="position: absolute;">Child Element 4</div>
+  ...
 </div>
 ```
 
-The class name and type of elements you can use are completely changable. The only real requirement is the parent must be relative and the children absolute. You can even call shapeshift on multiple elements that have the same class name.
+### Multiwidth Children
+
+Shapeshift relies on a column grid system, this means that every time Shapeshift is initialized on a container it will determine the column width based on the width of the first child in that container. If no column width is specified on a child element then Shapeshift will assume it will use it to set the single column width for the grid.
+
+To make a child element multiwidth, simply add the data attribute "data-ss-colspan=X", where X is the amount of columns it should span. Shapeshift does not automatically set their width though so the childs width must already be set to the correct width. The calculated width must be set to: "single column width * columns to span + the gutter space in between".
+
+For example, assuming the default gutter value of 10px, multiwidth elements can be created as such:
+
+```css
+.container div { width: 80px; } // When no colspan is set, it is one colspan
+.container div[data-ss-colspan="2"] { width: 170px; }
+.container div[data-ss-colspan="3"] { width: 260px; }
+.container div[data-ss-colspan="4"] { width: 350px; }
+```
+
+```html
+<div class="container" style="position: relative;">
+  <div style="position: absolute;">1 Column Width</div>
+  <div style="position: absolute;" data-ss-colspan="2">2 Column Width</div>
+  <div style="position: absolute;" data-ss-colspan="3">3 Column Width</div>
+  <div style="position: absolute;" data-ss-colspan="4">4 Column Width</div>
+  ...
+</div>
+```
+
 
 ### Shapeshift Everything!
 
@@ -70,263 +132,438 @@ Now that we have our setup complete, simply call .shapeshift() on the parent ele
 $('.container').shapeshift();
 ```
 
+
+Options
+---------------
+
 ### Shapeshift Options
 
-There are several options that can be passed into the plugin through the objects hash, which also includes turning core features on or off. Here is an example of those options and then descriptions of each attribute.
+Customize your grid even further. All of these are the default options and more in depth information can be found further down the page.
 
-***All of these attributes are the defaults.***
+```coffeescript
+$('.container').shapeshift
+    # The Basics
+    selector: "*"
 
-```javascript
-$('.container').shapeshift({
-  // Features
-  centerGrid: true,
-  enableAnimation: true,
-  enableAnimationOnInit: false,
-  enableAutoHeight: true,
-  enableDrag: true,
-  enableDragAnimation: true,
-  enableRearrange: true,
-  enableResize: true,
-  enableTrash: false,
+    # Features
+    enableDrag: true
+    enableCrossDrop: true
+    enableResize: true
+    enableTrash: false
 
-  // Options
-  animateSpeed: 150,
-  columns: null,
-  dragClone: false,
-  dragRate: 100,
-  dragWhitelist: "*",
-  dropCutoff: 0,
-  dropWhitelist: "*",
-  gutterX: 10,
-  gutterY: 10,
-  minHeight: 100,
-  paddingY: 0,
-  paddingX: 0,
-  selector: ""
-});
+    # Grid Properties
+    align: "center"
+    colWidth: null
+    columns: null
+    minColumns: 1
+    autoHeight: true
+    maxHeight: null
+    minHeight: 100
+    gutterX: 10
+    gutterY: 10
+    paddingX: 10
+    paddingY: 10
+
+    # Animation
+    animated: true
+    animateOnInit: false
+    animationSpeed: 225
+    animationThreshold: 100
+
+    # Drag/Drop Options
+    dragClone: false
+    deleteClone: true
+    dragRate: 100
+    dragWhitelist: "*"
+    crossDropWhitelist: "*"
+    cutoffStart: null
+    cutoffEnd: null
+    handle: false
+
+    # Customize CSS
+    cloneClass: "ss-cloned-child"
+    activeClass: "ss-active-child"
+    draggedClass: "ss-dragged-child"
+    placeholderClass: "ss-placeholder-child"
+    originalContainerClass: "ss-original-container"
+    currentContainerClass: "ss-current-container"
+    previousContainerClass: "ss-previous-container"
 ```
 
+### The Basics
 <table>
-  <tr>
-    <th>Feature</th>
-    <th>Description</th>
-    <th>Type</th>
-    <th>Default</th>
-    <th>Example</th>
-  </tr>
-  <tr>
-    <td>centerGrid</td>
-    <td>Center the grid inside the container. This is mainly helpful for when using a responsive container width.</td>
-    <td>Boolean</td>
-    <td>true</td>
-    <td>false</td>
-  </tr>
-  <tr>
-    <td>enableAnimation</td>
-    <td>Objects will animate into their new position when shapeshift() is initialized, or when the container is resized.</td>
-    <td>Boolean</td>
-    <td>true</td>
-    <td>false</td>
-  </tr>
-  <tr>
-    <td>enableAnimationOnInit</td>
-    <td>Determines if objects will be animated into position when the page initially loads.</td>
-    <td>Boolean</td>
-    <td>false</td>
-    <td>true</td>
-  </tr>
-  <tr>
-    <td>enableAutoHeight</td>
-    <td>If this is set to true the parent containers height will be automatically be adjusted to compensate for all of the child elements.</td>
-    <td>Boolean</td>
-    <td>true</td>
-    <td>false</td>
-  </tr>
-  <tr>
-    <td>enableDrag</td>
-    <td>Enables objects in this container to be drag and dropped.</td>
-    <td>Boolean</td>
-    <td>true</td>
-    <td>false</td>
-  </tr>
-  <tr>
-    <td>enableDragAnimation</td>
-    <td>Turn off the object animations of other elements when an element is being dragged.</td>
-    <td>Boolean</td>
-    <td>true</td>
-    <td>false</td>
-  </tr>
-  <tr>
-    <td>enableRearrange</td>
-    <td>Setting this to false will disable any rearrangement via drag & drop in the current container.</td>
-    <td>Boolean</td>
-    <td>true</td>
-    <td>false</td>
-  </tr>
-  <tr>
-    <td>enableResize</td>
-    <td>The elements will dynamically adjust to the width of their parent container.</td>
-    <td>Boolean</td>
-    <td>true</td>
-    <td>false</td>
-  </tr>
-  <tr>
-    <td>enableTrash</td>
-    <td>Any element dropped on this container will be removed from the DOM.</td>
-    <td>Boolean</td>
-    <td>false</td>
-    <td>true</td>
-  </tr>
   <tr>
     <th>Option</th>
     <th>Description</th>
     <th>Type</th>
+    <th>Acceptable Values</th>
     <th>Default</th>
-    <th>Example</th>
   </tr>
   <tr>
-    <td>animateSpeed</td>
-    <td>The speed in milliseconds that the animations will transition using. This currently will also determine how often the drag function gets called, which is the animation speed divided by three (i.e. for the default speed, 100, the drag function will run every 33.3 milliseconds).</td>
-    <td>Integer</td>
-    <td>150</td>
-    <td>276</td>
+    <td>Selector</td>
+    <td>Use a CSS selector to specify which child elements should be Shapeshifted.</td>
+    <td>String</td>
+    <td>Any CSS selector, such as ".amelia" or "#pond"</td>
+    <td>"*"</td>
+  </tr>
+</table>
+
+### Extra Features
+<table>
+  <tr>
+    <th>Option</th>
+    <th>Description</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>enableDrag</td>
+    <td>Allows for the child items to be dragged in the container and to other containers that have drop enabled. See Drag and Drop options for more customization.</td>
+    <td>true</td>
+  </tr>
+  <tr>
+    <td>enableCrossDrop</td>
+    <td>Allows for children to be dropped from *other* containers into this one.</td>
+    <td>true</td>
+  </tr>
+  <tr>
+    <td>enableResize</td>
+    <td>Shapeshift will listen for the window resize event and rearrange the child elements if the parent container has also changed.</td>
+    <td>true</td>
+  </tr>
+  <tr>
+    <td>enableTrash</td>
+    <td>When an item is dropped into a container that has trash enabled, it will destroy the dropped element.</td>
+    <td>false</td>
+  </tr>
+</table>
+
+### Grid Properties
+<table>
+  <tr>
+    <th>Option</th>
+    <th>Description</th>
+    <th>Acceptable Values</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>align</td>
+    <td>Align / justify the grid.</td>
+    <td>"left", "center", "right"</td>
+    <td>"center"</td>
+  </tr>
+  <tr>
+    <td>colWidth</td>
+    <td>Manually set the column width. Column width is automatically determined by Shapeshift, however it is required to be set if the container has no initial children to calculate it from.</td>
+    <td>Any Integer >= 1</td>
+    <td>1</td>
   </tr>
   <tr>
     <td>columns</td>
-    <td>Manually specify the number of columns to render. It will automatically detect the maximum amount of columns by default.</td>
-    <td>Integer</td>
-    <td>null (Auto)</td>
-    <td>5</td>
+    <td>Force the grid to have a specific number of columns. Setting this to null will automatically determine the maximum columns for the width of the container.</td>
+    <td>Any Integer >= 1</td>
+    <td>null</td>
+  </tr>
+  <tr>
+    <td>minColumns</td>
+    <td>This will prevent the grid from ever going below a set number of columns. If using multiwidth then this must be set to the highest colspan child element.</td>
+    <td>Any Integer >= 1</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td>autoHeight</td>
+    <td>Automatically sets the height of the container according to the height of the contents within it. If set to false, then the "height" option must also be specified.</td>
+    <td>true, false</td>
+    <td>true</td>
+  </tr>
+  <tr>
+    <td>maxHeight</td>
+    <td>If "autoHeight" is turned on, maxHeight will never allow the container height to go above this number.</td>
+    <td>Any Integer >= 1</td>
+    <td>null</td>
+  </tr>
+  <tr>
+    <td>minHeight</td>
+    <td>If "autoHeight" is turned on, minHeight will never allow the container height to go below this number.</td>
+    <td>Any Integer >= 1</td>
+    <td>100</td>
+  </tr>
+  <tr>
+    <td>gutterX</td>
+    <td>The number of pixels horizontally between each column.</td>
+    <td>Any Integer >= 0</td>
+    <td>10</td>
+  </tr>
+  <tr>
+    <td>gutterY</td>
+    <td>The number of pixels vertically between each element.</td>
+    <td>Any Integer >= 0</td>
+    <td>10</td>
+  </tr>
+  <tr>
+    <td>paddingX</td>
+    <td>Sets the horizontal padding of the grid between the left and right sides of the container.</td>
+    <td>Any Integer >= 0</td>
+    <td>10</td>
+  </tr>
+  <tr>
+    <td>paddingY</td>
+    <td>Sets the vertical padding of the grid between the top and bottom sides of the container.</td>
+    <td>Any Integer >= 0</td>
+    <td>10</td>
+  </tr>
+</table>
+
+### Animation Settings
+<table>
+  <tr>
+    <th>Option</th>
+    <th>Description</th>
+    <th>Acceptable Values</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>animated</td>
+    <td>When children shift around via the resize or drag and drop features, they will animate into place.</td>
+    <td>true, false</td>
+    <td>true</td>
+  </tr>
+  <tr>
+    <td>animateOnInit</td>
+    <td>Animates the children into position upon page load.</td>
+    <td>true, false</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>animationSpeed</td>
+    <td>The speed at which the children will animate into place.</td>
+    <td>Any Integer >= 0</td>
+    <td>225</td>
+  </tr>
+  <tr>
+    <td>animationThreshold</td>
+    <td>If there are too many elements on a page then it can get very laggy during animation. If the number of children exceed this threshold then they will not animate when changing positions.</td>
+    <td>Any Integer >= 0</td>
+    <td>100</td>
+  </tr>
+</table>
+
+### Drag and Drop Settings
+<table>
+  <tr>
+    <th>Option</th>
+    <th>Description</th>
+    <th>Acceptable Values</th>
+    <th>Default</th>
   </tr>
   <tr>
     <td>dragClone</td>
-    <td>If set to true, the item that is dragged will be a clone and therefore will not remove the item from the original container upon drop. This would be analogous to "copy and paste", instead of the default "cut and paste".</td>
-    <td>Boolean</td>
+    <td>When an element is dragged it will create a clone instead.</td>
+    <td>true, false</td>
     <td>false</td>
+  </tr>
+  <tr>
+    <td>deleteClone</td>
+    <td>If a cloned item is dropped into its original container, delete the clone that was made.</td>
+    <td>true, false</td>
     <td>true</td>
   </tr>
   <tr>
     <td>dragRate</td>
-    <td>Determines how often the program will detect a position for the currently dragged item to be dropped, in milliseconds. The faster the speed then the more the computer will have to process, but the slower the speed the less responsive it is to items being dragged around.</td>
-    <td>Integer</td>
+    <td>The number of milliseconds that Shapeshift will attempt to find a target pisition for a dragged item.</td>
+    <td>Any Integer >= 0</td>
     <td>100</td>
-    <td>55</td>
+  </tr>
+  <tr>
+    <td>dragRate</td>
+    <td>The number of milliseconds that Shapeshift will attempt to find a target pisition for a dragged item.</td>
+    <td>Any Integer >= 0</td>
+    <td>100</td>
   </tr>
   <tr>
     <td>dragWhitelist</td>
-    <td>Specify a string which contains the elements that ***can*** be dropped into this container. This defaults to any element being draggable.</td>
-    <td>String</td>
+    <td>A CSS selector specifying the elements which can be dragged.</td>
+    <td>Any CSS selector, such as ".river" or "#song"</td>
     <td>"*"</td>
-    <td>".comment, .post, div, #taco"</td>
   </tr>
   <tr>
-    <td>dropCutoff</td>
-    <td>Prevents a user from dropping an item X amount from the end of the objects list. For example, if you have 20 items in your container, and you set the dropCutoff to be 3, then you would not be able to drop after the 17th item.</td>
-    <td>Integer</td>
-    <td>0</td>
-    <td>3</td>
-  </tr>
-  <tr>
-    <td>dropWhitelist</td>
-    <td>Specify a string which contains the elements that ***can*** be dropped into this container. This defaults to any element being droppable.
-
-    ***If a white list is set, only items listed with it can be draggable.***</td>
-    <td>String</td>
+    <td>crossDropWhitelist</td>
+    <td>A CSS selector specifying the elements which can be dropped into this container from *other* containers.</td>
+    <td>Any CSS selector, such as ".martha" or "#jones"</td>
     <td>"*"</td>
-    <td>".comment, .post, div, #taco"</td>
   </tr>
   <tr>
-    <td>gutterX</td>
-    <td>Sets the amount of padding horizontally between columns.</td>
-    <td>Integer</td>
-    <td>10</td>
-    <td>25</td>
+    <td>cutoffStart</td>
+    <td>Items cannot be dragged to an index position below this number.</td>
+    <td>Any Integer >= 0</td>
+    <td>null</td>
   </tr>
   <tr>
-    <td>gutterY</td>
-    <td>Sets the amount of padding vertically between objects.</td>
-    <td>Integer</td>
-    <td>10</td>
-    <td>25</td>
+    <td>cutoffEnd</td>
+    <td>Items cannot be dragged to an index position past this number.</td>
+    <td>Any Integer >= 0</td>
+    <td>null</td>
   </tr>
   <tr>
-    <td>minHeight</td>
-    <td>Set a minimum height that the container element will be. ***This is only helpful if you have enableAutoHeight turned on.***</td>
-    <td>Integer</td>
-    <td>100</td>
-    <td>550</td>
-  </tr>
-  <tr>
-    <td>paddingX</td>
-    <td>Offset the entire grid from the left side of the container element with this attribute.</td>
-    <td>Integer</td>
-    <td>0</td>
-    <td>42</td>
-  </tr>
-  <tr>
-    <td>paddingY</td>
-    <td>Offset the entire grid from the top of the container element with this attribute.</td>
-    <td>Integer</td>
-    <td>0</td>
-    <td>42</td>
-  </tr>
-  <tr>
-    <td>selector</td>
-    <td>Shapeshift will by default try to rearrange all of the child elements within the parent element. Setting a selector will target only the children with the class, ID, or element name that the selector describes.
-</td>
-    <td>String</td>
-    <td>""</td>
-    <td>".gallery_image"</td>
+    <td>handle</td>
+    <td>If specified, restricts dragging from starting unless the mousedown occurs on the specified element(s).</td>
+    <td>Any CSS selector, such as ".jack" or "#harkness"</td>
+    <td>false</td>
   </tr>
 </table>
 
-### Styling the Dragged Element
-
-When an element is picked up it the ".ss-moving" class will be appended to it. Just target it in your own CSS file. For example,
-
-```css
-.container .ss-moving {
-  opacity: .7;
-  transform: rotate(3deg);
-}
-```
+### Customize CSS
+Certain elements will have CSS classes attached to them for specific events. Customize those CSS classes if needed.
+<table>
+  <tr>
+    <th>Option</th>
+    <th>Affected Element</th>
+    <th>Description</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>activeClass</td>
+    <td>Child Elements</td>
+    <td>Every active Shapeshift child item will have this class applied to them.</td>
+    <td>ss-active-child</td>
+  </tr>
+  <tr>
+    <td>cloneClass</td>
+    <td>Cloned Child Element</td>
+    <td>If the "dragClone" option is used, this is the CSS class applied to the clone that is created.</td>
+    <td>ss-cloned-child</td>
+  </tr>
+  <tr>
+    <td>draggedClass</td>
+    <td>Dragged Child Element</td>
+    <td>The class applied to an element while it is being dragged.</td>
+    <td>ss-dragged-child</td>
+  </tr>
+  <tr>
+    <td>placeholderClass</td>
+    <td>Placeholder Element</td>
+    <td>When an item is dragged, a placeholder element is created to show the new target position.</td>
+    <td>ss-placeholder-child</td>
+  </tr>
+  <tr>
+    <td>originalContainerClass</td>
+    <td>Container Element</td>
+    <td>When an item is dragged, this is the class applied to the container it originated from.</td>
+    <td>ss-original-container</td>
+  </tr>
+  <tr>
+    <td>currentContainerClass</td>
+    <td>Container Element</td>
+    <td>When an item is dragged, this is the class applied to the container it currently is in.</td>
+    <td>ss-current-container</td>
+  </tr>
+  <tr>
+    <td>previousContainerClass</td>
+    <td>Container Element</td>
+    <td>When an item is dragged between containers, this is the class applied to the container it was previously in.</td>
+    <td>ss-previous-container</td>
+  </tr>
+</table>
 
 ### Detecting Changes
 
+Changes to the grid will trigger several different events on the container element and important objects will be returned with it. Here are a list of events that can be listened to, with some examples following.
+
+<table>
+  <tr>
+    <th>Event Name</th>
+    <th>Triggered When</th>
+    <th>Triggered On</th>
+    <th>Variables Returned</th>
+  </tr>
+  <tr>
+    <td>ss-rearranged</td>
+    <td>When an item is dropped into the container it originated from.</td>
+    <td>original container element</td>
+    <td>selected element</td>
+  </tr>
+  <tr>
+    <td>ss-removed</td>
+    <td>When an item is dropped into a container it didn't originate from.</td>
+    <td>original container element</td>
+    <td>selected element</td>
+  </tr>
+  <tr>
+    <td>ss-added</td>
+    <td>When an item is dropped into a container it didn't originate from.</td>
+    <td>new container element</td>
+    <td>selected element</td>
+  </tr>
+  <tr>
+    <td>ss-trashed</td>
+    <td>When an item is dropped into a container that has trash enabled and therefore is removed from the DOM.</td>
+    <td>trash enabled container element</td>
+    <td>selected element</td>
+  </tr>
+  <tr>
+    <td>ss-drop-complete</td>
+    <td>When an item is dropped into a container, this gets called when it has stopped moving to its new position.</td>
+    <td>new container element</td>
+    <td>none</td>
+  </tr>
+  <tr>
+    <td>ss-arranged</td>
+    <td>When an item is dragged around in a container, arranged is triggered every time items are shifted.</td>
+    <td>current container element</td>
+    <td>none</td>
+  </tr>
+</table>
+
+#### Event Listening Examples
+
 When an item has begun being dragged, it will trigger the "ss-event-dragged" on the container element. You can then write out some code to be fired off when that event occurs. The object that was just selected is also passed back to you. For example,
 
-```javascript
-$containers.on("ss-event-dragged", function(e, selected) {
-  var $selected = $(selected);
-  console.log("This is the item being dragged:", $selected);
-});
+```coffeescript
+
+  $containers = $(".ss-container")
+
+  $containers.on "ss-rearranged", (e, selected) ->
+    console.log "This container:", $(this)
+    console.log "Has rearranged this item:", $(selected)
+    console.log "Into this position:", $(selected).index()
+
+  $containers.on "ss-removed", (e, selected) ->
+    console.log "This item:", $(selected)
+    console.log "Has been removed from this container:", $(this)
+
+  $containers.on "ss-added", (e, selected) ->
+    console.log "This item:", $(selected)
+    console.log "Has been added to this container:", $(this)
+
+  $containers.on "ss-trashed", (e, selected) ->
+    console.log "This item:", $(selected)
+    console.log "Has been removed from the DOM"
+
+  $containers.on "ss-drop-complete", (e) ->
+    console.log "This container:", $(this)
+    console.log "Has finished rearrangement after a drop."
+
+  $containers.on "ss-arranged", (e) ->
+    console.log "This container:", $(this)
+    console.log "Has just rearranged items but no drop has occurred."
+
 ```
 
-Another event that you can watch for is the dropped event. This will also return the selected element, and is useful for getting the final index positions for all the elements in the container. For example,
+### Triggering a Rearrange
 
-```javascript
-$containers.on("ss-event-dropped", function(e, selected) {
-  var $selected = $(selected)
-  console.log("The dropped item is:", $selected)
+If you add, remove, hide, or show elements through your own code then you may need to rearrange the items into their new positions. Triggering "ss-rearrange" on the target container will do so.
 
-  // Get the index position of each object
-  $objects = $(this).children();
-  $objects.each(function(i) {
-    console.log("Get the index position:", i)
-    console.log("Get the current element:", $(this))
-  });
-});
+```coffeescript
+  $(".ss-container").trigger("ss-rearrange")
 ```
 
-Similarly, when an item is destroyed by being dropped in a container that has the enableTrash attribute turned on, that item will trigger the "ss-event-destroyed" event on the last container it was placed in.
+### Destroying Shapeshift
 
-```javascript
-$containers.on("ss-event-destroyed", function(e, selected) {
-  var $selected = $(selected);
-  console.log("This is the item being destroyed:", $selected);
-});
+Simply trigger the event "ss-destroy" on the container.
+
+```coffeescript
+  $(".ss-container").trigger("ss-destroy")
 ```
 
-## For contributors
+## For Contributors
 
 Feel like you've got an idea on how to optimize the code and want to share it? We are totally open to new changes, however this is one of the first publically available plugins that I am offering and therefore do not have an exact process on pull requests. Feel free to fork the project all you want, but be aware any pull requests that are made may take a while to get implemented (if at all).

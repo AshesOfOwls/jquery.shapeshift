@@ -1,0 +1,145 @@
+body {
+  background: url(http://subtlepatterns.com/patterns/bright_squares.png);
+  font-family: Georgia;
+  font-size: 13px;
+  min-width: 300px;
+  height: 100%;
+}
+
+a {
+  color: rgba(0,0,0,0.8);
+}
+
+header {
+  text-align: center;
+}
+
+header h1 {
+  font-size: 24px;
+  padding: 10px 100px 10px;
+}
+
+header h1 a.title {
+  display: inline-block;
+  text-decoration: none;
+}
+
+header .hr {
+  max-width: 620px;
+  margin: 5px auto 4px;
+}
+
+header .subtitle {
+  clear: both;
+  display: block;
+  font-size: 11px;
+}
+
+header .details {
+  margin-top: 5px;
+  margin-bottom: 14px;
+}
+
+header .details ul {
+  display: none;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  margin-top: 14px;
+}
+
+header .details ul li {
+  margin: 5px 0;
+}
+
+header .details ul li strong {
+  font-weight: bold;
+}
+
+ul.options {
+  margin-top: 15px;
+  text-align: center;
+  width: 100%;
+}
+
+ul.options li {
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+ul.options li h4 {
+  color: rgba(0,0,0,0.8);
+  font-size: 12px;
+  text-shadow: 0px 1px 0 rgba(255,255,255,0.4);
+}
+
+ul.btn-group {
+  color: #FFF;
+  font-family: Helvetica, Arial;
+  font-weight: 100;
+  margin: 10px;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.9);
+}
+
+ul.btn-group li {
+  background: #7958b8;
+  border-bottom: 1px solid #563f83;
+  border-left: 1px solid #563f83;
+  border-top: 1px solid #563f83;
+  cursor: pointer;
+  display: inline-block;
+  float: left;
+  margin: 0;
+  padding: 7px;
+}
+
+ul.btn-group li:hover, ul.btn-group li.active {
+  background: rgb(150, 110, 226);
+}
+
+ul.btn-group li:first-child {
+  border-radius: 2px 0 0 2px;
+  padding-left: 7px;
+}
+ul.btn-group li:last-child {
+  border-radius: 0 2px 2px 0;
+  border-right: 1px solid #563f83;
+  padding-right: 7px;
+}
+
+footer {
+  clear: both;
+  padding: 30px 0 20px 0;
+  text-align: center;
+  width: 100%;
+}
+
+footer div {
+  margin: 10px 0;
+}
+
+.fork-me {
+  position: absolute;
+}
+
+.logo {
+  background: url('../images/wtm_logo.png');
+  display: block;
+  height: 41px;
+  opacity: .3;
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  text-indent: -9999px;
+  width: 46px;
+}
+
+.logo:hover {
+  opacity: 1;
+}
+
+.hr {
+  background: rgba(0,0,0,0.45);
+  border-bottom: 1px solid rgba(255,255,255,0.75);
+  height: 1px;
+  width: 100%;
+}

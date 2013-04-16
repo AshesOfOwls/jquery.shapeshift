@@ -1,0 +1,50 @@
+ul.ss-container {
+  outline: 1px dashed rgba(0,0,0,0.25);
+  float: left;
+  margin: 1%;
+  position: relative;
+  width: 48%;
+}
+
+ul.ss-container li {
+  background: rgba(0,0,0,0.15);
+  border-radius: 3px;
+  border: 1px solid rgba(0,0,0,0.4);
+  position: absolute;
+  width: 80px;
+}
+
+ul.ss-container li.ss-dragged-child {
+  cursor: move;
+  z-index: 9999;
+  opacity: .7;
+  transform:rotate(2deg);
+  -ms-transform:rotate(2deg); /* IE 9 */
+  -moz-transform:rotate(2deg); /* Firefox */
+  -webkit-transform:rotate(2deg); /* Safari and Chrome */
+  -o-transform:rotate(2deg); /* Opera */
+}
+
+ul.ss-container li.ss-placeholder-child {
+  background: transparent;
+  border: 0px;
+  outline: 1px dashed red;
+}
+
+ul.ss-container li .position {
+  background: #DEDEDE;
+  border-radius: 4px;
+  display: none;
+  font-size: 30px;
+  height: 100%;
+  text-align: center;
+  width: 100%;
+}
+
+ul.ss-container li .position div {
+  padding-top: 40%;
+}
+
+ul.ss-container li[data-ss-colspan="2"] { width: 172px; }
+ul.ss-container li[data-ss-colspan="3"] { width: 264px; }
+ul.ss-container li[data-ss-colspan="4"] { width: 356px; }
