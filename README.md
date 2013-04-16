@@ -494,6 +494,12 @@ Changes to the grid will trigger several different events on the container eleme
     <td>new container element</td>
     <td>none</td>
   </tr>
+  <tr>
+    <td>ss-arranged</td>
+    <td>When an item is dragged around in a container, arranged is triggered every time items are shifted.</td>
+    <td>current container element</td>
+    <td>none</td>
+  </tr>
 </table>
 
 #### Event Listening Examples
@@ -524,6 +530,10 @@ When an item has begun being dragged, it will trigger the "ss-event-dragged" on 
   $containers.on "ss-drop-complete", (e) ->
     console.log "This container:", $(this)
     console.log "Has finished rearrangement after a drop."
+
+  $containers.on "ss-arranged", (e) ->
+    console.log "This container:", $(this)
+    console.log "Has just rearranged items but no drop has occurred."
 
 ```
 

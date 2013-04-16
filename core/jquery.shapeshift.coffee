@@ -43,6 +43,7 @@
     crossDropWhitelist: "*"
     cutoffStart: null
     cutoffEnd: null
+    handle: ".position"
 
     # Customize CSS
     cloneClass: "ss-cloned-child"
@@ -301,6 +302,7 @@
           ), animation_speed
         else
           $container.trigger("ss-drop-complete")
+      $container.trigger("ss-arranged")
 
       # Set the container height
       if options.autoHeight
@@ -465,6 +467,7 @@
         $container.children("." + active_class).filter(options.dragWhitelist).draggable
           addClasses: false
           containment: 'document'
+          handle: options.handle
           zIndex: 9999
 
           start: (e, ui) ->

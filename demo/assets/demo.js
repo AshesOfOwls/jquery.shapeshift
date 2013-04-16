@@ -19,7 +19,7 @@
             height = Math.random() * 100 + 100;
             colspan = 1;
           }
-          elements.push("<li data-ss-colspan=" + colspan + " style='height: " + height + "'><div class='position'></div></li>");
+          elements.push("<li data-ss-colspan=" + colspan + " style='height: " + height + "'><div class='position'>" + i + "</div></li>");
         }
         return $(this).append(elements.join(""));
       });
@@ -41,6 +41,7 @@
         if (type === "index") {
           return $(this).find(".position").show();
         } else {
+          $(this).find(".position").hide();
           _results = [];
           for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
             $child = $($children[i]);
@@ -107,6 +108,13 @@
     $(".options ul.placeholders li").on("click", function() {
       renderPlaceholders($(this).data("option"));
       return $containers.shapeshift(filter_options);
+    });
+    $containers.on("ss-arranged", function(e, selected) {
+      var modifier;
+      modifier = $(this).find(".ss-dragging")[0] ? 1 : 0;
+      return $(this).children().each(function() {
+        return $(this).find(".position").text($(this).index() - modifier);
+      });
     });
     $containers.on("ss-rearranged", function(e, selected) {
       console.log("----------------------------------------");

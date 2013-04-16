@@ -32,6 +32,7 @@
       crossDropWhitelist: "*",
       cutoffStart: null,
       cutoffEnd: null,
+      handle: ".position",
       cloneClass: "ss-cloned-child",
       activeClass: "ss-active-child",
       draggedClass: "ss-dragged-child",
@@ -253,6 +254,7 @@
             $container.trigger("ss-drop-complete");
           }
         }
+        $container.trigger("ss-arranged");
         if (options.autoHeight) {
           container_height = globals.container_height;
           max_height = options.maxHeight;
@@ -397,6 +399,7 @@
           $container.children("." + active_class).filter(options.dragWhitelist).draggable({
             addClasses: false,
             containment: 'document',
+            handle: options.handle,
             zIndex: 9999,
             start: function(e, ui) {
               var selected_tag;

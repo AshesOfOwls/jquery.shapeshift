@@ -19,7 +19,7 @@ $ ->
         else
           height = Math.random() * 100 + 100
           colspan = 1
-        elements.push "<li data-ss-colspan="+colspan+" style='height: "+height+"'><div class='position'></div></li>"
+        elements.push "<li data-ss-colspan="+colspan+" style='height: "+height+"'><div class='position'>"+i+"</div></li>"
 
       $(@).append(elements.join(""))
 
@@ -38,6 +38,7 @@ $ ->
       if type is "index"
         $(@).find(".position").show()
       else
+        $(@).find(".position").hide()
         for i in [0...child_count]
           $child = $($children[i])
           height = $child.height()
@@ -105,6 +106,13 @@ $ ->
     renderPlaceholders $(this).data("option")
 
     $containers.shapeshift filter_options
+
+
+  $containers.on "ss-arranged", (e, selected) ->
+    modifier = if $(@).find(".ss-dragging")[0] then 1 else 0
+
+    $(@).children().each ->
+      $(@).find(".position").text($(@).index() - modifier)
 
   # -------------
   # Drag and Drop events for shapeshift
