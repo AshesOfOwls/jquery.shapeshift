@@ -19,7 +19,7 @@
             height = Math.random() * 100 + 100;
             colspan = 1;
           }
-          elements.push("<li data-ss-colspan=" + colspan + " style='height: " + height + "'><div class='position'>" + i + "</div></li>");
+          elements.push("<li data-ss-colspan=" + colspan + " style='height: " + height + "px'><div class='position'>" + i + "</div></li>");
         }
         return $(this).append(elements.join(""));
       });

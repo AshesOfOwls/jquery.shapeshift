@@ -409,7 +409,7 @@
               }
               $selected.addClass(dragged_class);
               selected_tag = $selected.prop("tagName");
-              $placeholder = $("<" + selected_tag + " class='" + placeholder_class + "' style='height: " + ($selected.height()) + "; width: " + ($selected.width()) + "'></" + selected_tag + ">");
+              $placeholder = $("<" + selected_tag + " class='" + placeholder_class + "' style='height: " + ($selected.height()) + "px; width: " + ($selected.width()) + "'></" + selected_tag + ">");
               $selected.parent().addClass(original_container_class).addClass(current_container_class);
               selected_offset_y = $selected.outerHeight() / 2;
               return selected_offset_x = $selected.outerWidth() / 2;
