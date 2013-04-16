@@ -12,31 +12,6 @@ Column Grid System + Drag and Drop
 
 Inspired heavily by the [jQuery Masonry plugin](http://masonry.desandro.com/), Shapeshift is a plugin which will dynamically arrange a collection of elements into a column grid system similar to [Pinterest](http://www.pinterest.com). What sets it apart is the ability to drag and drop items within the grid while still maintaining a logical index position for each item. This allows for the grid to be rendered exactly the same every time Shapeshift is used, as long as the child elements are in the correct order.
 
-
-Index
------
-#### [Features](#features)
-#### [Credits](#credits)
-#### [Getting Started](#getting-started)
-* [Dependencies](#dependencies)
-* [Setting up the Parent Container](#setting-up-the-parent-container)
-* [Setting up the Child Elements](#setting-up-the-child-elements)
-* [Multiwidth Elements](#multiwidth-elements)
-
-#### [Shapeshift Options](#shapeshift-options)
-* [The Basics](#the-basics)
-* [Extra Features](#extra-features)
-* [Grid Properties](#grid-properties)
-* [Animation Settings](#animation-settings)
-* [Drag and Drop Settings](#drag-and-drop-settings)
-* [Customize CSS](#customize-css)
-
-#### [Detecting Changes](#detecting-changes)
-* [Event Listening Examples](#event-listening-examples)
-
-#### [For Contributors](#for-contributors)
-
-
 Features
 --------
 
@@ -67,6 +42,27 @@ Sites Using Shapeshift
 ----------------------
 
 Got a project that you are using shapeshift on? Let us know and we will happily throw a link to your page here!
+
+Index
+-----
+#### [Getting Started](#getting-started)
+* [Dependencies](#dependencies)
+* [Setting up the Parent Container](#setting-up-the-parent-container)
+* [Setting up the Child Elements](#setting-up-the-child-elements)
+* [Multiwidth Elements](#multiwidth-elements)
+
+#### [Shapeshift Options](#shapeshift-options)
+* [The Basics](#the-basics)
+* [Extra Features](#extra-features)
+* [Grid Properties](#grid-properties)
+* [Animation Settings](#animation-settings)
+* [Drag and Drop Settings](#drag-and-drop-settings)
+* [Customize CSS](#customize-css)
+
+#### [Detecting Changes](#detecting-changes)
+* [Event Listening Examples](#event-listening-examples)
+
+#### [For Contributors](#for-contributors)
 
 
 Getting Started
