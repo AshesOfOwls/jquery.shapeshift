@@ -666,13 +666,16 @@
     # array column with the lowest number
     # ----------------------------
     lowestCol: (array, offset = 0) ->
-      augmented_array = array.map (val, index) -> [val, index]
+      length = array.length
+      augmented_array = []
+      
+      for i in [0...length]
+        augmented_array.push [array[i], i]
 
       augmented_array.sort (a, b) ->
           ret = a[0] - b[0]
           ret = a[1] - b[1] if ret is 0
           ret
-
       augmented_array[offset][1]
 
     # ----------------------------

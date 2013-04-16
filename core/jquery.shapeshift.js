@@ -571,13 +571,15 @@
       };
 
       Plugin.prototype.lowestCol = function(array, offset) {
-        var augmented_array;
+        var augmented_array, i, length, _i;
         if (offset == null) {
           offset = 0;
         }
-        augmented_array = array.map(function(val, index) {
-          return [val, index];
-        });
+        length = array.length;
+        augmented_array = [];
+        for (i = _i = 0; 0 <= length ? _i < length : _i > length; i = 0 <= length ? ++_i : --_i) {
+          augmented_array.push([array[i], i]);
+        }
         augmented_array.sort(function(a, b) {
           var ret;
           ret = a[0] - b[0];
