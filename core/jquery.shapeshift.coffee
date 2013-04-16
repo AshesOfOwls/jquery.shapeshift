@@ -481,7 +481,7 @@
 
             # Create Placeholder
             selected_tag = $selected.prop("tagName")
-            $placeholder = $("<#{selected_tag} class='#{placeholder_class}' style='height: #{$selected.height()}px; width: #{$selected.width()}'></#{selected_tag}>")
+            $placeholder = $("<#{selected_tag} class='#{placeholder_class}' style='height: #{$selected.height()}px; width: #{$selected.width()}px'></#{selected_tag}>")
             
             # Set current container
             $selected.parent().addClass(original_container_class).addClass(current_container_class)
