@@ -247,10 +247,10 @@
         if (trigger_drop_finished) {
           if (animated) {
             setTimeout((function() {
-              return $container.trigger("ss-drop-finished");
+              return $container.trigger("ss-drop-complete");
             }), animation_speed);
           } else {
-            $container.trigger("ss-drop-finished");
+            $container.trigger("ss-drop-complete");
           }
         }
         if (options.autoHeight) {

@@ -138,7 +138,7 @@ $ ->
     console.log $(selected)
     console.log "Has been removed from the DOM"
 
-  $containers.on "ss-drop-finished", (e) ->
+  $containers.on "ss-drop-complete", (e) ->
     console.log "----------------------------------------"
     console.log "This container:"
     console.log $(@)

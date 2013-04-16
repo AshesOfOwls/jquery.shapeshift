@@ -297,10 +297,10 @@
       if trigger_drop_finished
         if animated
           setTimeout (->
-            $container.trigger("ss-drop-finished")
+            $container.trigger("ss-drop-complete")
           ), animation_speed
         else
-          $container.trigger("ss-drop-finished")
+          $container.trigger("ss-drop-complete")
 
       # Set the container height
       if options.autoHeight

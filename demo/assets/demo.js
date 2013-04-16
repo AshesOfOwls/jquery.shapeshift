@@ -136,7 +136,7 @@
       console.log($(selected));
       return console.log("Has been removed from the DOM");
     });
-    return $containers.on("ss-drop-finished", function(e) {
+    return $containers.on("ss-drop-complete", function(e) {
       console.log("----------------------------------------");
       console.log("This container:");
       console.log($(this));

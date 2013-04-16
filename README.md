@@ -521,7 +521,7 @@ When an item has begun being dragged, it will trigger the "ss-event-dragged" on 
     console.log "This item:", $(selected)
     console.log "Has been removed from the DOM"
 
-  $containers.on "ss-drop-finished", (e) ->
+  $containers.on "ss-drop-complete", (e) ->
     console.log "This container:", $(this)
     console.log "Has finished rearrangement after a drop."
 
