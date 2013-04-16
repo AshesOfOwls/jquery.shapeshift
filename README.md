@@ -45,13 +45,13 @@ Got a project that you are using shapeshift on? Let us know and we will happily 
 
 Index
 -----
-1 [Getting Started](#getting-started)
+1. [Getting Started](#getting-started)
   * [Dependencies](#dependencies)
   * [Setting up the Parent Container](#setting-up-the-parent-container)
   * [Setting up the Child Elements](#setting-up-the-child-elements)
   * [Multiwidth Elements](#multiwidth-elements)
 
-2 [Shapeshift Options](#shapeshift-options)
+2. [Shapeshift Options](#shapeshift-options)
   * [The Basics](#the-basics)
   * [Extra Features](#extra-features)
   * [Grid Properties](#grid-properties)
@@ -59,14 +59,14 @@ Index
   * [Drag and Drop Settings](#drag-and-drop-settings)
   * [Customize CSS](#customize-css)
 
-3 [Detecting Changes](#detecting-changes)
+3. [Detecting Changes](#detecting-changes)
   * [Event Listening Examples](#event-listening-examples)
 
-4 [Triggering a Rearrange](#triggering-a-rearrange)
+4. [Triggering a Rearrange](#triggering-a-rearrange)
 
-5 [Destroying Shapeshift](#destroying-shapeshift)
+5. [Destroying Shapeshift](#destroying-shapeshift)
 
-6 [For Contributors](#for-contributors)
+6. [For Contributors](#for-contributors)
 
 
 Getting Started
