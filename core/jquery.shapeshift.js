@@ -83,8 +83,11 @@
           _this = this;
         options = this.options;
         $container = this.$container;
-        $container.off("ss-arrange").on("ss-arrange", function() {
-          return _this.render();
+        $container.off("ss-arrange").on("ss-arrange", function(e, trigger_drop_finished) {
+          if (trigger_drop_finished == null) {
+            trigger_drop_finished = false;
+          }
+          return _this.render(false, trigger_drop_finished);
         });
         $container.off("ss-rearrange").on("ss-rearrange", function() {
           return _this.render(true);
@@ -176,12 +179,12 @@
         }
       };
 
-      Plugin.prototype.render = function(reparse) {
+      Plugin.prototype.render = function(reparse, trigger_drop_finished) {
         if (reparse == null) {
           reparse = false;
         }
         this.setGridColumns();
-        return this.arrange(reparse);
+        return this.arrange(reparse, trigger_drop_finished);
       };
 
       Plugin.prototype.setGridColumns = function() {
@@ -213,7 +216,7 @@
         }
       };
 
-      Plugin.prototype.arrange = function(reparse) {
+      Plugin.prototype.arrange = function(reparse, trigger_drop_finished) {
         var $child, $container, animated, animation_speed, attributes, child_positions, container_height, dragged_class, globals, i, is_dragged_child, max_height, min_height, options, parsed_children, placeholder_class, total_children, _i;
         if (reparse) {
           this.setParsedChildren();
@@ -236,9 +239,18 @@
             $child = $child.siblings("." + placeholder_class);
           }
           if (animated && !is_dragged_child) {
-            $child.stop(true, false).animate(attributes, animation_speed);
+            $child.stop(true, false).animate(attributes, animation_speed, function() {});
           } else {
             $child.css(attributes);
+          }
+        }
+        if (trigger_drop_finished) {
+          if (animated) {
+            setTimeout((function() {
+              return $container.trigger("ss-drop-finished");
+            }), animation_speed);
+          } else {
+            $container.trigger("ss-drop-finished");
           }
         }
         if (options.autoHeight) {
@@ -250,9 +262,8 @@
           } else if (max_height && container_height > max_height) {
             container_height = max_height;
           }
-          $container.height(container_height);
+          return $container.height(container_height);
         }
-        return $container.trigger("ss-arranged");
       };
 
       Plugin.prototype.getPositions = function(include_dragged) {
@@ -413,7 +424,10 @@
               return ui.position.top = e.pageY - $selected.parent().offset().top - selected_offset_y;
             },
             stop: function() {
-              console.log("!");
+              var $current_container, $original_container, $previous_container;
+              $original_container = $("." + original_container_class);
+              $current_container = $("." + current_container_class);
+              $previous_container = $("." + previous_container_class);
               $selected.removeClass(dragged_class);
               $("." + placeholder_class).remove();
               if (drag_clone) {
@@ -424,10 +438,17 @@
                   $clone.removeClass(clone_class);
                 }
               }
-              $selected = $placeholder = null;
-              $("." + original_container_class).trigger("ss-arrange").removeClass(original_container_class);
-              $("." + current_container_class).trigger("ss-arrange").removeClass(current_container_class);
-              return $("." + previous_container_class).trigger("ss-arrange").removeClass(previous_container_class);
+              if ($original_container[0] === $current_container[0]) {
+                $current_container.trigger("ss-rearranged", $selected);
+              } else {
+                $original_container.trigger("ss-removed", $selected);
+                $current_container.trigger("ss-added", $selected);
+              }
+              console.log("stop");
+              $original_container.trigger("ss-arrange").removeClass(original_container_class);
+              $current_container.trigger("ss-arrange", true).removeClass(current_container_class);
+              $previous_container.trigger("ss-arrange").removeClass(previous_container_class);
+              return $selected = $placeholder = null;
             }
           });
         }
@@ -441,11 +462,17 @@
               return $(e.target).addClass(current_container_class);
             },
             drop: function(e, selected) {
+              var $current_container, $original_container, $previous_container;
               if (_this.options.enableTrash) {
-                $(selected.helper).remove();
-                $("." + original_container_class).trigger("ss-rearrange").removeClass(original_container_class);
-                $("." + current_container_class).trigger("ss-rearrange").removeClass(current_container_class);
-                return $("." + previous_container_class).trigger("ss-arrange").removeClass(previous_container_class);
+                $original_container = $("." + original_container_class);
+                $current_container = $("." + current_container_class);
+                $previous_container = $("." + previous_container_class);
+                $selected = $(selected.helper);
+                $current_container.trigger("ss-trashed", $selected);
+                $selected.remove();
+                $original_container.trigger("ss-rearrange").removeClass(original_container_class);
+                $current_container.trigger("ss-rearrange").removeClass(current_container_class);
+                return $previous_container.trigger("ss-arrange").removeClass(previous_container_class);
               }
             }
           });

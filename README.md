@@ -446,6 +446,43 @@ Certain elements will have CSS classes attached to them for specific events. Cus
 
 ### Detecting Changes
 
+Changes to the grid will trigger several different events on the container element and important objects will be returned with it. Here are a list of events that can be listened to, with some examples following.
+
+<table>
+  <tr>
+    <th>Event</th>
+    <th>Triggered When<th>
+    <th>Triggered On</th>
+    <th>Variables Returned</th>
+  </tr>
+  <tr>
+    <td>ss-rearranged</td>
+    <td>When an item is dropped into the container it originated from.</td>
+    <td>original container element</td>
+    <td>selected element</td>
+  </tr>
+  <tr>
+    <td>ss-removed</td>
+    <td>When an item is dropped into a container it didn't originate from.</td>
+    <td>original container element</td>
+    <td>selected element</td>
+  </tr>
+  <tr>
+    <td>ss-added</td>
+    <td>When an item is dropped into a container it didn't originate from.</td>
+    <td>new container element</td>
+    <td>selected element</td>
+  </tr>
+  <tr>
+    <td>ss-trashed</td>
+    <td>When an item is dropped into a container that has trash enabled and therefore is removed from the DOM.</td>
+    <td>new container element</td>
+    <td>none</td>
+  </tr>
+</table>
+
+#### Examples for listening to events
+
 When an item has begun being dragged, it will trigger the "ss-event-dragged" on the container element. You can then write out some code to be fired off when that event occurs. The object that was just selected is also passed back to you. For example,
 
 ```javascript

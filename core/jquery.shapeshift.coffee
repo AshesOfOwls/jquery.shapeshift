@@ -106,7 +106,7 @@
       options = @options
       $container = @$container
 
-      $container.off("ss-arrange").on "ss-arrange", => @render()
+      $container.off("ss-arrange").on "ss-arrange", (e, trigger_drop_finished = false) => @render(false, trigger_drop_finished)
       $container.off("ss-rearrange").on "ss-rearrange", => @render(true)
       $container.off("ss-setTargetPosition").on "ss-setTargetPosition", => @setTargetPosition()
       $container.off("ss-destroy").on "ss-destroy", => @destroy()
@@ -216,9 +216,9 @@
     # Determine the active children and
     # arrange them to the calculated grid
     # ----------------------------
-    render: (reparse = false) ->
+    render: (reparse = false, trigger_drop_finished) ->
       @setGridColumns()
-      @arrange(reparse)
+      @arrange(reparse, trigger_drop_finished)
 
     # ----------------------------
     # setGrid:
@@ -261,7 +261,7 @@
     # arrange:
     # Animates the elements into their calcluated positions
     # ----------------------------
-    arrange: (reparse) ->
+    arrange: (reparse, trigger_drop_finished) ->
       @setParsedChildren() if reparse
 
       globals = @globals
@@ -289,9 +289,18 @@
           $child = $child.siblings("." + placeholder_class)
 
         if animated and !is_dragged_child
-          $child.stop(true, false).animate attributes, animation_speed
+          $child.stop(true, false).animate attributes, animation_speed, ->
         else
           $child.css attributes
+
+
+      if trigger_drop_finished
+        if animated
+          setTimeout (->
+            $container.trigger("ss-drop-finished")
+          ), animation_speed
+        else
+          $container.trigger("ss-drop-finished")
 
       # Set the container height
       if options.autoHeight
@@ -305,8 +314,6 @@
           container_height = max_height
 
         $container.height container_height
-
-      $container.trigger("ss-arranged");
 
     # ----------------------------
     # getPositions:
@@ -499,8 +506,11 @@
             ui.position.top = e.pageY - $selected.parent().offset().top - selected_offset_y;
 
           stop: ->
+            $original_container = $("." + original_container_class)
+            $current_container = $("." + current_container_class)
+            $previous_container = $("." + previous_container_class)
+
             # Clear globals
-            console.log "!"
             $selected.removeClass(dragged_class)
             $("." + placeholder_class).remove()
 
@@ -511,14 +521,21 @@
               else
                 $clone.removeClass(clone_class)
 
+            # Trigger Events
+            if $original_container[0] is $current_container[0]
+              $current_container.trigger("ss-rearranged", $selected)
+            else
+              $original_container.trigger("ss-removed", $selected)
+              $current_container.trigger("ss-added", $selected)
+
+            # Arrange dragged item into place and clear container classes
+            console.log "stop"
+            $original_container.trigger("ss-arrange").removeClass(original_container_class)
+            $current_container.trigger("ss-arrange", true).removeClass(current_container_class)
+            $previous_container.trigger("ss-arrange").removeClass(previous_container_class)
+
             $selected = $placeholder = null
 
-            # Arrange dragged item into place
-            $("." + original_container_class).trigger("ss-arrange").removeClass(original_container_class)
-            $("." + current_container_class).trigger("ss-arrange").removeClass(current_container_class)
-            $("." + previous_container_class).trigger("ss-arrange").removeClass(previous_container_class)
-
-        
 
       if options.enableCrossDrop
         $container.droppable
@@ -531,10 +548,17 @@
 
           drop: (e, selected) =>
             if @options.enableTrash
-              $(selected.helper).remove()
-              $("." + original_container_class).trigger("ss-rearrange").removeClass(original_container_class)
-              $("." + current_container_class).trigger("ss-rearrange").removeClass(current_container_class)
-              $("." + previous_container_class).trigger("ss-arrange").removeClass(previous_container_class)
+              $original_container = $("." + original_container_class)
+              $current_container = $("." + current_container_class)
+              $previous_container = $("." + previous_container_class)
+              $selected = $(selected.helper)
+
+              $current_container.trigger("ss-trashed", $selected)
+              $selected.remove()
+
+              $original_container.trigger("ss-rearrange").removeClass(original_container_class)
+              $current_container.trigger("ss-rearrange").removeClass(current_container_class)
+              $previous_container.trigger("ss-arrange").removeClass(previous_container_class)
 
     # ----------------------------
     # getTargetPosition:

@@ -110,22 +110,38 @@ $ ->
   # Drag and Drop events for shapeshift
   # -------------
 
-  $containers.on "ss-arranged", (e, selected) ->
-    modifier = if $(@).find(".ss-dragging")[0] then 1 else 0
+  $containers.on "ss-rearranged", (e, selected) ->
+    console.log "----------------------------------------"
+    console.log "This container:"
+    console.log $(@)
+    console.log "Has rearranged this item:"
+    console.log $(selected)
+    console.log "Into this position:", $(selected).index()
 
-    $(@).children().each ->
-      $(@).find(".position").text($(@).index() - modifier)
+  $containers.on "ss-removed", (e, selected) ->
+    console.log "----------------------------------------"
+    console.log "This item:"
+    console.log $(selected)
+    console.log "Has been removed from this container:"
+    console.log $(@)
 
-  $containers.on "ss-event-dropped", (e, selected) ->
-    $selected = $(selected)
-    # console.log "The dropped item is:", $selected
+  $containers.on "ss-added", (e, selected) ->
+    console.log "----------------------------------------"
+    console.log "This item:"
+    console.log $(selected)
+    console.log "Has been added to this container:"
+    console.log $(@)
 
-    # Get the index position of each object
-    $objects = $(@).children()
-    $objects.each (i) ->
-      # console.log "Get the index position:", i
-      # console.log "Get the current element:", $(@)
+  $containers.on "ss-trashed", (e, selected) ->
+    console.log "----------------------------------------"
+    console.log "This item:"
+    console.log $(selected)
+    console.log "Has been removed from the DOM"
 
-  $containers.on "ss-event-dragged", (e, selected) ->
-    $selected = $(selected);
-    # console.log "This is the item being dragged:", $selected
+  $containers.on "ss-drop-finished", (e) ->
+    console.log "----------------------------------------"
+    console.log "This container:"
+    console.log $(@)
+    console.log "Has finished rearrangement after a drop."
+
+

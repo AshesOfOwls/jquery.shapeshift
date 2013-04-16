@@ -108,22 +108,39 @@
       renderPlaceholders($(this).data("option"));
       return $containers.shapeshift(filter_options);
     });
-    $containers.on("ss-arranged", function(e, selected) {
-      var modifier;
-      modifier = $(this).find(".ss-dragging")[0] ? 1 : 0;
-      return $(this).children().each(function() {
-        return $(this).find(".position").text($(this).index() - modifier);
-      });
+    $containers.on("ss-rearranged", function(e, selected) {
+      console.log("----------------------------------------");
+      console.log("This container:");
+      console.log($(this));
+      console.log("Has rearranged this item:");
+      console.log($(selected));
+      return console.log("Into this position:", $(selected).index());
     });
-    $containers.on("ss-event-dropped", function(e, selected) {
-      var $objects, $selected;
-      $selected = $(selected);
-      $objects = $(this).children();
-      return $objects.each(function(i) {});
+    $containers.on("ss-removed", function(e, selected) {
+      console.log("----------------------------------------");
+      console.log("This item:");
+      console.log($(selected));
+      console.log("Has been removed from this container:");
+      return console.log($(this));
     });
-    return $containers.on("ss-event-dragged", function(e, selected) {
-      var $selected;
-      return $selected = $(selected);
+    $containers.on("ss-added", function(e, selected) {
+      console.log("----------------------------------------");
+      console.log("This item:");
+      console.log($(selected));
+      console.log("Has been added to this container:");
+      return console.log($(this));
+    });
+    $containers.on("ss-trashed", function(e, selected) {
+      console.log("----------------------------------------");
+      console.log("This item:");
+      console.log($(selected));
+      return console.log("Has been removed from the DOM");
+    });
+    return $containers.on("ss-drop-finished", function(e) {
+      console.log("----------------------------------------");
+      console.log("This container:");
+      console.log($(this));
+      return console.log("Has finished rearrangement after a drop.");
     });
   });
 
