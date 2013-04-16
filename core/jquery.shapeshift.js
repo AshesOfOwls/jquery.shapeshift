@@ -158,7 +158,7 @@
           child = {
             i: i,
             el: $child,
-            colspan: parseInt($child.attr("data-ss-colspan")),
+            colspan: parseInt($child.attr("data-ss-colspan")) || 1,
             height: $child.outerHeight()
           };
           parsedChildren.push(child);
