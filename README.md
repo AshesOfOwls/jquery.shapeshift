@@ -62,6 +62,8 @@ Index
 #### [Detecting Changes](#detecting-changes)
 * [Event Listening Examples](#event-listening-examples)
 
+#### [Triggering a Rearrange](#triggering-a-rearrange)
+
 #### [Destroying Shapeshift](#destroying-shapeshift)
 
 #### [For Contributors](#for-contributors)
