@@ -78,22 +78,22 @@ Shapeshift requires the latest version of jQuery, and drag and drop feature (ena
 
 ### Setting Up the Parent Container
 
-Shapeshift arranges child elements by absolutely positioning them in their parent container which must be set to "position: relative". The container does not have to be a div and can be substituted for any element that can have child elements, such as an unordered list.
+Shapeshift arranges child elements by absolutely positioning them in their parent container which must be set to "position: relative". The container does not have to be a div and can be substituted for any element that can have child elements, such as an unordered list. The container also must have a width specified.
 
 ```html
-<div class="container" style="position: relative;"></div>
+<div class="container" style="position: relative; width: 100%;"></div>
 ```
 
 ### Setting up the Child Elements
 
-By default all child elements within the parent container will be Shapeshifted. Just make sure that they are set to "position: absolute" in your CSS file.
+By default all child elements within the parent container will be Shapeshifted. Just make sure that they are set to "position: absolute" in your CSS file. The children also must have a height/width specified.
 
 ```html
 <div class="container" style="position: relative;">
-  <div style="position: absolute;">Child Element 1</div>
-  <div style="position: absolute;">Child Element 2</div>
-  <div style="position: absolute;">Child Element 3</div>
-  <div style="position: absolute;">Child Element 4</div>
+  <div style="height: 50px; position: absolute; width: 50px;">Child Element 1</div>
+  <div style="height: 50px; position: absolute; width: 50px;">Child Element 2</div>
+  <div style="height: 50px; position: absolute; width: 50px;">Child Element 3</div>
+  <div style="height: 50px; position: absolute; width: 50px;">Child Element 4</div>
   ...
 </div>
 ```
@@ -107,7 +107,7 @@ To make a child element multiwidth, simply add the data attribute "data-ss-colsp
 For example, assuming the default gutter value of 10px, multiwidth elements can be created as such:
 
 ```css
-.container div { width: 80px; } // When no colspan is set, it is one colspan
+.container div { height: 120px; position: absolute; width: 80px; } // When no colspan is set, it is one colspan
 .container div[data-ss-colspan="2"] { width: 170px; }
 .container div[data-ss-colspan="3"] { width: 260px; }
 .container div[data-ss-colspan="4"] { width: 350px; }
@@ -115,10 +115,10 @@ For example, assuming the default gutter value of 10px, multiwidth elements can 
 
 ```html
 <div class="container" style="position: relative;">
-  <div style="position: absolute;">1 Column Width</div>
-  <div style="position: absolute;" data-ss-colspan="2">2 Column Width</div>
-  <div style="position: absolute;" data-ss-colspan="3">3 Column Width</div>
-  <div style="position: absolute;" data-ss-colspan="4">4 Column Width</div>
+  <div>1 Column Width</div>
+  <div data-ss-colspan="2">2 Column Width</div>
+  <div data-ss-colspan="3">3 Column Width</div>
+  <div data-ss-colspan="4">4 Column Width</div>
   ...
 </div>
 ```
