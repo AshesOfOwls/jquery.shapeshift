@@ -43,7 +43,7 @@
     crossDropWhitelist: "*"
     cutoffStart: null
     cutoffEnd: null
-    handle: ".position"
+    handle: false
 
     # Customize CSS
     cloneClass: "ss-cloned-child"
@@ -694,11 +694,17 @@
       $container.off("ss-rearrange")
       $container.off("ss-setTargetPosition")
       $container.off("ss-destroy")
+
+      active_class = @options.activeClass
+      $active_children = $container.find("." + active_class)
       
       if @options.enableDrag
-        $container.children().draggable().draggable('destroy')
-      if @options.enableDrop
+        $active_children.draggable('destroy')
+      if @options.enableCrossDrop
         $container.droppable('destroy')
+
+      $active_children.removeClass(active_class)
+      $container.removeClass(@identifier)
 
 
   $.fn[pluginName] = (options) ->

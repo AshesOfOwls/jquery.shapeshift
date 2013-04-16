@@ -32,7 +32,7 @@
       crossDropWhitelist: "*",
       cutoffStart: null,
       cutoffEnd: null,
-      handle: ".position",
+      handle: false,
       cloneClass: "ss-cloned-child",
       activeClass: "ss-active-child",
       draggedClass: "ss-dragged-child",
@@ -595,18 +595,22 @@
       };
 
       Plugin.prototype.destroy = function() {
-        var $container;
+        var $active_children, $container, active_class;
         $container = this.$container;
         $container.off("ss-arrange");
         $container.off("ss-rearrange");
         $container.off("ss-setTargetPosition");
         $container.off("ss-destroy");
+        active_class = this.options.activeClass;
+        $active_children = $container.find("." + active_class);
         if (this.options.enableDrag) {
-          $container.children().draggable().draggable('destroy');
+          $active_children.draggable('destroy');
         }
-        if (this.options.enableDrop) {
-          return $container.droppable('destroy');
+        if (this.options.enableCrossDrop) {
+          $container.droppable('destroy');
         }
+        $active_children.removeClass(active_class);
+        return $container.removeClass(this.identifier);
       };
 
       return Plugin;

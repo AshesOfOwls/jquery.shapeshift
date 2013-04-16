@@ -62,6 +62,8 @@ Index
 #### [Detecting Changes](#detecting-changes)
 * [Event Listening Examples](#event-listening-examples)
 
+#### [Destroying Shapeshift](#destroying-shapeshift)
+
 #### [For Contributors](#for-contributors)
 
 
@@ -174,6 +176,7 @@ $('.container').shapeshift
     crossDropWhitelist: "*"
     cutoffStart: null
     cutoffEnd: null
+    handle: false
 
     # Customize CSS
     cloneClass: "ss-cloned-child"
@@ -398,6 +401,12 @@ $('.container').shapeshift
     <td>Any Integer >= 0</td>
     <td>null</td>
   </tr>
+  <tr>
+    <td>handle</td>
+    <td>If specified, restricts dragging from starting unless the mousedown occurs on the specified element(s).</td>
+    <td>Any CSS selector, such as ".jack" or "#harkness"</td>
+    <td>false</td>
+  </tr>
 </table>
 
 ### Customize CSS
@@ -535,6 +544,14 @@ When an item has begun being dragged, it will trigger the "ss-event-dragged" on 
     console.log "This container:", $(this)
     console.log "Has just rearranged items but no drop has occurred."
 
+```
+
+### Destroying Shapeshift
+
+Simply trigger the event "ss-destroy" on the container.
+
+```coffeescript
+  $(".ss-container").trigger("ss-destroy")
 ```
 
 ## For Contributors
