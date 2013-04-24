@@ -321,13 +321,13 @@ $('.container').shapeshift
   <tr>
     <td>gutterX</td>
     <td>The number of pixels horizontally between each column.</td>
-    <td>Any Integer >= 0</td>
+    <td>Any Integer</td>
     <td>10</td>
   </tr>
   <tr>
     <td>gutterY</td>
     <td>The number of pixels vertically between each element.</td>
-    <td>Any Integer >= 0</td>
+    <td>Any Integer</td>
     <td>10</td>
   </tr>
   <tr>

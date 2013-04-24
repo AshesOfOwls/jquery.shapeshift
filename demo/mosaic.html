@@ -27,8 +27,8 @@
   <script type="text/JavaScript" src="demo_assets/jquery.shapeshift.min.js"></script>
 
   <!-- Demo Files -->
-  <link rel="stylesheet" type="text/css" href="demo_assets/index.css">
-  <script src="demo_assets/index.js"></script>
+  <link rel="stylesheet" type="text/css" href="demo_assets/mosaic.css">
+  <script src="demo_assets/mosaic.js"></script>
 </head>
 <body>
   <!-- navbar -->
@@ -59,85 +59,39 @@
       </div>
     </div>
   </div>
-
+  
   <!-- details accordion -->
   <div class="accordion more_info">
-    <div class="accordion-group details">
+    <div class="accordion-group code_example">
       <div class="accordion-heading">
-        <a class="accordion-toggle" data-toggle="collapse" href="#details">
+        <a class="accordion-toggle" data-toggle="collapse" href="#code_example">
           <div class="container">
-            Details
+            Code Example
           </div>
         </a>
       </div>
-      <div id="details" class="accordion-body collapse" style="height: 0px;">
+      <div id="code_example" class="accordion-body collapse" style="height: 0px;">
         <div class="accordion-inner">
           <div class="container">
-            <h3>What is Shapeshift?</h3>
-            <p>Inspired heavily by the <a href="http://masonry.desandro.com/">jQuery Masonry</a> plugin, Shapeshift is an open source plugin which will dynamically arrange a collection of elements into a column grid system similar to <a href="http://pinterest.com/">Pinterest</a>. What sets it apart is the ability to drag and drop items within the grid and between multiple containers while still maintaining a logical index position for each item. This allows for the grid to be rendered exactly the same every time Shapeshift is used, as long as the child elements are in the correct order.</p>
-            <h4>Function > Form</h4>
-            <p>Shapeshift was designed to always render the same grid as long as the elements are in the same order. While this may leave holes, it is intentional as to favor higher index positioned elements over lower.</p>
-            <h4>Features</h4>
-            <ul class="unstyled">
-              <li>
-                <strong>Column Grid System:</strong>
-                All items flow from left to right, top to bottom.
-              </li>
-              <li>
-                <strong>Drag &amp; Drop:</strong>
-                Click and drag elements to move them, even to different containers.
-              </li>
-              <li>
-                <strong>Responsive:</strong>
-                Resize the browser window so see the grid change with the new dimensions.
-              </li>
-              <li>
-                <strong>Works on Touch:</strong>
-                Enable drag and drop on touch devices by using the included <a href="http://touchpunch.furf.com/">jQuery UI Touch Punch</a>.
-              </li>
-            </ul>
+            <div class="row">
+              <div class="span6">
+                <h5>HTML</h5>
+                <script src="https://gist.github.com/McPants/5450352.js"></script>
+                <h5>JS</h5>
+                <script src="https://gist.github.com/McPants/5450366.js"></script>
+              </div>
+              <div class="span6">
+                <h5>CSS</h5>
+                <script src="https://gist.github.com/McPants/5456027.js"></script>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- controls -->
-  <div class="container well controls">
-    <h6 class="container-label">Demo Controls</h6>
-    <ul class="inline">
-      <li class="animations">
-        <label>Animations</label>
-        <div class="switch">
-          <input type="checkbox" checked="checked">
-        </div>
-      </li>
-      <li class="dragndrop">
-        <label>Drag &amp; Drop</label>
-        <div class="switch">
-          <input type="checkbox" checked="checked">
-        </div>
-      </li>
-      <li class="filtering">
-        <label>Filtering</label>
-        <div class="btn-group">
-          <button class="btn" data-option="show">Show Random</button>
-          <button class="btn" data-option="hide">Hide Random</button>
-        </div>
-      </li>
-      <li class="placeholders">
-        <label>Placeholders</label>
-        <div class="btn-group toggle">
-          <button class="btn active" data-option="fpoimg">FPOImg</button>
-          <button class="btn" data-option="placekittens">Placekittens</button>
-          <button class="btn" data-option="index">Index Positions</button>
-        </div>
-      </li>
-    </ul>
-  </div>
-
   <!-- content -->
-  <ul class="ss-container unstyled"></ul>
   <ul class="ss-container unstyled"></ul>
   <div class="clearfix"></div>
   
@@ -145,7 +99,7 @@
   <footer class="footer">
     <div class="container">
       <p>jQuery.Shapeshift uses the <a href="https://github.com/McPants/jquery.shapeshift/blob/master/LICENSE">MIT license</a></p>
-      <p>Placeholder images provided by <a href="http://fpoimg.com">FPOImg.com</a> and <a href="http://placekitten.com">Placekitten.com</a>.</p>
+      <p>Placeholder images provided by <a href="http://fpoimg.com">FPOImg.com</a>.
     </div>
   </footer>
 </body>

@@ -20,18 +20,26 @@ body {
   opacity: 1;
 }
 
-.details {
+.github-btn {
+  float: left;
+  margin-top: 10px;
+}
+
+.accordion-group {
   border-radius: 0;
+}
+
+.more_info.accordion .accordion-toggle {
   text-align: center;
 }
 
-.details .accordion-group {
-  border-radius: 0;
-}
-
-.details p {
+.details.accordion-group p {
   max-width: 690px;
   margin: 0 auto 20px auto;
+}
+
+.details.accordion-group {
+  text-align: center;
 }
 
 footer {
