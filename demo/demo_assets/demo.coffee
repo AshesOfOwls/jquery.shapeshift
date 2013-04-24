@@ -15,11 +15,11 @@ $ ->
       for i in [0...child_count]
         if container_i is 0
           colspan = weighted_colspans[Math.floor(Math.random() * weighted_colspans.length)]
-          height = colspan * 80 + ((colspan - 1) * 12)
+          height = colspan * 70 + ((colspan - 1) * 12)
         else
           height = Math.random() * 100 + 100
           colspan = 1
-        elements.push "<li data-ss-colspan="+colspan+" style='height: "+height+"px'><div class='position'>"+i+"</div></li>"
+        elements.push "<li data-ss-colspan="+colspan+" style='height: "+height+"px'><div class='position'><div>"+i+"</div></div></li>"
 
       $(@).append(elements.join(""))
 
@@ -67,28 +67,18 @@ $ ->
   # Clicking the filter options
   # -------------
 
-  $(".options ul.animation li").on "click", ->
-    switch $(this).data "option"
-      when "enable"
-        filter_options.animated = true
-      else
-        filter_options.animated = false
-
+  $(".controls .animations .switch").on "switch-change", (e, data) ->
+    filter_options.animated = data.value
     $containers.shapeshift filter_options
 
-  $(".options ul.dragndrop li").on "click", ->
-    switch $(this).data "option"
-      when "enable"
-        filter_options.enableDrag = true
-        filter_options.enableDrop = true
-      else
-        filter_options.enableDrag = false
-        filter_options.enableDrop = false
+  $(".controls .dragndrop .switch").on "switch-change", (e, data) ->
+    filter_options.enableDrag = data.value
+    filter_options.enableDrop = data.value
 
     $containers.trigger 'ss-destroy'
     $containers.shapeshift filter_options
 
-  $(".options ul.filtering li").on "click", ->
+  $(".controls .filtering button").on "click", ->
     switch $(this).data "option"
       when "hide"
         $containers.children(":visible").sort( ->
@@ -101,7 +91,7 @@ $ ->
 
     $containers.trigger "ss-rearrange"
 
-  $(".options ul.placeholders li").on "click", ->
+  $(".controls .placeholders button").on "click", ->
     renderPlaceholders $(this).data("option")
 
     $containers.shapeshift filter_options
@@ -111,7 +101,7 @@ $ ->
     modifier = if $(@).find(".ss-dragging")[0] then 1 else 0
 
     $(@).children().each ->
-      $(@).find(".position").text($(@).index() - modifier)
+      $(@).find(".position div").text($(@).index() - modifier)
 
   # -------------
   # Drag and Drop events for shapeshift

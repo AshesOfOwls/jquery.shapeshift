@@ -11,8 +11,12 @@ ul.ss-container li {
   border-radius: 3px;
   border: 1px solid rgba(0,0,0,0.4);
   position: absolute;
-  width: 80px;
+  width: 70px;
 }
+
+ul.ss-container li[data-ss-colspan="2"] { width: 152px; }
+ul.ss-container li[data-ss-colspan="3"] { width: 234px; }
+ul.ss-container li[data-ss-colspan="4"] { width: 316px; }
 
 ul.ss-container li.ss-dragged-child {
   cursor: move;
@@ -28,7 +32,7 @@ ul.ss-container li.ss-dragged-child {
 ul.ss-container li.ss-placeholder-child {
   background: transparent;
   border: 0px;
-  outline: 1px dashed red;
+  outline: 1px dashed #68C;
 }
 
 ul.ss-container li .position {
@@ -42,9 +46,5 @@ ul.ss-container li .position {
 }
 
 ul.ss-container li .position div {
-  padding-top: 40%;
+  padding-top: 30%;
 }
-
-ul.ss-container li[data-ss-colspan="2"] { width: 172px; }
-ul.ss-container li[data-ss-colspan="3"] { width: 264px; }
-ul.ss-container li[data-ss-colspan="4"] { width: 356px; }

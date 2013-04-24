@@ -1,0 +1,19 @@
+/* Prevents the top body padding from 
+  interfering with small window content */
+@media (max-width: 979px) {
+  body { padding-top: 0; }
+}
+
+/* Force the footer to expand to 
+  100% when in a small window */
+@media (max-width: 767px) {
+  .footer {
+    margin-left: -20px;
+    margin-right: -20px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+/* Force position relative on containers */
+.container { position: relative; }

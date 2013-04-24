@@ -14,12 +14,12 @@
         for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
           if (container_i === 0) {
             colspan = weighted_colspans[Math.floor(Math.random() * weighted_colspans.length)];
-            height = colspan * 80 + ((colspan - 1) * 12);
+            height = colspan * 70 + ((colspan - 1) * 12);
           } else {
             height = Math.random() * 100 + 100;
             colspan = 1;
           }
-          elements.push("<li data-ss-colspan=" + colspan + " style='height: " + height + "px'><div class='position'>" + i + "</div></li>");
+          elements.push("<li data-ss-colspan=" + colspan + " style='height: " + height + "px'><div class='position'><div>" + i + "</div></div></li>");
         }
         return $(this).append(elements.join(""));
       });
@@ -67,30 +67,17 @@
       minColumns: 3
     };
     $containers.shapeshift(filter_options);
-    $(".options ul.animation li").on("click", function() {
-      switch ($(this).data("option")) {
-        case "enable":
-          filter_options.animated = true;
-          break;
-        default:
-          filter_options.animated = false;
-      }
+    $(".controls .animations .switch").on("switch-change", function(e, data) {
+      filter_options.animated = data.value;
       return $containers.shapeshift(filter_options);
     });
-    $(".options ul.dragndrop li").on("click", function() {
-      switch ($(this).data("option")) {
-        case "enable":
-          filter_options.enableDrag = true;
-          filter_options.enableDrop = true;
-          break;
-        default:
-          filter_options.enableDrag = false;
-          filter_options.enableDrop = false;
-      }
+    $(".controls .dragndrop .switch").on("switch-change", function(e, data) {
+      filter_options.enableDrag = data.value;
+      filter_options.enableDrop = data.value;
       $containers.trigger('ss-destroy');
       return $containers.shapeshift(filter_options);
     });
-    $(".options ul.filtering li").on("click", function() {
+    $(".controls .filtering button").on("click", function() {
       switch ($(this).data("option")) {
         case "hide":
           $containers.children(":visible").sort(function() {
@@ -104,7 +91,7 @@
       }
       return $containers.trigger("ss-rearrange");
     });
-    $(".options ul.placeholders li").on("click", function() {
+    $(".controls .placeholders button").on("click", function() {
       renderPlaceholders($(this).data("option"));
       return $containers.shapeshift(filter_options);
     });
@@ -112,7 +99,7 @@
       var modifier;
       modifier = $(this).find(".ss-dragging")[0] ? 1 : 0;
       return $(this).children().each(function() {
-        return $(this).find(".position").text($(this).index() - modifier);
+        return $(this).find(".position div").text($(this).index() - modifier);
       });
     });
     $containers.on("ss-rearranged", function(e, selected) {

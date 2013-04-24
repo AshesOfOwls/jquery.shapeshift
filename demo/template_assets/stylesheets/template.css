@@ -1,0 +1,64 @@
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  padding-top: 40px;
+  min-height: 100%;
+}
+
+.logo {
+  background: url('../images/wtm_logo_nav.png') no-repeat left center;
+  background-size: auto 75%;
+  display: block;
+  float: left;
+  height: 40px;
+  margin-right: 15px;
+  opacity: 0.6;
+  text-indent: -9999px;
+  width: 35px;
+}
+
+.logo:hover {
+  opacity: 1;
+}
+
+.details {
+  border-radius: 0;
+  text-align: center;
+}
+
+.details .accordion-group {
+  border-radius: 0;
+}
+
+.details p {
+  max-width: 690px;
+  margin: 0 auto 20px auto;
+}
+
+footer {
+  text-align: center;
+  padding: 30px 0;
+  margin-top: 70px;
+  border-top: 1px solid #e5e5e5;
+  background-color: #f5f5f5;
+}
+
+.controls {
+  text-align: center;
+  padding-bottom: 10px;
+  padding-top: 40px;
+}
+
+.controls li {
+  margin-bottom: 20px;
+}
+
+.container-label {
+  background: rgba(0,0,0,0.1);
+  border-radius: 0 0 3px 3px;
+  left: 50%;
+  margin-left: -48px;
+  top: -10px;
+  padding: 1px 0px;
+  width: 98px;
+  position: absolute;
+}
