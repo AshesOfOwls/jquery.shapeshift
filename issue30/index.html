@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <style>
+            #x { height: 100px; }
+
+            .container {position relative; width:100%; }
+            .container div { position:absolute; height:50px; width:80px; background-color:#966; }
+            .container div[data-ss-colspan="1"] { width: 80px; }
+            .container div[data-ss-colspan="2"] { width: 170px; }
+            .container div[data-ss-colspan="3"] { width: 260px; }
+            .container div[data-ss-colspan="4"] { width: 350px; }
+            .container div[data-ss-colspan="5"] { width: 440px; }
+            .container div[data-ss-colspan="6"] { width: 530px; }
+            .container div[data-ss-colspan="7"] { width: 620px; }
+            .container div[data-ss-colspan="8"] { width: 710px; }
+            .container div[data-ss-colspan="9"] { width: 800px; }
+            .container div[data-ss-colspan="10"] { width: 890px; }
+            .container div[data-ss-colspan="11"] { width: 980px; }
+            .container div[data-ss-colspan="12"] { width: 1070px; }
+        </style>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+        <script type="text/JavaScript" src="core/jquery.shapeshift.js"></script>
+    </head>
+
+    <body>
+        <div class="container">
+            <div id="x" data-ss-colspan="1">x</div>
+            <div id="a"  data-ss-colspan="7">a</div>
+            <div id="b"  data-ss-colspan="5">b</div>
+            <div id="c"  data-ss-colspan="12">c</div>
+        </div>
+
+        <script>
+            (function($){
+
+                $('.container').shapeshift({
+                    enableDrag: true,
+                    enableResize: true,
+                    align: "left",
+                    minColumns: 12,
+                //    gutterY: 10
+                });
+
+                function handleFileDrop(e) {
+                }
+
+                // Setup the dnd listeners.
+                var x = document.getElementById('x');
+                x.addEventListener('drop', handleFileDrop, false);
+
+            })(jQuery);
+        </script>
+    </body>
+</html>
