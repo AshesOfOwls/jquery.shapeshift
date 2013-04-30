@@ -69,7 +69,7 @@ Getting Started
 
 ### Dependencies
 
-Shapeshift requires the latest version of jQuery, and drag and drop feature (enabled by default) requires jQuery UI Draggable/Droppable libraries. It also requires [jQuery Touch Punch](http://touchpunch.furf.com/) to work on touch devices.
+Shapeshift requires the latest version of jQuery (1.9.1 minimum), and drag and drop feature (enabled by default) requires jQuery UI Draggable/Droppable libraries. It also requires [jQuery Touch Punch](http://touchpunch.furf.com/) to work on touch devices.
 
 ### Setting Up the Parent Container
 
