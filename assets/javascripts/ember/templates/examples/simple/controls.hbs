@@ -1,0 +1,40 @@
+{{#view Demo.ControlsView}}
+  <div class="container well controls">
+    <h6 class="container-label">Demo Controls</h6>
+    <ul class="inline">
+      <li data-option="animation">
+        <label>Animations</label>
+        <div class="switch">
+          <input type="checkbox" checked="checked">
+        </div>
+      </li>
+      <li data-option="dragndrop">
+        <label>Drag &amp; Drop</label>
+        <div class="switch">
+          <input type="checkbox" checked="checked">
+        </div>
+      </li>
+      <li data-option="indexes">
+        <label>Show Index</label>
+        <div class="switch">
+          <input type="checkbox">
+        </div>
+      </li>
+      <li data-option="filtering">
+        <label>Filtering</label>
+        <div class="btn-group">
+          <button class="btn" data-value="show">Show Random</button>
+          <button class="btn" data-value="hide">Hide Random</button>
+        </div>
+      </li>
+      <li data-option="placeholders">
+        <label>Placeholders</label>
+        <div class="btn-group toggle">
+          <button class="btn active" data-value="fpoimg">FPOImg</button>
+          <button class="btn" data-value="placekitten">Placekittens</button>
+          <button class="btn" data-value="placezombies">PlaceZombies</button>
+        </div>
+      </li>
+    </ul>
+  </div>
+{{/view}}
