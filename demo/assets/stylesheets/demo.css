@@ -3,16 +3,18 @@
 /* -------------- */
 .ss-container {
   position: relative;
+  width: 100%;
 }
 
 .ss-container > div {
   background: rgba(0,0,0,0.2);
   position: absolute;
+  width: 80px;
 }
 
 .ss-container .ss-placeholder-child {
   background: transparent;
-  border: 1px dashed rgba(250,0,0,0.4);
+  border: 1px dashed rgba(0,0,250,0.5);
 }
 
 /* --------------------- */
@@ -36,10 +38,6 @@
   width: 47%;
 }
 
-.ss-container.simple > div {
-  width: 80px;
-}
-
 .ss-container.simple div[data-ss-colspan="2"] { width: 170px; }
 .ss-container.simple div[data-ss-colspan="3"] { width: 260px; }
 
@@ -53,3 +51,17 @@
 
 .ss-container.mosaic div[data-ss-colspan="2"] { width: 200px; }
 .ss-container.mosaic div[data-ss-colspan="3"] { width: 300px; }
+
+
+/* --------------------- */
+/* Trash Example Styles */
+/* --------------------- */
+.ss-container.trash_bin {
+  border: 1px dashed red;
+  float: left;
+  height: 300px;
+  margin: 0 2%;
+  padding-top: 10px;
+  text-align: center;
+  width: 96%;
+}

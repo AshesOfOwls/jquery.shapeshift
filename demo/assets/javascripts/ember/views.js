@@ -99,6 +99,23 @@ Demo.MosaicView = Ember.View.extend({
   }
 });
 
+Demo.TrashView = Ember.View.extend({
+  templateName: 'examples/trash/index',
+  didInsertElement: function() {
+    $container = $(".ss-container.trash");
+    $trash = $(".ss-container.trash_bin");
+    $children = $container.children();
+    $children.pikit({ service: 'placezombies', height: [100, 300] })
+    $children.shuffle();
+    $container.shapeshift()
+    $trash.shapeshift({
+      autoHeight: false,
+      colWidth: 80,
+      enableTrash: true
+    })
+  }
+});
+
 Demo.ControlsView = Ember.View.extend({
   templateName: 'examples/simple/index',
   didInsertElement: function() {
