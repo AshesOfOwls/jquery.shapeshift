@@ -31,7 +31,7 @@ Features
 
 Documentation
 -------------
-Check out our [Wiki](https://github.com/McPants/jquery.shapeshift/wiki) for full documentation.
+Check out our [Wiki](https://github.com/McPants/jquery.shapeshift/wiki) for [full documentation](https://github.com/McPants/jquery.shapeshift/wiki/2.0-api-documentation).
 
 
 Credits
