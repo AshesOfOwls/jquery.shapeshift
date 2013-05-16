@@ -17,3 +17,9 @@
 
 /* Force position relative on containers */
 .container { position: relative; }
+
+/* Code Examples */
+.gist .gist-file .gist-data {
+  font-size: 93% !important;
+  line-height: 125% !important;
+}

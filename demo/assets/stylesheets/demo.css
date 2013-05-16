@@ -1,0 +1,55 @@
+/* -------------- */
+/* Generic Styles */
+/* -------------- */
+.ss-container {
+  position: relative;
+}
+
+.ss-container > div {
+  background: rgba(0,0,0,0.2);
+  position: absolute;
+}
+
+.ss-container .ss-placeholder-child {
+  background: transparent;
+  border: 1px dashed rgba(250,0,0,0.4);
+}
+
+/* --------------------- */
+/* Demo Styles */
+/* --------------------- */
+.ss-container .position {
+  background: rgba(0,0,0,0.5);
+  color: #FFF;
+  text-align: center;
+  position: absolute;
+  width: 100% !important;
+}
+
+/* --------------------- */
+/* Simple Example Styles */
+/* --------------------- */
+.ss-container.simple {
+  border: 1px dashed rgba(0,0,0,0.3);
+  float: left;
+  margin-left: 2%;
+  width: 47%;
+}
+
+.ss-container.simple > div {
+  width: 80px;
+}
+
+.ss-container.simple div[data-ss-colspan="2"] { width: 170px; }
+.ss-container.simple div[data-ss-colspan="3"] { width: 260px; }
+
+
+/* --------------------- */
+/* Mosaic Example Styles */
+/* --------------------- */
+.ss-container.mosaic > div {
+  width: 100px;
+}
+
+.ss-container.mosaic div[data-ss-colspan="2"] { width: 200px; }
+.ss-container.mosaic div[data-ss-colspan="3"] { width: 300px; }

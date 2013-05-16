@@ -1,0 +1,33 @@
+<!-- navbar -->
+<div class="navbar navbar-inverse navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container">
+      <!-- Mobile Collapse Button -->
+      <a class="btn btn-navbar" data-toggle="collapse" data-target=".navbar-inverse-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </a>
+      <!-- WTM Logo -->
+      <a class="logo" href="http://www.wtmworldwide.com">Maintained by We the Media</a>
+      <!-- Demo Title -->
+      <a class="brand" href="#">{{unbound demo_name}} <small>{{unbound demo_version}}</small></a>
+      <!-- Github Star Button -->
+      <iframe class="github-btn" src="{{unbound github_button_url}}" allowtransparency="true" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
+      <!-- Menu -->
+      <div class="nav-collapse navbar-inverse-collapse collapse">
+        <ul class="nav pull-right">
+          <li><a href="{{unbound documentation_url}}">Docs</a></li>
+          <li><a href="{{unbound getting_started_url}}">Getting Started</a></li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li>{{#linkTo 'simple'}}Simple{{/linkTo}}</li>
+              <li>{{#linkTo 'mosaic'}}Mosaic{{/linkTo}}</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

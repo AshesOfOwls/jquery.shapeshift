@@ -1,166 +1,49 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>jQuery.Shapeshift</title>
-
+  
   <!-- Meta -->
   <meta charset="UTF-8">
   <meta name="description" content="jQuery plugin which creates a column based grid system that allows drag and drop even between multiple containers.">
   <meta name="keywords" content="jquery,html,grid,column,drag,drop,pinterest">
-
-  <!-- Stylesheets -->
-  <link rel="stylesheet" href="template_assets/bootstrap/bootstrap.min.css" />
-  <link rel="stylesheet" href="template_assets/bootstrap/bootstrap-responsive.min.css" />
-  <link rel="stylesheet" href="template_assets/bootstrap/bootstrap-switch.css" />
-  <link rel="stylesheet" href="template_assets/stylesheets/template.css" />
-  <link rel="stylesheet" href="template_assets/stylesheets/shame.css" />
   
-  <!-- Javascripts -->
+  <!-- JS Libraries -->
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
-  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
-  <script src="template_assets/bootstrap/bootstrap.min.js"></script>
-  <script src="template_assets/bootstrap/bootstrap-switch.js"></script>
-  <script src="template_assets/javascripts/template.js"></script>
-
-  <!-- Core Shapeshift Files -->
-  <script type="text/JavaScript" src="demo_assets/jquery.touch-punch.min.js"></script>
-  <script type="text/JavaScript" src="demo_assets/jquery.shapeshift.min.js"></script>
 
   <!-- Demo Files -->
-  <link rel="stylesheet" type="text/css" href="demo_assets/index.css">
-  <script src="demo_assets/index.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+  <script src="assets/vendor/pikit/jquery.pikit.js"></script>
+  <script src="assets/vendor/shuffle.js"></script>
+  <link rel="stylesheet" href="assets/stylesheets/demo.css" />
+  <script src="assets/javascripts/demo.js"></script>
+  <script src="core/jquery.shapeshift.min.js"></script>
+  
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css" />
+  <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap-responsive.min.css" />
+  <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap-switch.css" />
+  <script src="assets/vendor/bootstrap/bootstrap.min.js"></script>
+  <script src="assets/vendor/bootstrap/bootstrap-switch.js"></script>
+
+  <!-- Ember.js -->
+  <script src="assets/vendor/ember/handlebars.js"></script>
+  <script src="assets/vendor/ember/ember-1.0.0-rc.3.min.js"></script>
+  <script src="assets/javascripts/ember/patches.js"></script>
+  <script src="assets/javascripts/ember/demo.js"></script>
+  <script src="assets/javascripts/ember/router.js"></script>
+  <script src="assets/javascripts/ember/views.js"></script>
+  <script src="assets/javascripts/ember/helpers.js"></script>
+  <script src="assets/javascripts/ember/controllers.js"></script>
+
+  <!-- Template Files -->
+  <link rel="stylesheet" href="assets/stylesheets/template.css" />
+  <link rel="stylesheet" href="assets/stylesheets/shame.css" />
 </head>
 <body>
-  <!-- navbar -->
-  <div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="navbar-inner">
-      <div class="container">
-        <a class="btn btn-navbar" data-toggle="collapse" data-target=".navbar-inverse-collapse">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </a>
-        <a class="logo" href="http://www.wtmworldwide.com">Maintained by We the Media</a>
-        <a class="brand" href="#">jQuery.Shapeshift <small>v2.0</small></a>
-        <iframe class="github-btn" src="http://ghbtns.com/github-btn.html?user=mcpants&repo=jquery.shapeshift&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
-        <div class="nav-collapse navbar-inverse-collapse collapse">
-          <ul class="nav pull-right">
-            <li><a href="https://github.com/McPants/jquery.shapeshift">Docs</a></li>
-            <li><a href="https://github.com/McPants/jquery.shapeshift#getting-started">Getting Started</a></li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
-              <ul class="dropdown-menu">
-                <li><a href="index.html">Basic</a></li>
-                <li><a href="mosaic.html">Mosaic</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- details accordion -->
-  <div class="accordion more_info">
-    <div class="accordion-group details">
-      <div class="accordion-heading">
-        <a class="accordion-toggle" data-toggle="collapse" href="#details">
-          <div class="container">
-            Details
-          </div>
-        </a>
-      </div>
-      <div id="details" class="accordion-body collapse" style="height: 0px;">
-        <div class="accordion-inner">
-          <div class="container">
-            <h3>What is Shapeshift?</h3>
-            <p>Inspired heavily by the <a href="http://masonry.desandro.com/">jQuery Masonry</a> plugin, Shapeshift is an open source plugin which will dynamically arrange a collection of elements into a column grid system similar to <a href="http://pinterest.com/">Pinterest</a>. What sets it apart is the ability to drag and drop items within the grid and between multiple containers while still maintaining a logical index position for each item. This allows for the grid to be rendered exactly the same every time Shapeshift is used, as long as the child elements are in the correct order.</p>
-            <h4>Function > Form</h4>
-            <p>Shapeshift was designed to always render the same grid as long as the elements are in the same order. While this may leave holes, it is intentional as to favor higher index positioned elements over lower.</p>
-            <h4>Features</h4>
-            <ul class="unstyled">
-              <li>
-                <strong>Column Grid System:</strong>
-                All items flow from left to right, top to bottom.
-              </li>
-              <li>
-                <strong>Drag &amp; Drop:</strong>
-                Click and drag elements to move them, even to different containers.
-              </li>
-              <li>
-                <strong>Responsive:</strong>
-                Resize the browser window so see the grid change with the new dimensions.
-              </li>
-              <li>
-                <strong>Works on Touch:</strong>
-                Enable drag and drop on touch devices by using the included <a href="http://touchpunch.furf.com/">jQuery UI Touch Punch</a>.
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- controls -->
-  <div class="container well controls">
-    <h6 class="container-label">Demo Controls</h6>
-    <ul class="inline">
-      <li class="animations">
-        <label>Animations</label>
-        <div class="switch">
-          <input type="checkbox" checked="checked">
-        </div>
-      </li>
-      <li class="dragndrop">
-        <label>Drag &amp; Drop</label>
-        <div class="switch">
-          <input type="checkbox" checked="checked">
-        </div>
-      </li>
-      <li class="filtering">
-        <label>Filtering</label>
-        <div class="btn-group">
-          <button class="btn" data-option="show">Show Random</button>
-          <button class="btn" data-option="hide">Hide Random</button>
-        </div>
-      </li>
-      <li class="placeholders">
-        <label>Placeholders</label>
-        <div class="btn-group toggle">
-          <button class="btn active" data-option="fpoimg">FPOImg</button>
-          <button class="btn" data-option="placekittens">Placekittens</button>
-          <button class="btn" data-option="index">Index Positions</button>
-        </div>
-      </li>
-    </ul>
-  </div>
-
-  <!-- content -->
-  <ul class="ss-container unstyled"></ul>
-  <ul class="ss-container unstyled"></ul>
-  <div class="clearfix"></div>
-  
-  <!-- footer -->
-  <footer class="footer">
-    <div class="container">
-      <p>jQuery.Shapeshift uses the <a href="https://github.com/McPants/jquery.shapeshift/blob/master/LICENSE">MIT license</a></p>
-      <p>Placeholder images provided by <a href="http://fpoimg.com">FPOImg.com</a> and <a href="http://placekitten.com">Placekitten.com</a>.</p>
-    </div>
-  </footer>
-
-  <script type="text/javascript">
-
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-36383129-1']);
-    _gaq.push(['_trackPageview']);
-
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-
+  <script type="text/x-handlebars">
+    {{outlet}}
   </script>
 </body>
 </html>

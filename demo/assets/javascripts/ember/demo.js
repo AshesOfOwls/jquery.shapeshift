@@ -1,0 +1,1 @@
+Demo = Ember.Application.create();
