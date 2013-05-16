@@ -105,7 +105,7 @@ Demo.TrashView = Ember.View.extend({
     $container = $(".ss-container.trash");
     $trash = $(".ss-container.trash_bin");
     $children = $container.children();
-    $children.pikit({ service: 'placezombies', height: [100, 300] })
+    $children.pikit({ service: 'placezombies', height: [100, 250] })
     $children.shuffle();
     $container.shapeshift()
     $trash.shapeshift({
