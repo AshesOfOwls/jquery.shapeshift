@@ -90,8 +90,8 @@ Demo.MosaicView = Ember.View.extend({
     $children.pikit({ service: 'placekitten', height: [100, 300] })
     $children.shuffle();
     $container.shapeshift({
-      gutterX: 0,
-      gutterY: 0,
+      gutterX: -1,
+      gutterY: -1,
       paddingX: 0,
       paddingY: 0,
       minColumns: 3

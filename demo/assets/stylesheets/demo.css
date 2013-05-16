@@ -46,11 +46,12 @@
 /* Mosaic Example Styles */
 /* --------------------- */
 .ss-container.mosaic > div {
+  border: 1px solid #111;
   width: 100px;
 }
 
-.ss-container.mosaic div[data-ss-colspan="2"] { width: 200px; }
-.ss-container.mosaic div[data-ss-colspan="3"] { width: 300px; }
+.ss-container.mosaic div[data-ss-colspan="2"] { width: 201px; }
+.ss-container.mosaic div[data-ss-colspan="3"] { width: 302px; }
 
 
 /* --------------------- */
