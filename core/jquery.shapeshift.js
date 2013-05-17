@@ -43,10 +43,12 @@
     };
     Plugin = (function() {
 
+    
+
       function Plugin(element, options) {
         this.element = element;
         this.options = $.extend({}, defaults, options);
-        this.globals = {};
+        this.globals = {dragging: false};
         this.$container = $(element);
         if (this.errorCheck()) {
           this.init();
@@ -92,6 +94,15 @@
         });
         $container.off("ss-rearrange").on("ss-rearrange", function() {
           return _this.render(true);
+        });
+        $container.off("ss-shuffle").on("ss-shuffle", function() {
+          return _this.shuffle();
+        });
+        $container.off("ss-setDragging").on("ss-setDragging", function() {
+          return _this.setDragging();
+        });
+        $container.off("ss-setNotDragging").on("ss-setNotDragging", function() {
+          return _this.setNotDragging();
         });
         $container.off("ss-setTargetPosition").on("ss-setTargetPosition", function() {
           return _this.setTargetPosition();
@@ -179,6 +190,50 @@
           return this.globals.col_width = this.options.colWidth + gutter_x;
         }
       };
+
+
+
+
+
+      Plugin.prototype.setDragging = function() {
+        this.globals.dragging = true;  
+      }
+
+      Plugin.prototype.setNotDragging = function() {
+        this.globals.dragging = false;  
+      }
+
+      Plugin.prototype.shuffle = function() {
+        calculateShuffled = function(container, activeClass)
+        {
+            return container.each(function(){
+                var items = container.find("." + activeClass).filter(":visible");
+                return (items.length) 
+                  ? container.html(shuffle(items)) 
+                  : this;
+              });
+            
+            function shuffle(arr) {
+              for(
+                var j, x, i = arr.length; i; 
+                j = parseInt(Math.random() * i), 
+                x = arr[--i], arr[i] = arr[j], arr[j] = x
+              );
+              return arr;
+            } 
+        }
+
+        if(!this.globals.dragging)
+        {
+          calculateShuffled(this.$container, this.options.activeClass);
+          this.enableFeatures();
+          this.$container.trigger("ss-rearrange");
+        }
+      };
+
+
+
+      
 
       Plugin.prototype.render = function(reparse, trigger_drop_finished) {
         if (reparse == null) {
@@ -419,7 +474,9 @@
                 $placeholder.remove().appendTo("." + current_container_class);
                 $("." + current_container_class).trigger("ss-setTargetPosition");
                 dragging = true;
+                $("." + current_container_class).trigger("ss-setDragging");
                 window.setTimeout((function() {
+                 
                   return dragging = false;
                 }), drag_rate);
               }
@@ -427,6 +484,7 @@
               return ui.position.top = e.pageY - $selected.parent().offset().top - selected_offset_y;
             },
             stop: function() {
+              $("." + current_container_class).trigger("ss-setNotDragging");
               var $current_container, $original_container, $previous_container;
               $original_container = $("." + original_container_class);
               $current_container = $("." + current_container_class);
@@ -600,6 +658,7 @@
         $container = this.$container;
         $container.off("ss-arrange");
         $container.off("ss-rearrange");
+        $container.off("ss-shuffle");
         $container.off("ss-setTargetPosition");
         $container.off("ss-destroy");
         active_class = this.options.activeClass;
