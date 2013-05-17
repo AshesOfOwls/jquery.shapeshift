@@ -43,12 +43,10 @@
     };
     Plugin = (function() {
 
-    
-
       function Plugin(element, options) {
         this.element = element;
         this.options = $.extend({}, defaults, options);
-        this.globals = {dragging: false};
+        this.globals = {};
         this.$container = $(element);
         if (this.errorCheck()) {
           this.init();
@@ -95,25 +93,20 @@
         $container.off("ss-rearrange").on("ss-rearrange", function() {
           return _this.render(true);
         });
-        $container.off("ss-shuffle").on("ss-shuffle", function() {
-          return _this.shuffle();
-        });
-        $container.off("ss-setDragging").on("ss-setDragging", function() {
-          return _this.setDragging();
-        });
-        $container.off("ss-setNotDragging").on("ss-setNotDragging", function() {
-          return _this.setNotDragging();
-        });
         $container.off("ss-setTargetPosition").on("ss-setTargetPosition", function() {
           return _this.setTargetPosition();
         });
-        return $container.off("ss-destroy").on("ss-destroy", function() {
+        $container.off("ss-destroy").on("ss-destroy", function() {
           return _this.destroy();
+        });
+        return $container.off("ss-shuffle").on("ss-shuffle", function() {
+          return _this.shuffle();
         });
       };
 
       Plugin.prototype.setGlobals = function() {
-        return this.globals.animated = this.options.animateOnInit;
+        this.globals.animated = this.options.animateOnInit;
+        return this.globals.dragging = false;
       };
 
       Plugin.prototype.afterInit = function() {
@@ -190,50 +183,6 @@
           return this.globals.col_width = this.options.colWidth + gutter_x;
         }
       };
-
-
-
-
-
-      Plugin.prototype.setDragging = function() {
-        this.globals.dragging = true;  
-      }
-
-      Plugin.prototype.setNotDragging = function() {
-        this.globals.dragging = false;  
-      }
-
-      Plugin.prototype.shuffle = function() {
-        calculateShuffled = function(container, activeClass)
-        {
-            return container.each(function(){
-                var items = container.find("." + activeClass).filter(":visible");
-                return (items.length) 
-                  ? container.html(shuffle(items)) 
-                  : this;
-              });
-            
-            function shuffle(arr) {
-              for(
-                var j, x, i = arr.length; i; 
-                j = parseInt(Math.random() * i), 
-                x = arr[--i], arr[i] = arr[j], arr[j] = x
-              );
-              return arr;
-            } 
-        }
-
-        if(!this.globals.dragging)
-        {
-          calculateShuffled(this.$container, this.options.activeClass);
-          this.enableFeatures();
-          this.$container.trigger("ss-rearrange");
-        }
-      };
-
-
-
-      
 
       Plugin.prototype.render = function(reparse, trigger_drop_finished) {
         if (reparse == null) {
@@ -434,7 +383,7 @@
       };
 
       Plugin.prototype.enableDragNDrop = function() {
-        var $clone, $container, $placeholder, $selected, active_class, clone_class, current_container_class, delete_clone, drag_clone, drag_rate, dragged_class, dragging, options, original_container_class, placeholder_class, previous_container_class, selected_offset_x, selected_offset_y,
+        var $clone, $container, $placeholder, $selected, active_class, clone_class, current_container_class, delete_clone, drag_clone, drag_rate, drag_timeout, dragged_class, options, original_container_class, placeholder_class, previous_container_class, selected_offset_x, selected_offset_y,
           _this = this;
         options = this.options;
         $container = this.$container;
@@ -449,7 +398,7 @@
         drag_clone = options.dragClone;
         clone_class = options.cloneClass;
         $selected = $placeholder = $clone = selected_offset_y = selected_offset_x = null;
-        dragging = false;
+        drag_timeout = false;
         if (options.enableDrag) {
           $container.children("." + active_class).filter(options.dragWhitelist).draggable({
             addClasses: false,
@@ -458,6 +407,7 @@
             zIndex: 9999,
             start: function(e, ui) {
               var selected_tag;
+              _this.globals.dragging = true;
               $selected = $(e.target);
               if (drag_clone) {
                 $clone = $selected.clone(true).insertBefore($selected).addClass(clone_class);
@@ -470,22 +420,20 @@
               return selected_offset_x = $selected.outerWidth() / 2;
             },
             drag: function(e, ui) {
-              if (!dragging && !(drag_clone && delete_clone && $("." + current_container_class)[0] === $("." + original_container_class)[0])) {
+              if (!drag_timeout && !(drag_clone && delete_clone && $("." + current_container_class)[0] === $("." + original_container_class)[0])) {
                 $placeholder.remove().appendTo("." + current_container_class);
                 $("." + current_container_class).trigger("ss-setTargetPosition");
-                dragging = true;
-                $("." + current_container_class).trigger("ss-setDragging");
+                drag_timeout = true;
                 window.setTimeout((function() {
-                 
-                  return dragging = false;
+                  return drag_timeout = false;
                 }), drag_rate);
               }
               ui.position.left = e.pageX - $selected.parent().offset().left - selected_offset_x;
               return ui.position.top = e.pageY - $selected.parent().offset().top - selected_offset_y;
             },
             stop: function() {
-              $("." + current_container_class).trigger("ss-setNotDragging");
               var $current_container, $original_container, $previous_container;
+              _this.globals.dragging = false;
               $original_container = $("." + original_container_class);
               $current_container = $("." + current_container_class);
               $previous_container = $("." + previous_container_class);
@@ -628,6 +576,40 @@
         });
       };
 
+      Plugin.prototype.shuffle = function() {
+        var calculateShuffled;
+        calculateShuffled = function(container, activeClass) {
+          var shuffle;
+          shuffle = function(arr) {
+            var i, j, x;
+            j = void 0;
+            x = void 0;
+            i = arr.length;
+            while (i) {
+              j = parseInt(Math.random() * i);
+              x = arr[--i];
+              arr[i] = arr[j];
+              arr[j] = x;
+            }
+            return arr;
+          };
+          return container.each(function() {
+            var items;
+            items = container.find("." + activeClass).filter(":visible");
+            if (items.length) {
+              return container.html(shuffle(items));
+            } else {
+              return this;
+            }
+          });
+        };
+        if (!this.globals.dragging) {
+          calculateShuffled(this.$container, this.options.activeClass);
+          this.enableFeatures();
+          return this.$container.trigger("ss-rearrange");
+        }
+      };
+
       Plugin.prototype.lowestCol = function(array, offset) {
         var augmented_array, i, length, _i;
         if (offset == null) {
@@ -658,7 +640,6 @@
         $container = this.$container;
         $container.off("ss-arrange");
         $container.off("ss-rearrange");
-        $container.off("ss-shuffle");
         $container.off("ss-setTargetPosition");
         $container.off("ss-destroy");
         active_class = this.options.activeClass;

@@ -111,6 +111,7 @@
       $container.off("ss-rearrange").on "ss-rearrange", => @render(true)
       $container.off("ss-setTargetPosition").on "ss-setTargetPosition", => @setTargetPosition()
       $container.off("ss-destroy").on "ss-destroy", => @destroy()
+      $container.off("ss-shuffle").on "ss-shuffle", => @shuffle()
 
     # ----------------------------
     # setGlobals:
@@ -119,6 +120,7 @@
     setGlobals: ->
       # Prevent initial animation if applicable
       @globals.animated = @options.animateOnInit
+      @globals.dragging = false
 
     # ----------------------------
     # afterInit:
@@ -461,7 +463,7 @@
       clone_class = options.cloneClass
 
       $selected = $placeholder = $clone = selected_offset_y = selected_offset_x = null
-      dragging = false
+      drag_timeout = false
 
       if options.enableDrag
         $container.children("." + active_class).filter(options.dragWhitelist).draggable
@@ -470,7 +472,9 @@
           handle: options.handle
           zIndex: 9999
 
-          start: (e, ui) ->
+          start: (e, ui) =>
+            @globals.dragging = true
+
             # Set $selected globals
             $selected = $(e.target)
 
@@ -491,7 +495,7 @@
             selected_offset_x = $selected.outerWidth() / 2
 
           drag: (e, ui) =>
-            if !dragging and !(drag_clone and delete_clone and $("." + current_container_class)[0] is $("." + original_container_class)[0])
+            if !drag_timeout and !(drag_clone and delete_clone and $("." + current_container_class)[0] is $("." + original_container_class)[0])
               # Append placeholder to container
               $placeholder.remove().appendTo("." + current_container_class)
 
@@ -499,16 +503,18 @@
               $("." + current_container_class).trigger("ss-setTargetPosition")
 
               # Disallow dragging from occurring too much
-              dragging = true
+              drag_timeout = true
               window.setTimeout ( ->
-                dragging = false
+                drag_timeout = false
               ), drag_rate
 
             # Manually center the element with respect to mouse position
             ui.position.left = e.pageX - $selected.parent().offset().left - selected_offset_x;
             ui.position.top = e.pageY - $selected.parent().offset().top - selected_offset_y;
 
-          stop: ->
+          stop: =>
+            @globals.dragging = false
+
             $original_container = $("." + original_container_class)
             $current_container = $("." + current_container_class)
             $previous_container = $("." + previous_container_class)
@@ -658,6 +664,33 @@
             resizing = false
             @render()
           , animation_speed / 3
+
+    # ----------------------------
+    # shuffle:
+    # Randomly sort the child elements
+    # ----------------------------
+    shuffle: ->
+      calculateShuffled = (container, activeClass) ->
+        shuffle = (arr) ->
+          j = undefined
+          x = undefined
+          i = arr.length
+
+          while i
+            j = parseInt(Math.random() * i)
+            x = arr[--i]
+            arr[i] = arr[j]
+            arr[j] = x
+          arr
+        return container.each(->
+          items = container.find("." + activeClass).filter(":visible")
+          (if (items.length) then container.html(shuffle(items)) else this)
+        )
+
+      unless @globals.dragging
+        calculateShuffled @$container, @options.activeClass
+        @enableFeatures()
+        @$container.trigger "ss-rearrange"
 
     # ----------------------------
     # lowestCol:
