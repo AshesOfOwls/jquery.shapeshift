@@ -193,7 +193,7 @@
       };
 
       Plugin.prototype.setGridColumns = function() {
-        var children_count, col_width, columns, globals, grid_width, gutter_x, inner_width, minColumns, options, padding_x;
+        var children_count, col_width, columns, globals, grid_width, gutter_x, i, inner_width, minColumns, options, padding_x, _i, _ref;
         globals = this.globals;
         options = this.options;
         col_width = globals.col_width;
@@ -208,7 +208,10 @@
         globals.columns = columns;
         children_count = this.parsedChildren.length;
         if (columns > children_count) {
-          columns = children_count;
+          columns = 0;
+          for (i = _i = 0, _ref = this.parsedChildren.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+            columns += this.parsedChildren[i].colspan;
+          }
         }
         globals.child_offset = padding_x;
         switch (options.align) {
@@ -659,8 +662,8 @@
     })();
     return $.fn[pluginName] = function(options) {
       return this.each(function() {
-        var bound_indentifier, old_class, _ref;
-        old_class = (_ref = $(this).attr("class").match(/shapeshifted_container_\w+/)) != null ? _ref[0] : void 0;
+        var bound_indentifier, old_class, _ref, _ref1;
+        old_class = (_ref = $(this).attr("class")) != null ? (_ref1 = _ref.match(/shapeshifted_container_\w+/)) != null ? _ref1[0] : void 0 : void 0;
         if (old_class) {
           bound_indentifier = "resize." + old_class;
           $(window).off(bound_indentifier);

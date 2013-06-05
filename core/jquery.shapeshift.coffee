@@ -247,7 +247,9 @@
       # Columns cannot exceed children
       children_count = @parsedChildren.length
       if columns > children_count
-        columns = children_count
+        columns = 0
+        for i in [0...@parsedChildren.length]
+          columns += @parsedChildren[i].colspan
 
       # Calculate the child offset from the left
       globals.child_offset = padding_x
