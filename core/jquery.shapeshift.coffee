@@ -745,7 +745,7 @@
   $.fn[pluginName] = (options) ->
     @each ->
       # Destroy any old resize events
-      old_class = $(@).attr("class").match(/shapeshifted_container_\w+/)?[0]
+      old_class = $(@).attr("class")?.match(/shapeshifted_container_\w+/)?[0]
       if old_class
         bound_indentifier = "resize." + old_class
         $(window).off(bound_indentifier)
