@@ -479,7 +479,7 @@
             $selected = $(e.target)
 
             if drag_clone
-              $clone = $selected.clone(true).insertBefore($selected).addClass(clone_class)
+              $clone = $selected.clone(false, false).insertBefore($selected).addClass(clone_class)
 
             $selected.addClass(dragged_class)
 
