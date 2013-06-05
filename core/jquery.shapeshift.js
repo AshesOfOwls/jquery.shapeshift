@@ -108,13 +108,14 @@
       };
 
       Plugin.prototype.getPositions = function() {
-        var child, col, col_heights, col_width, columns, gutter_y, i, offset_left, offset_x, offset_y, positions, total_children, _i, _j;
+        var child, col, col_heights, col_width, columns, gutter_y, i, offset_left, offset_x, offset_y, padding_top, positions, total_children, _i, _j;
         col_width = this.grid.col_width;
         gutter_y = this.options.gutterY;
+        padding_top = this.grid.padding_top;
         col_heights = [];
         columns = this.grid.columns;
         for (i = _i = 0; 0 <= columns ? _i < columns : _i > columns; i = 0 <= columns ? ++_i : --_i) {
-          col_heights.push(this.grid.padding_top);
+          col_heights.push(padding_top);
         }
         positions = [];
         total_children = this.parsedChildren.length;
@@ -130,6 +131,7 @@
           };
           col_heights[col] += child.height + gutter_y;
         }
+        this.grid.height = this.highestCol(col_heights) - gutter_y - padding_top;
         return positions;
       };
 
@@ -137,6 +139,9 @@
         var $child, i, positions, total_children, _i, _results;
         this.calculateGrid();
         positions = this.getPositions();
+        this.$container.stop(true, false).animate({
+          height: this.grid.height
+        }, 200);
         total_children = this.parsedChildren.length;
         _results = [];
         for (i = _i = 0; 0 <= total_children ? _i < total_children : _i > total_children; i = 0 <= total_children ? ++_i : --_i) {
@@ -148,6 +153,10 @@
 
       Plugin.prototype.lowestCol = function(array) {
         return $.inArray(Math.min.apply(window, array), array);
+      };
+
+      Plugin.prototype.highestCol = function(array) {
+        return array[$.inArray(Math.max.apply(window, array), array)];
       };
 
       Plugin.prototype.enableResize = function() {

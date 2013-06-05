@@ -148,12 +148,13 @@
     getPositions: ->
       col_width = @grid.col_width
       gutter_y = @options.gutterY
+      padding_top = @grid.padding_top
 
       # Array that stores the height of each column
       col_heights = []
       columns = @grid.columns
       for i in [0...columns]
-        col_heights.push(@grid.padding_top)
+        col_heights.push(padding_top)
 
       # Go over each child and determine its position
       positions = []
@@ -169,6 +170,9 @@
         positions[child.i] = { left: offset_x, top: offset_y }
         col_heights[col] += child.height + gutter_y
 
+      # Store the height of the grid
+      @grid.height = @highestCol(col_heights) - gutter_y - padding_top
+
       return positions
 
 
@@ -179,8 +183,13 @@
     # ----------------------------
     arrange: (array) ->
       @calculateGrid()
+      
       positions = @getPositions()
+      
+      # Animate the container to the appropriate height
+      @$container.stop(true, false).animate({ height: @grid.height }, 200)
 
+      # Animate the Children
       total_children = @parsedChildren.length
       for i in [0...total_children]
         $child = @parsedChildren[i].el
@@ -195,6 +204,16 @@
     # ----------------------------
     lowestCol: (array) ->
       $.inArray Math.min.apply(window,array), array
+
+
+    # ----------------------------
+    # highestCol:
+    # Helper
+    # Returns the index position of the
+    # array column with the highest number
+    # ----------------------------
+    highestCol: (array) ->
+      array[$.inArray Math.max.apply(window,array), array]
 
 
     # ----------------------------
