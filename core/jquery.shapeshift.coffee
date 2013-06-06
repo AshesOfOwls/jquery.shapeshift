@@ -71,7 +71,7 @@
     # attributes for all the active children
     # ----------------------------
     setParsedChildren: ->
-      $children = @$container.children()
+      $children = @$container.children(@options.selector)
       total = $children.length
 
       parsedChildren = []
@@ -167,7 +167,11 @@
         offset_x = (col * col_width) + offset_left
         offset_y = col_heights[col]
 
-        positions[child.i] = { left: offset_x, top: offset_y }
+        positions[child.i] = { 
+          left: offset_x, 
+          top: offset_y
+        }
+
         col_heights[col] += child.height + gutter_y
 
       # Store the height of the grid
@@ -182,18 +186,19 @@
     # respective positions
     # ----------------------------
     arrange: (array) ->
+      # Make sure the grid is correct and then
+      # retrieve the positions of the children
       @calculateGrid()
-      
       positions = @getPositions()
       
       # Animate the container to the appropriate height
-      @$container.stop(true, false).animate({ height: @grid.height }, 200)
+      @$container.css({ height: @grid.height })
 
       # Animate the Children
       total_children = @parsedChildren.length
       for i in [0...total_children]
         $child = @parsedChildren[i].el
-        $child.stop(true, false).animate(positions[i], 200)
+        $child.stop(true, false).css(positions[i], 200)
 
 
     # ----------------------------

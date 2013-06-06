@@ -3,8 +3,10 @@ Shapeshift v3.0
 
 [Check out a demo here.](http://mcpants.github.com/jquery.shapeshift/)
 
-**April 16th, 2013: Version 2.0 released.**
-**There may be bugs and we are still browser testing. Please report any bugs you find through issues.**
+2.0 > 3.0 Changes
+----------------------------------
+* Padding option has been removed and instead can just be set through CSS
+* CSS3 Transitions supported!
 
 
 Column Grid System + Drag and Drop

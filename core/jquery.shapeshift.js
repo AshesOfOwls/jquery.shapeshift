@@ -53,7 +53,7 @@
 
       Plugin.prototype.setParsedChildren = function() {
         var $child, $children, i, parsedChildren, total, _i;
-        $children = this.$container.children();
+        $children = this.$container.children(this.options.selector);
         total = $children.length;
         parsedChildren = [];
         for (i = _i = 0; 0 <= total ? _i < total : _i > total; i = 0 <= total ? ++_i : --_i) {
@@ -139,14 +139,14 @@
         var $child, i, positions, total_children, _i, _results;
         this.calculateGrid();
         positions = this.getPositions();
-        this.$container.stop(true, false).animate({
+        this.$container.css({
           height: this.grid.height
-        }, 200);
+        });
         total_children = this.parsedChildren.length;
         _results = [];
         for (i = _i = 0; 0 <= total_children ? _i < total_children : _i > total_children; i = 0 <= total_children ? ++_i : --_i) {
           $child = this.parsedChildren[i].el;
-          _results.push($child.stop(true, false).animate(positions[i], 200));
+          _results.push($child.stop(true, false).css(positions[i], 200));
         }
         return _results;
       };
