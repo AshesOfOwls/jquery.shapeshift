@@ -20,6 +20,22 @@
     gutterX: 10
     gutterY: 10
 
+    # Animation Settings
+    animated: true
+    animateOnInit: false
+    animateInStyle: "fadein"
+
+  # Create a style to ignore CSS transitions
+  style = $('<style>
+              .ss-notransitions { 
+                -webkit-transition: none !important;
+                -moz-transition: none !important;
+                -o-transition: none !important;
+                transition: none !important;
+              }
+            </style>')
+  $('html > head').append(style);
+
   class Plugin
     constructor: (@element, options) ->
       @options = $.extend {}, defaults, options
@@ -48,7 +64,7 @@
       @setParsedChildren()
       @initializeGrid()
       @calculateGrid()
-      @arrange()
+      @render()
 
     # ----------------------------
     # enableFeatures:
@@ -185,7 +201,7 @@
     # Physically moves the children into their
     # respective positions
     # ----------------------------
-    arrange: (array) ->
+    arrange: (style_options) ->
       # Make sure the grid is correct and then
       # retrieve the positions of the children
       @calculateGrid()
@@ -198,8 +214,47 @@
       total_children = @parsedChildren.length
       for i in [0...total_children]
         $child = @parsedChildren[i].el
-        $child.stop(true, false).css(positions[i], 200)
+        position = positions[i]
 
+        if style_options
+          if style_options.top
+            position.top = position.top + style_options.top
+          if style_options.left
+            position.left += style_options.left
+          if style_options.opacity >= 0
+            position.opacity = style_options.opacity
+
+        console.log(position)
+        $child.css(position, 200)
+
+
+    # ----------------------------
+    # render:
+    # The intial render of the elements
+    # ----------------------------
+    render: ->
+      # Toggle Animations
+      if !@options.animateOnInit or !@options.animated
+        @toggleCssTransitions(false)
+      
+      if @options.animateInStyle
+        @toggleCssTransitions(false)
+
+        switch @options.animateInStyle
+          when "fadein"
+            @arrange({top: -120, opacity: 0})
+
+        setTimeout( =>
+          @toggleCssTransitions(true)
+          @arrange({opacity: 1})
+        , 200 )
+      else
+        # Arrange the elements to their exact positions
+        @arrange()
+
+        # Toggle Animations
+        if @options.animated
+          @toggleCssTransitions(true)
 
     # ----------------------------
     # lowestCol:
@@ -210,7 +265,6 @@
     lowestCol: (array) ->
       $.inArray Math.min.apply(window,array), array
 
-
     # ----------------------------
     # highestCol:
     # Helper
@@ -219,6 +273,19 @@
     # ----------------------------
     highestCol: (array) ->
       array[$.inArray Math.max.apply(window,array), array]
+
+    # ----------------------------
+    # toggleCssTransitions:
+    # Sometimes CSS transitions need to be
+    # turned off. There was a style created
+    # at the beginning of the page.
+    # ----------------------------
+    toggleCssTransitions: (enabled) ->
+      if enabled
+        $(".ss-notransitions").removeClass("ss-notransitions")
+      else
+        @$container.addClass("ss-notransitions")
+        @$container.children().addClass("ss-notransitions")
 
 
     # ----------------------------

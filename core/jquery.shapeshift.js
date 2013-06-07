@@ -2,7 +2,7 @@
 (function() {
 
   (function($, window, document) {
-    var Plugin, defaults, pluginName;
+    var Plugin, defaults, pluginName, style;
     pluginName = "shapeshift";
     defaults = {
       selector: "*",
@@ -11,8 +11,20 @@
       columns: null,
       colWidth: null,
       gutterX: 10,
-      gutterY: 10
+      gutterY: 10,
+      animated: true,
+      animateOnInit: false,
+      animateInStyle: "fadein"
     };
+    style = $('<style>\
+              .ss-notransitions { \
+                -webkit-transition: none !important;\
+                -moz-transition: none !important;\
+                -o-transition: none !important;\
+                transition: none !important;\
+              }\
+            </style>');
+    $('html > head').append(style);
     Plugin = (function() {
 
       function Plugin(element, options) {
@@ -35,7 +47,7 @@
         this.setParsedChildren();
         this.initializeGrid();
         this.calculateGrid();
-        return this.arrange();
+        return this.render();
       };
 
       Plugin.prototype.enableFeatures = function() {
@@ -135,8 +147,8 @@
         return positions;
       };
 
-      Plugin.prototype.arrange = function(array) {
-        var $child, i, positions, total_children, _i, _results;
+      Plugin.prototype.arrange = function(style_options) {
+        var $child, i, position, positions, total_children, _i, _results;
         this.calculateGrid();
         positions = this.getPositions();
         this.$container.css({
@@ -146,9 +158,50 @@
         _results = [];
         for (i = _i = 0; 0 <= total_children ? _i < total_children : _i > total_children; i = 0 <= total_children ? ++_i : --_i) {
           $child = this.parsedChildren[i].el;
-          _results.push($child.stop(true, false).css(positions[i], 200));
+          position = positions[i];
+          if (style_options) {
+            if (style_options.top) {
+              position.top = position.top + style_options.top;
+            }
+            if (style_options.left) {
+              position.left += style_options.left;
+            }
+            if (style_options.opacity >= 0) {
+              position.opacity = style_options.opacity;
+            }
+          }
+          console.log(position);
+          _results.push($child.css(position, 200));
         }
         return _results;
+      };
+
+      Plugin.prototype.render = function() {
+        var _this = this;
+        if (!this.options.animateOnInit || !this.options.animated) {
+          this.toggleCssTransitions(false);
+        }
+        if (this.options.animateInStyle) {
+          this.toggleCssTransitions(false);
+          switch (this.options.animateInStyle) {
+            case "fadein":
+              this.arrange({
+                top: -120,
+                opacity: 0
+              });
+          }
+          return setTimeout(function() {
+            _this.toggleCssTransitions(true);
+            return _this.arrange({
+              opacity: 1
+            });
+          }, 200);
+        } else {
+          this.arrange();
+          if (this.options.animated) {
+            return this.toggleCssTransitions(true);
+          }
+        }
       };
 
       Plugin.prototype.lowestCol = function(array) {
@@ -157,6 +210,15 @@
 
       Plugin.prototype.highestCol = function(array) {
         return array[$.inArray(Math.max.apply(window, array), array)];
+      };
+
+      Plugin.prototype.toggleCssTransitions = function(enabled) {
+        if (enabled) {
+          return $(".ss-notransitions").removeClass("ss-notransitions");
+        } else {
+          this.$container.addClass("ss-notransitions");
+          return this.$container.children().addClass("ss-notransitions");
+        }
       };
 
       Plugin.prototype.enableResize = function() {
