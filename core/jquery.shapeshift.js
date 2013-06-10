@@ -7,6 +7,7 @@
     defaults = {
       selector: "*",
       enableResize: true,
+      cssAnimations: false,
       align: "center",
       columns: null,
       colWidth: null,
@@ -148,13 +149,14 @@
       };
 
       Plugin.prototype.arrange = function(style_options) {
-        var $child, i, position, positions, total_children, _i, _results;
+        var $child, i, position, positions, total_children, use_css, _i, _results;
         this.calculateGrid();
         positions = this.getPositions();
         this.$container.css({
           height: this.grid.height
         });
         total_children = this.parsedChildren.length;
+        use_css = !this.options.animated || this.options.cssAnimations;
         _results = [];
         for (i = _i = 0; 0 <= total_children ? _i < total_children : _i > total_children; i = 0 <= total_children ? ++_i : --_i) {
           $child = this.parsedChildren[i].el;
@@ -170,10 +172,28 @@
               position.opacity = style_options.opacity;
             }
           }
-          console.log(position);
-          _results.push($child.css(position, 200));
+          if (style_options && style_options.staggered) {
+            _results.push(this.staggerAnimate(i, $child, position, use_css));
+          } else {
+            _results.push(this.animate($child, position, use_css));
+          }
         }
         return _results;
+      };
+
+      Plugin.prototype.animate = function($child, position, use_css) {
+        if (use_css) {
+          return $child.css(position);
+        } else {
+          return $child.stop(true, true).animate(position, 200);
+        }
+      };
+
+      Plugin.prototype.staggerAnimate = function(i, $child, position, use_css) {
+        var _this = this;
+        return setTimeout(function() {
+          return _this.animate($child, position, use_css);
+        }, 50 * i);
       };
 
       Plugin.prototype.render = function() {
@@ -186,14 +206,15 @@
           switch (this.options.animateInStyle) {
             case "fadein":
               this.arrange({
-                top: -120,
+                top: -200,
                 opacity: 0
               });
           }
           return setTimeout(function() {
             _this.toggleCssTransitions(true);
             return _this.arrange({
-              opacity: 1
+              opacity: 1,
+              staggered: true
             });
           }, 200);
         } else {

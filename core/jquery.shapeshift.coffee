@@ -12,6 +12,7 @@
 
     # Features
     enableResize: true
+    cssAnimations: false
 
     # Grid Properties
     align: "center"
@@ -212,6 +213,7 @@
 
       # Animate the Children
       total_children = @parsedChildren.length
+      use_css = !@options.animated or @options.cssAnimations
       for i in [0...total_children]
         $child = @parsedChildren[i].el
         position = positions[i]
@@ -224,8 +226,22 @@
           if style_options.opacity >= 0
             position.opacity = style_options.opacity
 
-        console.log(position)
-        $child.css(position, 200)
+        if style_options and style_options.staggered
+          @staggerAnimate(i, $child, position, use_css)
+        else
+          @animate($child, position, use_css)
+
+    animate: ($child, position, use_css) ->
+      if use_css
+        $child.css(position)
+      else
+        $child.stop(true, true).animate(position, 200)
+
+    staggerAnimate: (i, $child, position, use_css) ->
+      setTimeout( =>
+        @animate($child, position, use_css)
+      , 50 * i )
+
 
 
     # ----------------------------
@@ -242,11 +258,11 @@
 
         switch @options.animateInStyle
           when "fadein"
-            @arrange({top: -120, opacity: 0})
+            @arrange({top: -200, opacity: 0})
 
         setTimeout( =>
           @toggleCssTransitions(true)
-          @arrange({opacity: 1})
+          @arrange({opacity: 1, staggered: true})
         , 200 )
       else
         # Arrange the elements to their exact positions
