@@ -244,12 +244,17 @@
         columns = minColumns
       globals.columns = columns
 
-      # Columns cannot exceed children
+      # Columns cannot exceed children span
       children_count = @parsedChildren.length
       if columns > children_count
-        columns = 0
+        actual_columns = 0
         for i in [0...@parsedChildren.length]
-          columns += @parsedChildren[i].colspan
+          colspan = @parsedChildren[i].colspan
+
+          if colspan + actual_columns <= columns
+            actual_columns += colspan
+
+        columns = actual_columns
 
       # Calculate the child offset from the left
       globals.child_offset = padding_x
