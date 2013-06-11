@@ -16,15 +16,18 @@
       states: {
         init: {
           animated: false,
+          staggered: false,
           modifications: {
-            top: -100,
+            position: "absolute",
+            top: -50,
             opacity: 0
           }
         },
         normal: {
           animated: true,
+          speed: 200,
+          staggered: true,
           modifications: {
-            left: -200,
             opacity: 1
           }
         }
@@ -37,6 +40,7 @@
         this.options = $.extend({}, defaults, options);
         this.$container = $(element);
         this.grid = {};
+        this.state = null;
         if (this.errorCheck()) {
           this.init();
         }
@@ -63,8 +67,11 @@
 
       Plugin.prototype.createEvents = function() {
         var _this = this;
-        return this.$container.off("ss-arrange").on("ss-arrange", function() {
+        this.$container.off("ss-arrange").on("ss-arrange", function() {
           return _this.arrange();
+        });
+        return this.$container.off("ss-setState").on("ss-setState", function(e, state) {
+          return _this.setState(state);
         });
       };
 
@@ -152,9 +159,12 @@
         return positions;
       };
 
-      Plugin.prototype.arrange = function(animate, style_options) {
-        var $child, i, position, positions, total_children, _i, _results;
-        this.calculateGrid();
+      Plugin.prototype.arrange = function() {
+        var $child, animated, i, position, positions, speed, staggered, state_style, total_children, _i, _results;
+        animated = this.state.animated;
+        staggered = this.state.staggered;
+        state_style = this.state.modifications;
+        speed = this.state.speed;
         positions = this.getPositions();
         this.$container.css({
           height: this.grid.height
@@ -164,24 +174,47 @@
         for (i = _i = 0; 0 <= total_children ? _i < total_children : _i > total_children; i = 0 <= total_children ? ++_i : --_i) {
           $child = this.parsedChildren[i].el;
           position = positions[i];
-          if (style_options) {
-            position = this.extendStyle(position, style_options);
+          if (state_style) {
+            position = this.extendStyle(position, state_style);
           }
-          if (animate) {
-            _results.push($child.animate(position));
+          if (staggered) {
+            _results.push(this.stagger(i, $child, position, animated, speed));
           } else {
-            _results.push($child.css(position));
+            _results.push(this.move($child, position, animated, speed));
           }
         }
         return _results;
       };
 
+      Plugin.prototype.stagger = function(i, $child, position, animated, speed) {
+        var _this = this;
+        return setTimeout(function() {
+          return _this.move($child, position, animated, speed);
+        }, 20 * i);
+      };
+
+      Plugin.prototype.move = function($child, position, animated, speed) {
+        if (animated) {
+          return $child.stop(true, false).animate(position, speed);
+        } else {
+          return $child.css(position);
+        }
+      };
+
       Plugin.prototype.extendStyle = function(position, style_options) {
         if (style_options.left) {
-          position.left += style_options.left;
+          if (style_options.positions === "absolute") {
+            position.left = style_options.left;
+          } else {
+            position.left += style_options.left;
+          }
         }
         if (style_options.top) {
-          position.top += style_options.top;
+          if (style_options.positions === "absolute") {
+            position.top = style_options.top;
+          } else {
+            position.top += style_options.top;
+          }
         }
         if (style_options.opacity >= 0) {
           position.opacity = style_options.opacity;
@@ -190,14 +223,10 @@
       };
 
       Plugin.prototype.setState = function(state_name) {
-        var animated, state;
-        state = this.options["states"][state_name];
-        animated = state.animated;
-        if (state_name === "init") {
-          return this.arrange(animated, state.modifications);
-        } else {
-          return this.arrange(animated, state.modifications);
-        }
+        var state;
+        this.state = state = $.extend({}, this.options["states"][state_name]);
+        this.arrange();
+        return this.state.staggered = false;
       };
 
       Plugin.prototype.render = function() {
@@ -218,12 +247,15 @@
           _this = this;
         resizing = false;
         return $(window).on("resize", function() {
+          var speed;
           if (!resizing) {
+            speed = _this.state.speed / 3;
             resizing = true;
             return setTimeout(function() {
-              resizing = false;
-              return _this.arrange();
-            }, 100);
+              _this.calculateGrid();
+              _this.arrange();
+              return resizing = false;
+            }, speed);
           }
         });
       };

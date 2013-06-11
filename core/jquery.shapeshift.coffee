@@ -24,13 +24,16 @@
     states:
       init:
         animated: false
+        staggered: false
         modifications:
-          top: -100
+          position: "absolute"
+          top: -50
           opacity: 0
       normal:
         animated: true
+        speed: 200
+        staggered: true
         modifications:
-          left: -200
           opacity: 1
 
   class Plugin
@@ -39,6 +42,8 @@
       @$container = $(element)
 
       @grid = {} # Stores properties about the grid
+
+      @state = null
 
       if @errorCheck()
         @init()
@@ -77,6 +82,7 @@
     # ----------------------------
     createEvents: ->
       @$container.off("ss-arrange").on "ss-arrange", => @arrange()
+      @$container.off("ss-setState").on "ss-setState", (e, state) => @setState(state)
       
     # ----------------------------
     # setParsedChildren:
@@ -198,10 +204,14 @@
     # Physically moves the children into their
     # respective positions
     # ----------------------------
-    arrange: (animate, style_options) ->
+    arrange: ->
+      animated = @state.animated
+      staggered = @state.staggered
+      state_style = @state.modifications
+      speed = @state.speed
+
       # Make sure the grid is correct and then
       # retrieve the positions of the children
-      @calculateGrid()
       positions = @getPositions()
       
       # Animate the container to the appropriate height
@@ -209,30 +219,43 @@
 
       # Animate the Children
       total_children = @parsedChildren.length
+
       for i in [0...total_children]
         $child = @parsedChildren[i].el
         position = positions[i]
 
-        if style_options
-          position = @extendStyle(position, style_options)
+        if state_style
+          position = @extendStyle(position, state_style)
 
-        if animate
-          $child.animate(position)
+        if staggered
+          @stagger(i, $child, position, animated, speed)
         else
-          $child.css(position)
+          @move($child, position, animated, speed)
 
+    stagger: (i, $child, position, animated, speed) ->
+      setTimeout( =>
+        @move($child, position, animated, speed)
+      , 20 * i)
 
-    # ----------------------------
-    # extendStyle:
-    # Adds more options to be changed via css
-    # to the position attribute in arrange
-    # ----------------------------
+    move: ($child, position, animated, speed) ->
+      if animated
+        $child.stop(true, false).animate(position, speed)
+      else
+        $child.css(position)
+
     extendStyle: (position, style_options) ->
       if style_options.left
-        position.left += style_options.left
+        if style_options.positions is "absolute"
+          position.left = style_options.left
+        else
+          position.left += style_options.left
+
         
       if style_options.top
-        position.top += style_options.top
+        if style_options.positions is "absolute"
+          position.top = style_options.top
+        else
+          position.top += style_options.top
 
       if style_options.opacity >= 0
         position.opacity = style_options.opacity
@@ -240,21 +263,14 @@
       return position
 
 
-
     # ----------------------------
     # setState:
     # Make the child elements a specific style / state
     # ----------------------------
     setState: (state_name) ->
-      state = @options["states"][state_name]
-
-      animated = state.animated
-
-      if state_name is "init"
-        @arrange(animated, state.modifications);
-      else
-        @arrange(animated, state.modifications);
-
+      @state = state = $.extend({}, @options["states"][state_name])
+      @arrange()
+      @state.staggered = false
 
       
     # ----------------------------
@@ -295,12 +311,14 @@
 
       $(window).on "resize", =>
         unless resizing
+          speed = @state.speed / 3
           resizing = true
 
           setTimeout =>
-            resizing = false
+            @calculateGrid()
             @arrange()
-          , 100
+            resizing = false
+          , speed
 
 
   $.fn[pluginName] = (options) ->
