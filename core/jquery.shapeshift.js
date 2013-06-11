@@ -2,7 +2,7 @@
 (function() {
 
   (function($, window, document) {
-    var Plugin, defaults, pluginName, style;
+    var Plugin, defaults, pluginName;
     pluginName = "shapeshift";
     defaults = {
       selector: "*",
@@ -13,19 +13,23 @@
       colWidth: null,
       gutterX: 10,
       gutterY: 10,
-      animated: true,
-      animateOnInit: false,
-      animateInStyle: "fadein"
+      states: {
+        init: {
+          animated: false,
+          modifications: {
+            top: -100,
+            opacity: 0
+          }
+        },
+        normal: {
+          animated: true,
+          modifications: {
+            left: -200,
+            opacity: 1
+          }
+        }
+      }
     };
-    style = $('<style>\
-              .ss-notransitions { \
-                -webkit-transition: none !important;\
-                -moz-transition: none !important;\
-                -o-transition: none !important;\
-                transition: none !important;\
-              }\
-            </style>');
-    $('html > head').append(style);
     Plugin = (function() {
 
       function Plugin(element, options) {
@@ -121,7 +125,7 @@
       };
 
       Plugin.prototype.getPositions = function() {
-        var child, col, col_heights, col_width, columns, gutter_y, i, offset_left, offset_x, offset_y, padding_top, positions, total_children, _i, _j;
+        var child, col, col_heights, col_width, columns, gutter_y, i, left, offset_left, padding_top, positions, top, total_children, _i, _j;
         col_width = this.grid.col_width;
         gutter_y = this.options.gutterY;
         padding_top = this.grid.padding_top;
@@ -136,11 +140,11 @@
         for (i = _j = 0; 0 <= total_children ? _j < total_children : _j > total_children; i = 0 <= total_children ? ++_j : --_j) {
           child = this.parsedChildren[i];
           col = this.lowestCol(col_heights);
-          offset_x = (col * col_width) + offset_left;
-          offset_y = col_heights[col];
+          left = (col * col_width) + offset_left;
+          top = col_heights[col];
           positions[child.i] = {
-            left: offset_x,
-            top: offset_y
+            left: left,
+            top: top
           };
           col_heights[col] += child.height + gutter_y;
         }
@@ -148,81 +152,57 @@
         return positions;
       };
 
-      Plugin.prototype.arrange = function(style_options) {
-        var $child, i, position, positions, total_children, use_css, _i, _results;
+      Plugin.prototype.arrange = function(animate, style_options) {
+        var $child, i, position, positions, total_children, _i, _results;
         this.calculateGrid();
         positions = this.getPositions();
         this.$container.css({
           height: this.grid.height
         });
         total_children = this.parsedChildren.length;
-        use_css = !this.options.animated || this.options.cssAnimations;
         _results = [];
         for (i = _i = 0; 0 <= total_children ? _i < total_children : _i > total_children; i = 0 <= total_children ? ++_i : --_i) {
           $child = this.parsedChildren[i].el;
           position = positions[i];
           if (style_options) {
-            if (style_options.top) {
-              position.top = position.top + style_options.top;
-            }
-            if (style_options.left) {
-              position.left += style_options.left;
-            }
-            if (style_options.opacity >= 0) {
-              position.opacity = style_options.opacity;
-            }
+            position = this.extendStyle(position, style_options);
           }
-          if (style_options && style_options.staggered) {
-            _results.push(this.staggerAnimate(i, $child, position, use_css));
+          if (animate) {
+            _results.push($child.animate(position));
           } else {
-            _results.push(this.animate($child, position, use_css));
+            _results.push($child.css(position));
           }
         }
         return _results;
       };
 
-      Plugin.prototype.animate = function($child, position, use_css) {
-        if (use_css) {
-          return $child.css(position);
-        } else {
-          return $child.stop(true, true).animate(position, 200);
+      Plugin.prototype.extendStyle = function(position, style_options) {
+        if (style_options.left) {
+          position.left += style_options.left;
         }
+        if (style_options.top) {
+          position.top += style_options.top;
+        }
+        if (style_options.opacity >= 0) {
+          position.opacity = style_options.opacity;
+        }
+        return position;
       };
 
-      Plugin.prototype.staggerAnimate = function(i, $child, position, use_css) {
-        var _this = this;
-        return setTimeout(function() {
-          return _this.animate($child, position, use_css);
-        }, 50 * i);
+      Plugin.prototype.setState = function(state_name) {
+        var animated, state;
+        state = this.options["states"][state_name];
+        animated = state.animated;
+        if (state_name === "init") {
+          return this.arrange(animated, state.modifications);
+        } else {
+          return this.arrange(animated, state.modifications);
+        }
       };
 
       Plugin.prototype.render = function() {
-        var _this = this;
-        if (!this.options.animateOnInit || !this.options.animated) {
-          this.toggleCssTransitions(false);
-        }
-        if (this.options.animateInStyle) {
-          this.toggleCssTransitions(false);
-          switch (this.options.animateInStyle) {
-            case "fadein":
-              this.arrange({
-                top: -200,
-                opacity: 0
-              });
-          }
-          return setTimeout(function() {
-            _this.toggleCssTransitions(true);
-            return _this.arrange({
-              opacity: 1,
-              staggered: true
-            });
-          }, 200);
-        } else {
-          this.arrange();
-          if (this.options.animated) {
-            return this.toggleCssTransitions(true);
-          }
-        }
+        this.setState("init");
+        return this.setState("normal");
       };
 
       Plugin.prototype.lowestCol = function(array) {
@@ -231,15 +211,6 @@
 
       Plugin.prototype.highestCol = function(array) {
         return array[$.inArray(Math.max.apply(window, array), array)];
-      };
-
-      Plugin.prototype.toggleCssTransitions = function(enabled) {
-        if (enabled) {
-          return $(".ss-notransitions").removeClass("ss-notransitions");
-        } else {
-          this.$container.addClass("ss-notransitions");
-          return this.$container.children().addClass("ss-notransitions");
-        }
       };
 
       Plugin.prototype.enableResize = function() {

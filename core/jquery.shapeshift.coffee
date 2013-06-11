@@ -21,21 +21,17 @@
     gutterX: 10
     gutterY: 10
 
-    # Animation Settings
-    animated: true
-    animateOnInit: false
-    animateInStyle: "fadein"
-
-  # Create a style to ignore CSS transitions
-  style = $('<style>
-              .ss-notransitions { 
-                -webkit-transition: none !important;
-                -moz-transition: none !important;
-                -o-transition: none !important;
-                transition: none !important;
-              }
-            </style>')
-  $('html > head').append(style);
+    states:
+      init:
+        animated: false
+        modifications:
+          top: -100
+          opacity: 0
+      normal:
+        animated: true
+        modifications:
+          left: -200
+          opacity: 1
 
   class Plugin
     constructor: (@element, options) ->
@@ -181,12 +177,12 @@
         child = @parsedChildren[i]
         col = @lowestCol(col_heights)
 
-        offset_x = (col * col_width) + offset_left
-        offset_y = col_heights[col]
+        left = (col * col_width) + offset_left
+        top = col_heights[col]
 
         positions[child.i] = { 
-          left: offset_x, 
-          top: offset_y
+          left: left, 
+          top: top
         }
 
         col_heights[col] += child.height + gutter_y
@@ -202,7 +198,7 @@
     # Physically moves the children into their
     # respective positions
     # ----------------------------
-    arrange: (style_options) ->
+    arrange: (animate, style_options) ->
       # Make sure the grid is correct and then
       # retrieve the positions of the children
       @calculateGrid()
@@ -213,64 +209,61 @@
 
       # Animate the Children
       total_children = @parsedChildren.length
-      use_css = !@options.animated or @options.cssAnimations
       for i in [0...total_children]
         $child = @parsedChildren[i].el
         position = positions[i]
 
         if style_options
-          if style_options.top
-            position.top = position.top + style_options.top
-          if style_options.left
-            position.left += style_options.left
-          if style_options.opacity >= 0
-            position.opacity = style_options.opacity
+          position = @extendStyle(position, style_options)
 
-        if style_options and style_options.staggered
-          @staggerAnimate(i, $child, position, use_css)
+        if animate
+          $child.animate(position)
         else
-          @animate($child, position, use_css)
+          $child.css(position)
 
-    animate: ($child, position, use_css) ->
-      if use_css
-        $child.css(position)
+
+    # ----------------------------
+    # extendStyle:
+    # Adds more options to be changed via css
+    # to the position attribute in arrange
+    # ----------------------------
+    extendStyle: (position, style_options) ->
+      if style_options.left
+        position.left += style_options.left
+        
+      if style_options.top
+        position.top += style_options.top
+
+      if style_options.opacity >= 0
+        position.opacity = style_options.opacity
+
+      return position
+
+
+
+    # ----------------------------
+    # setState:
+    # Make the child elements a specific style / state
+    # ----------------------------
+    setState: (state_name) ->
+      state = @options["states"][state_name]
+
+      animated = state.animated
+
+      if state_name is "init"
+        @arrange(animated, state.modifications);
       else
-        $child.stop(true, true).animate(position, 200)
-
-    staggerAnimate: (i, $child, position, use_css) ->
-      setTimeout( =>
-        @animate($child, position, use_css)
-      , 50 * i )
+        @arrange(animated, state.modifications);
 
 
-
+      
     # ----------------------------
     # render:
     # The intial render of the elements
     # ----------------------------
     render: ->
-      # Toggle Animations
-      if !@options.animateOnInit or !@options.animated
-        @toggleCssTransitions(false)
-      
-      if @options.animateInStyle
-        @toggleCssTransitions(false)
-
-        switch @options.animateInStyle
-          when "fadein"
-            @arrange({top: -200, opacity: 0})
-
-        setTimeout( =>
-          @toggleCssTransitions(true)
-          @arrange({opacity: 1, staggered: true})
-        , 200 )
-      else
-        # Arrange the elements to their exact positions
-        @arrange()
-
-        # Toggle Animations
-        if @options.animated
-          @toggleCssTransitions(true)
+      @setState("init")
+      @setState("normal")
 
     # ----------------------------
     # lowestCol:
@@ -289,19 +282,6 @@
     # ----------------------------
     highestCol: (array) ->
       array[$.inArray Math.max.apply(window,array), array]
-
-    # ----------------------------
-    # toggleCssTransitions:
-    # Sometimes CSS transitions need to be
-    # turned off. There was a style created
-    # at the beginning of the page.
-    # ----------------------------
-    toggleCssTransitions: (enabled) ->
-      if enabled
-        $(".ss-notransitions").removeClass("ss-notransitions")
-      else
-        @$container.addClass("ss-notransitions")
-        @$container.children().addClass("ss-notransitions")
 
 
     # ----------------------------
