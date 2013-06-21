@@ -220,6 +220,7 @@
     # arrange them to the calculated grid
     # ----------------------------
     render: (reparse = false, trigger_drop_finished) ->
+      @setActiveChildren() if reparse
       @setGridColumns()
       @arrange(reparse, trigger_drop_finished)
 
