@@ -222,7 +222,7 @@
     render: (reparse = false, trigger_drop_finished) ->
       @setActiveChildren() if reparse
       @setGridColumns()
-      @arrange(reparse, trigger_drop_finished)
+      @arrange(false, trigger_drop_finished)
 
     # ----------------------------
     # setGrid:
