@@ -7,7 +7,7 @@
     defaults = {
       selector: "*",
       enableResize: true,
-      cssAnimations: false,
+      cssAnimations: true,
       align: "center",
       columns: null,
       colWidth: null,
@@ -15,19 +15,17 @@
       gutterY: 10,
       states: {
         init: {
-          animated: false,
-          staggered: false,
-          modifications: {
-            position: "absolute",
-            top: -50,
+          style: {
+            marginTop: -100,
             opacity: 0
           }
         },
         normal: {
           animated: true,
           speed: 200,
-          staggered: true,
-          modifications: {
+          staggeredIntro: true,
+          style: {
+            marginTop: 0,
             opacity: 1
           }
         }
@@ -160,11 +158,14 @@
       };
 
       Plugin.prototype.arrange = function() {
-        var $child, animated, i, position, positions, speed, staggered, state_style, total_children, _i, _results;
+        var $child, animated, i, position, positions, speed, staggeredIntro, state_style, total_children, _i, _results;
         animated = this.state.animated;
-        staggered = this.state.staggered;
-        state_style = this.state.modifications;
+        staggeredIntro = this.state.staggeredIntro;
+        state_style = this.state.style;
         speed = this.state.speed;
+        if (animated && this.options.cssAnimations) {
+          animated = false;
+        }
         positions = this.getPositions();
         this.$container.css({
           height: this.grid.height
@@ -175,9 +176,9 @@
           $child = this.parsedChildren[i].el;
           position = positions[i];
           if (state_style) {
-            position = this.extendStyle(position, state_style);
+            $.extend(position, state_style);
           }
-          if (staggered) {
+          if (staggeredIntro) {
             _results.push(this.stagger(i, $child, position, animated, speed));
           } else {
             _results.push(this.move($child, position, animated, speed));
@@ -197,36 +198,23 @@
         if (animated) {
           return $child.stop(true, false).animate(position, speed);
         } else {
-          return $child.css(position);
-        }
-      };
-
-      Plugin.prototype.extendStyle = function(position, style_options) {
-        if (style_options.left) {
-          if (style_options.positions === "absolute") {
-            position.left = style_options.left;
-          } else {
-            position.left += style_options.left;
+          if (this.options.cssAnimations && !this.state.animated) {
+            $child.toggleClass('no-transition');
+          }
+          $child.css(position);
+          if (this.options.cssAnimations && !this.state.animated) {
+            return setTimeout(function() {
+              return $child.toggleClass('no-transition');
+            }, 0);
           }
         }
-        if (style_options.top) {
-          if (style_options.positions === "absolute") {
-            position.top = style_options.top;
-          } else {
-            position.top += style_options.top;
-          }
-        }
-        if (style_options.opacity >= 0) {
-          position.opacity = style_options.opacity;
-        }
-        return position;
       };
 
       Plugin.prototype.setState = function(state_name) {
         var state;
         this.state = state = $.extend({}, this.options["states"][state_name]);
         this.arrange();
-        return this.state.staggered = false;
+        return this.state.staggeredIntro = false;
       };
 
       Plugin.prototype.render = function() {
@@ -249,13 +237,17 @@
         return $(window).on("resize", function() {
           var speed;
           if (!resizing) {
-            speed = _this.state.speed / 3;
+            speed = _this.state.speed;
             resizing = true;
+            setTimeout(function() {
+              _this.calculateGrid();
+              return _this.arrange();
+            }, speed * .5);
             return setTimeout(function() {
               _this.calculateGrid();
               _this.arrange();
               return resizing = false;
-            }, speed);
+            }, speed * 1.1);
           }
         });
       };

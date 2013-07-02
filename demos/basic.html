@@ -27,11 +27,17 @@
       position: absolute;
       height: 100px;
       width: 100px;
+
+      transition: left .2s, top .2s, opacity .2s, margin-top .2s;
     }
 
     .container > .ss-placeholder-child {
       background: transparent;
       border: 1px dashed blue;
+    }
+
+    .no-transition {
+      transition: none !important;
     }
   </style>
 

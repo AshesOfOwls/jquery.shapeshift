@@ -12,7 +12,7 @@
 
     # Features
     enableResize: true
-    cssAnimations: false
+    cssAnimations: true
 
     # Grid Properties
     align: "center"
@@ -23,17 +23,15 @@
 
     states:
       init:
-        animated: false
-        staggered: false
-        modifications:
-          position: "absolute"
-          top: -50
+        style:
+          marginTop: -100
           opacity: 0
       normal:
         animated: true
         speed: 200
-        staggered: true
-        modifications:
+        staggeredIntro: true
+        style:
+          marginTop: 0
           opacity: 1
 
   class Plugin
@@ -206,9 +204,12 @@
     # ----------------------------
     arrange: ->
       animated = @state.animated
-      staggered = @state.staggered
-      state_style = @state.modifications
+      staggeredIntro = @state.staggeredIntro
+      state_style = @state.style
       speed = @state.speed
+
+      if animated and @options.cssAnimations
+        animated = false
 
       # Make sure the grid is correct and then
       # retrieve the positions of the children
@@ -225,9 +226,9 @@
         position = positions[i]
 
         if state_style
-          position = @extendStyle(position, state_style)
+          $.extend(position, state_style)
 
-        if staggered
+        if staggeredIntro
           @stagger(i, $child, position, animated, speed)
         else
           @move($child, position, animated, speed)
@@ -241,26 +242,16 @@
       if animated
         $child.stop(true, false).animate(position, speed)
       else
+
+        if @options.cssAnimations and !@state.animated
+          $child.toggleClass('no-transition')
+
         $child.css(position)
 
-    extendStyle: (position, style_options) ->
-      if style_options.left
-        if style_options.positions is "absolute"
-          position.left = style_options.left
-        else
-          position.left += style_options.left
-
-        
-      if style_options.top
-        if style_options.positions is "absolute"
-          position.top = style_options.top
-        else
-          position.top += style_options.top
-
-      if style_options.opacity >= 0
-        position.opacity = style_options.opacity
-
-      return position
+        if @options.cssAnimations and !@state.animated
+          setTimeout ->
+            $child.toggleClass('no-transition')
+          , 0
 
 
     # ----------------------------
@@ -270,7 +261,7 @@
     setState: (state_name) ->
       @state = state = $.extend({}, @options["states"][state_name])
       @arrange()
-      @state.staggered = false
+      @state.staggeredIntro = false
 
       
     # ----------------------------
@@ -311,14 +302,19 @@
 
       $(window).on "resize", =>
         unless resizing
-          speed = @state.speed / 3
+          speed = @state.speed
           resizing = true
 
           setTimeout =>
             @calculateGrid()
             @arrange()
+          , speed * .5
+
+          setTimeout =>
+            @calculateGrid()
+            @arrange()
             resizing = false
-          , speed
+          , speed * 1.1
 
 
   $.fn[pluginName] = (options) ->
