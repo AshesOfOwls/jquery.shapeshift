@@ -188,8 +188,11 @@
         if (reparse == null) {
           reparse = false;
         }
+        if (reparse) {
+          this.setActiveChildren();
+        }
         this.setGridColumns();
-        return this.arrange(reparse, trigger_drop_finished);
+        return this.arrange(false, trigger_drop_finished);
       };
 
       Plugin.prototype.setGridColumns = function() {
