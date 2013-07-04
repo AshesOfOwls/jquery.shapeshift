@@ -451,7 +451,9 @@
                   $clone.remove();
                   $("." + current_container_class).trigger("ss-rearrange");
                 } else {
-                  $clone.removeClass(clone_class);
+                    $clone.removeClass(clone_class);
+                    $original_container.shapeshift($original_container.data("plugin_shapeshift").options);
+                    $current_container.shapeshift($current_container.data("plugin_shapeshift").options);
                 }
               }
               if ($original_container[0] === $current_container[0]) {
