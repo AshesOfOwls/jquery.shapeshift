@@ -45,6 +45,19 @@
   <script>
     $(document).ready(function() {
       $(".container").shapeshift();
+
+      setTimeout(function() {
+        $newDiv = $("<div>the new one</div>")
+        $(".container").first().shapeshift('insert', $newDiv.clone(), 0);
+        $(".container").first().shapeshift('insert', $newDiv.clone(), 2);
+        $(".container").first().shapeshift('insert', $newDiv.clone(), 4);
+        $(".container").first().shapeshift('insert', $newDiv.clone(), 6);
+        $(".container").first().shapeshift('insert', $newDiv.clone(), 8);
+        $(".container").first().shapeshift('insert', $newDiv.clone(), 10);
+        $(".container").first().shapeshift('insert', $newDiv.clone(), 12);
+        $(".container").first().shapeshift('insert', $newDiv.clone(), 14);
+        $(".container").first().shapeshift('insert', $newDiv.clone(), 16);
+      }, 500)
     })
   </script>
 </head>
