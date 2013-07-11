@@ -18,7 +18,7 @@
   <style>
     .container {
       border: 1px dashed #CCC;
-      padding: 100px;
+      padding: 40px;
       position: relative;
     }
 
@@ -46,18 +46,17 @@
     $(document).ready(function() {
       $(".container").shapeshift();
 
-      setTimeout(function() {
-        $newDiv = $("<div>the new one</div>")
-        $(".container").first().shapeshift('insert', $newDiv.clone(), 0);
-        $(".container").first().shapeshift('insert', $newDiv.clone(), 2);
-        $(".container").first().shapeshift('insert', $newDiv.clone(), 4);
-        $(".container").first().shapeshift('insert', $newDiv.clone(), 6);
-        $(".container").first().shapeshift('insert', $newDiv.clone(), 8);
-        $(".container").first().shapeshift('insert', $newDiv.clone(), 10);
-        $(".container").first().shapeshift('insert', $newDiv.clone(), 12);
-        $(".container").first().shapeshift('insert', $newDiv.clone(), 14);
-        $(".container").first().shapeshift('insert', $newDiv.clone(), 16);
-      }, 500)
+      $newDiv = $("<div></div>")
+
+      addDiv = function(i) {
+        setTimeout(function() {
+          $(".container").first().shapeshift('insert', $newDiv.clone().text(i), 500);
+        }, i)
+      }
+
+      for(var i=0;i<30;i++) {
+        addDiv(i)
+      }
     })
   </script>
 </head>

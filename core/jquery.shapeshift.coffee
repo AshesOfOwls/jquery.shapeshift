@@ -8,12 +8,31 @@
   pluginName = "shapeshift"
 
   defaults = 
+    # Features
+    enableResize: true
+    cssAnimations: true
+
     # Grid Properties
     align: "center"
     columns: null
     colWidth: null
     gutterX: 10
     gutterY: 10
+
+    # States
+    initChain: ['init', 'normal']
+    states:
+      init:
+        style:
+          marginTop: -1200
+          opacity: 0
+      normal:
+        animated: true
+        speed: 200
+        staggeredIntro: false
+        style:
+          marginTop: -40
+          opacity: 1
 
   Plugin = (element, options) ->
     @options = $.extend({}, defaults, options)
@@ -22,10 +41,13 @@
     @$container = $(element)
     @children = []
 
+    @states = @options.states
+
     @init()
 
   Plugin:: =
     init: ->
+      @_enableFeatures()
       @_parseAllChildren()
       @_initializeGrid()
       @_arrange()
@@ -56,6 +78,14 @@
     # --------------------------------------------------------------------
     # ------------------------- Private Methods --------------------------
     # --------------------------------------------------------------------
+
+    # ----------------------------
+    # enableFeatures:
+    # Enables options features
+    # ----------------------------
+    _enableFeatures: ->
+      @enableResize() if @options.enableResize
+
 
     # --------------------------------------------
     # parseAllChildren
@@ -88,6 +118,8 @@
         el: $child
         colspan: parseInt($child.attr("data-ss-colspan")) || 1
         height: $child.outerHeight()
+        position: null
+        state: 'normal'
 
 
     # --------------------------------------------
@@ -164,12 +196,19 @@
 
       positions = @_getPositions()
 
-      for i in [0...child_count]
-        $child = children[i].el
-        position = positions[i]
+      # Animate the container to the appropriate height
+      @$container.css({ height: @grid.height })
 
-        console.log(position)
-        $child.css(position)
+      for i in [0...child_count]
+        child = children[i]
+        $child = child.el
+        position = positions[i]
+        position_string = JSON.stringify(position)
+
+        # Animate only if necessary
+        if position_string isnt child.position
+          $child.css(position)
+          child.position = position_string
         
       @
 
@@ -181,9 +220,11 @@
     # calculate/save their x/y positions
     # --------------------------------------------
     _getPositions: ->
+      children = @children
       col_width = @grid.col_width
       gutter_y = @options.gutterY
       padding_top = @grid.padding_top
+      states = @states
 
       # Array that stores the height of each column
       col_heights = []
@@ -193,19 +234,24 @@
 
       # Go over each child and determine its position
       positions = []
-      total_children = @children.length
+      child_count = children.length
       offset_left = @grid.child_offset
-      for i in [0...total_children]
-        child = @children[i]
+      for i in [0...child_count]
+        child = children[i]
         col = @lowestCol(col_heights)
 
         left = (col * col_width) + offset_left
         top = col_heights[col]
 
-        positions.push { 
+        position = { 
           left: left, 
           top: top
         }
+
+        state_style = states[child.state].style
+        $.extend(position, state_style) if state_style
+
+        positions.push(position)
 
         col_heights[col] += child.height + gutter_y
 
@@ -220,6 +266,8 @@
     #
     # Return the index position of the lowest
     # number from within a given array
+    #
+    # array: The array to process
     # --------------------------------------------
     lowestCol: (array) ->
       $.inArray Math.min.apply(window,array), array
@@ -230,10 +278,40 @@
     #
     # Return the index position of the highest
     # number from within a given array
+    #
+    # array: The array to process
     # --------------------------------------------
     highestCol: (array) ->
       array[$.inArray Math.max.apply(window,array), array]
 
+
+    # --------------------------------------------------------------------
+    # ---------------------------- Features ------------------------------
+    # --------------------------------------------------------------------
+
+    # --------------------------------------------
+    # enableResize:
+    #
+    # Arrange the grid upon resizing the window
+    # --------------------------------------------
+    enableResize: ->
+      resizing = false
+
+      $(window).on "resize", =>
+        unless resizing
+          speed = 200
+          resizing = true
+
+          setTimeout =>
+            @_calculateGrid()
+            @_arrange()
+          , speed * .6
+
+          setTimeout =>
+            @_calculateGrid()
+            @_arrange()
+            resizing = false
+          , speed * 1.1
 
   # --------------------------------------------------------------------
   # ----------------------- Dirty Initialization -----------------------
