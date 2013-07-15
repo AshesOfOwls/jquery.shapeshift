@@ -12,27 +12,29 @@
     enableResize: true
     cssAnimations: true
 
-    # Grid Properties
-    align: "center"
-    columns: null
-    colWidth: null
-    gutterX: 10
-    gutterY: 10
-
     # States
-    initChain: ['init', 'normal']
+    state: 'default'
     states:
-      init:
-        style:
-          marginTop: -1200
-          opacity: 0
-      normal:
+      default:
+        class: 'default_state'
+
         animated: true
         speed: 200
         staggeredIntro: false
+
+        grid:
+          align: 'center'
+          columns: null
+          colWidth: null
+          gutter: [10, 10]
+
         style:
-          marginTop: -40
+          marginTop: 0
           opacity: 1
+
+        init_style:
+          marginTop: -240
+          opacity: 0
 
   Plugin = (element, options) ->
     @options = $.extend({}, defaults, options)
@@ -41,14 +43,14 @@
     @$container = $(element)
     @children = []
 
-    @states = @options.states
+    @state = @options.states[@options.state]
 
     @init()
 
   Plugin:: =
     init: ->
       @_enableFeatures()
-      @_parseAllChildren()
+      @_parseChildren()
       @_initializeGrid()
       @_arrange()
 
@@ -67,10 +69,33 @@
     # --------------------------------------------
     insert: ($child, i) ->
       # Append to the end by default
-      i = @children.length if i is undefined
+      i = 999999 if i is undefined
 
       @$container.append($child)
-      @_addChild($child, i)
+      @_parseChild($child, i)
+      @_calculateGrid()
+      @_arrange()
+
+    # --------------------------------------------
+    # insertMany
+    #
+    # Insert multiple new children into this 
+    # container
+    #
+    # children: An array of children which is
+    #           formatted as such:
+    #           [[$child, index], [$child, index]]
+    # --------------------------------------------
+    insertMany: (children) ->
+      child_count = children.length
+
+      for i in [0...child_count]
+        $child = children[i][0]
+        index = children[i][1] || 999999 # Append to the end by default
+
+        @$container.append($child)
+        @_parseChild($child, index)
+
       @_calculateGrid()
       @_arrange()
 
@@ -87,25 +112,33 @@
       @enableResize() if @options.enableResize
 
 
+    # ----------------------------
+    # setState:
+    # Enables options features
+    # ----------------------------
+    _setState: (state) ->
+      @state = @options.states[state]
+
+
     # --------------------------------------------
     # parseAllChildren
     #
     # Go over every child element in the container
     # and add it to the global children array
     # --------------------------------------------
-    _parseAllChildren: ->
+    _parseChildren: ->
       $children = @$container.children()
       child_count = $children.length
 
       for i in [0...child_count]
         $child = $($children[i])
-        @_addChild($child, i)
+        @_parseChild($child, i)
 
       @
 
 
     # --------------------------------------------
-    # addChild
+    # parseChild
     #
     # Add a single childs properties to a specific
     # index position in the children array
@@ -113,13 +146,13 @@
     # $child: The element to be inserted 
     #      i: The position to be inserted into
     # --------------------------------------------
-    _addChild: ($child, i) ->
+    _parseChild: ($child, i) ->
       @children.splice i, 0,
         el: $child
         colspan: parseInt($child.attr("data-ss-colspan")) || 1
         height: $child.outerHeight()
         position: null
-        state: 'normal'
+        initialized: false
 
 
     # --------------------------------------------
@@ -128,11 +161,12 @@
     # Determines the initial grid properties
     # --------------------------------------------
     _initializeGrid: ->
-      gutter_x = @options.gutterX
+      grid_state = @state.grid
+      gutter_x = grid_state.gutter[0]
 
-      if @options.colWidth
+      if grid_state.colWidth
         # Column width is manually set
-        @grid.col_width = @options.colWidth + gutter_x
+        @grid.col_width = grid_state.colWidth + gutter_x
       else
         # Column width is automatically determined
         first_child = @children[0]
@@ -158,11 +192,12 @@
     # container is resized.
     # --------------------------------------------
     _calculateGrid: ->
+      grid_state = @state.grid
       col_width = @grid.col_width
 
       # Determine how many columns can exist
       container_inner_width = @$container.width()
-      columns = @options.columns || Math.floor container_inner_width / col_width
+      columns = grid_state.columns || Math.floor container_inner_width / col_width
 
       # The columns cannot outnumber the children
       if columns > @children.length
@@ -173,8 +208,8 @@
       # Determine the left offset of children
       child_offset = @grid.padding_left
 
-      grid_width = (columns * col_width) - @options.gutterX
-      switch @options.align
+      grid_width = (columns * col_width) - grid_state.gutter[0]
+      switch grid_state.align
         when "center"
           child_offset += (container_inner_width - grid_width) / 2
 
@@ -187,14 +222,17 @@
     # --------------------------------------------
     # arrange
     #
-    # Physically moves the elements to
-    # predetermined positions
+    # Reclaculates the position of each element
+    # and arranges them to those positions
     # --------------------------------------------
     _arrange: ->
       children = @children
       child_count = children.length
 
       positions = @_getPositions()
+
+      state_style = @state.style
+      init_style = @state.init_style
 
       # Animate the container to the appropriate height
       @$container.css({ height: @grid.height })
@@ -205,12 +243,30 @@
         position = positions[i]
         position_string = JSON.stringify(position)
 
+        if !child.initialized
+          init_position = $.extend({}, position, init_style)
+          $child.css(init_position)
+          child.initialized = true
+
         # Animate only if necessary
         if position_string isnt child.position
-          $child.css(position)
+          $.extend(position, state_style)
+          @_move $child, position, 10 * i
           child.position = position_string
         
       @
+
+
+    # --------------------------------------------
+    # move:
+    #
+    # Move a single child to a position
+    # --------------------------------------------
+    _move: ($child, position, delay = 0) ->
+      setTimeout =>
+        $child.addClass(@state.class)
+        $child.css(position)
+      , delay
 
 
     # --------------------------------------------
@@ -222,7 +278,7 @@
     _getPositions: ->
       children = @children
       col_width = @grid.col_width
-      gutter_y = @options.gutterY
+      gutter_y = @state.grid.gutter[1]
       padding_top = @grid.padding_top
       states = @states
 
@@ -243,15 +299,10 @@
         left = (col * col_width) + offset_left
         top = col_heights[col]
 
-        position = { 
+        positions.push { 
           left: left, 
           top: top
         }
-
-        state_style = states[child.state].style
-        $.extend(position, state_style) if state_style
-
-        positions.push(position)
 
         col_heights[col] += child.height + gutter_y
 

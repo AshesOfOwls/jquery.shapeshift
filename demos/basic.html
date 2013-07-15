@@ -28,7 +28,10 @@
       height: 100px;
       width: 100px;
 
-      transition: left .2s, top .2s, opacity .2s, margin-top .2s;
+    }
+
+    .default_state {
+      transition: all .2s;
     }
 
     .container > .ss-placeholder-child {
@@ -47,16 +50,15 @@
       $(".container").shapeshift();
 
       $newDiv = $("<div></div>")
+      newDivs = []
 
-      addDiv = function(i) {
-        setTimeout(function() {
-          $(".container").first().shapeshift('insert', $newDiv.clone().text(i), 500);
-        }, i)
+      for(var i=0;i<10;i++) {
+        newDivs.push([$newDiv.clone().text(i), 5])
       }
 
-      for(var i=0;i<30;i++) {
-        addDiv(i)
-      }
+      setTimeout(function() {
+        $(".container").first().shapeshift('insertMany', newDivs);
+      }, 400)
     })
   </script>
 </head>

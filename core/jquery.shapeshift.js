@@ -7,26 +7,26 @@
     defaults = {
       enableResize: true,
       cssAnimations: true,
-      align: "center",
-      columns: null,
-      colWidth: null,
-      gutterX: 10,
-      gutterY: 10,
-      initChain: ['init', 'normal'],
+      state: 'default',
       states: {
-        init: {
-          style: {
-            marginTop: -1200,
-            opacity: 0
-          }
-        },
-        normal: {
+        "default": {
+          "class": 'default_state',
           animated: true,
           speed: 200,
           staggeredIntro: false,
+          grid: {
+            align: 'center',
+            columns: null,
+            colWidth: null,
+            gutter: [10, 10]
+          },
           style: {
-            marginTop: -40,
+            marginTop: 0,
             opacity: 1
+          },
+          init_style: {
+            marginTop: -240,
+            opacity: 0
           }
         }
       }
@@ -36,22 +36,34 @@
       this.grid = {};
       this.$container = $(element);
       this.children = [];
-      this.states = this.options.states;
+      this.state = this.options.states[this.options.state];
       return this.init();
     };
     Plugin.prototype = {
       init: function() {
         this._enableFeatures();
-        this._parseAllChildren();
+        this._parseChildren();
         this._initializeGrid();
         return this._arrange();
       },
       insert: function($child, i) {
         if (i === void 0) {
-          i = this.children.length;
+          i = 999999;
         }
         this.$container.append($child);
-        this._addChild($child, i);
+        this._parseChild($child, i);
+        this._calculateGrid();
+        return this._arrange();
+      },
+      insertMany: function(children) {
+        var $child, child_count, i, index, _i;
+        child_count = children.length;
+        for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
+          $child = children[i][0];
+          index = children[i][1] || 999999;
+          this.$container.append($child);
+          this._parseChild($child, index);
+        }
         this._calculateGrid();
         return this._arrange();
       },
@@ -60,30 +72,34 @@
           return this.enableResize();
         }
       },
-      _parseAllChildren: function() {
+      _setState: function(state) {
+        return this.state = this.options.states[state];
+      },
+      _parseChildren: function() {
         var $child, $children, child_count, i, _i;
         $children = this.$container.children();
         child_count = $children.length;
         for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
           $child = $($children[i]);
-          this._addChild($child, i);
+          this._parseChild($child, i);
         }
         return this;
       },
-      _addChild: function($child, i) {
+      _parseChild: function($child, i) {
         return this.children.splice(i, 0, {
           el: $child,
           colspan: parseInt($child.attr("data-ss-colspan")) || 1,
           height: $child.outerHeight(),
           position: null,
-          state: 'normal'
+          initialized: false
         });
       },
       _initializeGrid: function() {
-        var fc_colspan, fc_width, first_child, gutter_x, single_width;
-        gutter_x = this.options.gutterX;
-        if (this.options.colWidth) {
-          this.grid.col_width = this.options.colWidth + gutter_x;
+        var fc_colspan, fc_width, first_child, grid_state, gutter_x, single_width;
+        grid_state = this.state.grid;
+        gutter_x = grid_state.gutter[0];
+        if (grid_state.colWidth) {
+          this.grid.col_width = grid_state.colWidth + gutter_x;
         } else {
           first_child = this.children[0];
           fc_width = first_child.el.outerWidth();
@@ -98,17 +114,18 @@
         return this._calculateGrid();
       },
       _calculateGrid: function() {
-        var child_offset, col_width, columns, container_inner_width, grid_width;
+        var child_offset, col_width, columns, container_inner_width, grid_state, grid_width;
+        grid_state = this.state.grid;
         col_width = this.grid.col_width;
         container_inner_width = this.$container.width();
-        columns = this.options.columns || Math.floor(container_inner_width / col_width);
+        columns = grid_state.columns || Math.floor(container_inner_width / col_width);
         if (columns > this.children.length) {
           columns = this.children.length;
         }
         this.grid.columns = columns;
         child_offset = this.grid.padding_left;
-        grid_width = (columns * col_width) - this.options.gutterX;
-        switch (this.options.align) {
+        grid_width = (columns * col_width) - grid_state.gutter[0];
+        switch (grid_state.align) {
           case "center":
             child_offset += (container_inner_width - grid_width) / 2;
             break;
@@ -118,10 +135,12 @@
         return this.grid.child_offset = child_offset;
       },
       _arrange: function() {
-        var $child, child, child_count, children, i, position, position_string, positions, _i;
+        var $child, child, child_count, children, i, init_position, init_style, position, position_string, positions, state_style, _i;
         children = this.children;
         child_count = children.length;
         positions = this._getPositions();
+        state_style = this.state.style;
+        init_style = this.state.init_style;
         this.$container.css({
           height: this.grid.height
         });
@@ -130,18 +149,34 @@
           $child = child.el;
           position = positions[i];
           position_string = JSON.stringify(position);
+          if (!child.initialized) {
+            init_position = $.extend({}, position, init_style);
+            $child.css(init_position);
+            child.initialized = true;
+          }
           if (position_string !== child.position) {
-            $child.css(position);
+            $.extend(position, state_style);
+            this._move($child, position, 10 * i);
             child.position = position_string;
           }
         }
         return this;
       },
+      _move: function($child, position, delay) {
+        var _this = this;
+        if (delay == null) {
+          delay = 0;
+        }
+        return setTimeout(function() {
+          $child.addClass(_this.state["class"]);
+          return $child.css(position);
+        }, delay);
+      },
       _getPositions: function() {
-        var child, child_count, children, col, col_heights, col_width, columns, gutter_y, i, left, offset_left, padding_top, position, positions, state_style, states, top, _i, _j;
+        var child, child_count, children, col, col_heights, col_width, columns, gutter_y, i, left, offset_left, padding_top, positions, states, top, _i, _j;
         children = this.children;
         col_width = this.grid.col_width;
-        gutter_y = this.options.gutterY;
+        gutter_y = this.state.grid.gutter[1];
         padding_top = this.grid.padding_top;
         states = this.states;
         col_heights = [];
@@ -157,15 +192,10 @@
           col = this.lowestCol(col_heights);
           left = (col * col_width) + offset_left;
           top = col_heights[col];
-          position = {
+          positions.push({
             left: left,
             top: top
-          };
-          state_style = states[child.state].style;
-          if (state_style) {
-            $.extend(position, state_style);
-          }
-          positions.push(position);
+          });
           col_heights[col] += child.height + gutter_y;
         }
         this.grid.height = this.highestCol(col_heights) - gutter_y - padding_top;
