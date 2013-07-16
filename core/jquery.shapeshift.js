@@ -178,7 +178,7 @@
           }
         }
         if (stagger_queue.length) {
-          this._stagger(stagger_queue);
+          this._staggerMove(stagger_queue);
         }
         return this;
       },

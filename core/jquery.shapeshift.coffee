@@ -280,7 +280,7 @@
           child.position = position_string
       
       if stagger_queue.length
-        @_stagger(stagger_queue)
+        @_staggerMove(stagger_queue)
 
       @
 
