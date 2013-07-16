@@ -39,7 +39,8 @@
   <script>
     $(document).ready(function() {
       $(".clones").shapeshift({
-        dragClone: true
+          dragClone: true,
+          enableCrossDrop: false
       });
       $(".droparea").shapeshift({
         colWidth: 100
@@ -56,6 +57,8 @@
     <div>E</div>
   </div>
 
+  <div class="container droparea">
+  </div>
   <div class="container droparea">
   </div>
 </body>
