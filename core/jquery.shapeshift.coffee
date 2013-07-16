@@ -24,7 +24,7 @@
         animateSpeed: 200
 
         staggerInit: true
-        staggerSpeed: 200
+        staggerSpeed: 50
 
         grid:
           align: 'center'
@@ -32,15 +32,15 @@
           colWidth: null
           gutter: [10, 10]
 
-        style:
-          marginLeft: 0
-          marginTop: 0
-          opacity: 1
-
         init_style:
-          marginLeft: -200
-          marginTop: -20
+          background: "black"
           opacity: 0
+          transform: 'rotateY(180deg) rotateX(180deg)'
+          
+        style:
+          background: "red"
+          opacity: 1
+          transform: 'rotateY(0deg) rotateX(0deg)'
 
   Plugin = (element, options) ->
     @options = $.extend({}, defaults, options)
