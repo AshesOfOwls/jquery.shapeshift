@@ -24,7 +24,7 @@
         animateSpeed: 200
 
         staggerInit: true
-        staggerSpeed: 500
+        staggerSpeed: 200
 
         grid:
           align: 'center'
@@ -48,6 +48,9 @@
 
     @$container = $(element)
     @children = []
+
+    @stagger_queue = []
+    @stagger_interval = null
 
     @state = null
 
@@ -233,17 +236,19 @@
     # and arranges them to those positions
     # ----------------------------------------------
     _arrange: ->
+      @_clearStaggerQueue()
+
       children = @children
       child_count = children.length
 
-      positions = @_getPositions()
-
       state_style = @state.style
-      state_class = @state.class
       init_style = @state.init_style
 
       stagger_speed = @state.staggerSpeed
       stagger_init = @state.staggerInit
+      stagger_queue = []
+
+      positions = @_getPositions()
 
       # Animate the container to the appropriate height
       @$container.css height: @grid.height
@@ -253,8 +258,8 @@
         $child = child.el
         position = positions[i]
         position_string = JSON.stringify(position)
+
         initialize = !child.initialized
-        staggered = stagger_init or initialize
 
         if initialize
           # Assign initialization style
@@ -266,41 +271,87 @@
         if position_string isnt child.position
           $.extend(position, state_style)
 
-          if staggered
-            # When initializing we must use stagger because otherwise
-            # the CSS attributes for the initialization will not be
-            # applied yet, therefore set the delay to be 0 if trying
-            # to both initialize and not stagger.
-            delay = if stagger_init and initialize then stagger_speed * i else 0
-            @_stagger $child, position, delay, state_class
+          if initialize
+            stagger_queue.push [$child, position]
           else
             @_move $child, position
 
-          # Store the position for checking
+          # Store the position string for checking
           child.position = position_string
-        
+      
+      if stagger_queue.length
+        @_stagger(stagger_queue)
+
       @
 
 
     # ----------------------------------------------
-    # stagger:
+    # staggerMove:
     #
     # Uses a delay to move a child into position.
     # Also useful for a 0 delay right after child
     # initialization to compensate for the removal
     # of CSS transitions.
     #
-    # $child:      The element to be moved
-    # position:    The hash of CSS attributes
-    # delay:       The delay in moving. Duh.
-    # state_class: The CSS style to be applied
+    # stagger_queue: An array containing the child
+    #                elements and the positions they
+    #                will be arranged to, e.g.:
+    #       [[$child, position], [$child, position]]
     # ----------------------------------------------
-    _stagger: ($child, position, delay, state_class) ->
-      setTimeout =>
-        $child.addClass(@state.class) if state_class
-        @_move($child, position, state_class)
+    _staggerMove: (stagger_queue) ->
+      state_class = @state.class
+      delay = @state.staggerSpeed
+
+      i = 0
+      @stagger_queue = stagger_queue
+      @stagger_interval = setInterval =>
+        child = stagger_queue[i]
+
+        if child
+          $child = child[0]
+          position = child[1]
+
+          $child.addClass(state_class)
+          @_move($child, position)
+
+          i++
+        else
+          clearInterval(@stagger_interval)
+          @stagger_interval = null
+
       , delay
 
+
+    # ----------------------------------------------
+    # clearStaggerQueue:
+    #
+    # If items are being staggered and another
+    # arrange is called then it will mess everything
+    # up by not allowing the timeouts to complete.
+    # To solve this, if another arrangement is
+    # called before a stagger finishes then all the
+    # staggered children get forced into position.
+    # ----------------------------------------------
+    _clearStaggerQueue: ->
+      clearInterval(@stagger_interval)
+      @stagger_interval = null
+
+      stagger_queue = @stagger_queue
+
+      if stagger_queue.length
+        child_count = stagger_queue.length
+        state_class = @state.class
+
+        for i in [0...child_count]
+          child = stagger_queue[i]
+
+          $child = child[0]
+          position = child[1]
+
+          $child.addClass(state_class)
+          @_move($child, position)
+
+        @stagger_queue = []
 
     # ----------------------------------------------
     # move:

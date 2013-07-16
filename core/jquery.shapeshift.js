@@ -13,7 +13,7 @@
           animated: true,
           animateSpeed: 200,
           staggerInit: true,
-          staggerSpeed: 500,
+          staggerSpeed: 200,
           grid: {
             align: 'center',
             columns: null,
@@ -38,6 +38,8 @@
       this.grid = {};
       this.$container = $(element);
       this.children = [];
+      this.stagger_queue = [];
+      this.stagger_interval = null;
       this.state = null;
       return this.init();
     };
@@ -141,15 +143,16 @@
         return this.grid.child_offset = child_offset;
       },
       _arrange: function() {
-        var $child, child, child_count, children, delay, i, init_position, init_style, initialize, position, position_string, positions, stagger_init, stagger_speed, staggered, state_class, state_style, _i;
+        var $child, child, child_count, children, i, init_position, init_style, initialize, position, position_string, positions, stagger_init, stagger_queue, stagger_speed, state_style, _i;
+        this._clearStaggerQueue();
         children = this.children;
         child_count = children.length;
-        positions = this._getPositions();
         state_style = this.state.style;
-        state_class = this.state["class"];
         init_style = this.state.init_style;
         stagger_speed = this.state.staggerSpeed;
         stagger_init = this.state.staggerInit;
+        stagger_queue = [];
+        positions = this._getPositions();
         this.$container.css({
           height: this.grid.height
         });
@@ -159,7 +162,6 @@
           position = positions[i];
           position_string = JSON.stringify(position);
           initialize = !child.initialized;
-          staggered = stagger_init || initialize;
           if (initialize) {
             init_position = $.extend({}, position, init_style);
             $child.css(init_position);
@@ -167,25 +169,58 @@
           }
           if (position_string !== child.position) {
             $.extend(position, state_style);
-            if (staggered) {
-              delay = stagger_init && initialize ? stagger_speed * i : 0;
-              this._stagger($child, position, delay, state_class);
+            if (initialize) {
+              stagger_queue.push([$child, position]);
             } else {
               this._move($child, position);
             }
             child.position = position_string;
           }
         }
+        if (stagger_queue.length) {
+          this._stagger(stagger_queue);
+        }
         return this;
       },
-      _stagger: function($child, position, delay, state_class) {
-        var _this = this;
-        return setTimeout(function() {
-          if (state_class) {
-            $child.addClass(_this.state["class"]);
+      _staggerMove: function(stagger_queue) {
+        var delay, i, state_class,
+          _this = this;
+        state_class = this.state["class"];
+        delay = this.state.staggerSpeed;
+        i = 0;
+        this.stagger_queue = stagger_queue;
+        return this.stagger_interval = setInterval(function() {
+          var $child, child, position;
+          child = stagger_queue[i];
+          if (child) {
+            $child = child[0];
+            position = child[1];
+            $child.addClass(state_class);
+            _this._move($child, position);
+            return i++;
+          } else {
+            clearInterval(_this.stagger_interval);
+            return _this.stagger_interval = null;
           }
-          return _this._move($child, position, state_class);
         }, delay);
+      },
+      _clearStaggerQueue: function() {
+        var $child, child, child_count, i, position, stagger_queue, state_class, _i;
+        clearInterval(this.stagger_interval);
+        this.stagger_interval = null;
+        stagger_queue = this.stagger_queue;
+        if (stagger_queue.length) {
+          child_count = stagger_queue.length;
+          state_class = this.state["class"];
+          for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
+            child = stagger_queue[i];
+            $child = child[0];
+            position = child[1];
+            $child.addClass(state_class);
+            this._move($child, position);
+          }
+          return this.stagger_queue = [];
+        }
       },
       _move: function($child, position) {
         return $child.css(position);
