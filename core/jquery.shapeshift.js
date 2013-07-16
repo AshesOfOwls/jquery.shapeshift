@@ -6,14 +6,14 @@
     pluginName = "shapeshift";
     defaults = {
       enableResize: true,
-      cssAnimations: true,
       state: 'default',
       states: {
         "default": {
           "class": 'default_state',
           animated: true,
-          speed: 200,
-          staggeredIntro: false,
+          animateSpeed: 200,
+          staggerInit: true,
+          staggerSpeed: 500,
           grid: {
             align: 'center',
             columns: null,
@@ -21,11 +21,13 @@
             gutter: [10, 10]
           },
           style: {
+            marginLeft: 0,
             marginTop: 0,
             opacity: 1
           },
           init_style: {
-            marginTop: -240,
+            marginLeft: -200,
+            marginTop: -20,
             opacity: 0
           }
         }
@@ -36,11 +38,12 @@
       this.grid = {};
       this.$container = $(element);
       this.children = [];
-      this.state = this.options.states[this.options.state];
+      this.state = null;
       return this.init();
     };
     Plugin.prototype = {
       init: function() {
+        this._setState();
         this._enableFeatures();
         this._parseChildren();
         this._initializeGrid();
@@ -73,6 +76,9 @@
         }
       },
       _setState: function(state) {
+        if (state == null) {
+          state = this.options.state;
+        }
         return this.state = this.options.states[state];
       },
       _parseChildren: function() {
@@ -135,12 +141,15 @@
         return this.grid.child_offset = child_offset;
       },
       _arrange: function() {
-        var $child, child, child_count, children, i, init_position, init_style, position, position_string, positions, state_style, _i;
+        var $child, child, child_count, children, delay, i, init_position, init_style, initialize, position, position_string, positions, stagger_init, stagger_speed, staggered, state_class, state_style, _i;
         children = this.children;
         child_count = children.length;
         positions = this._getPositions();
         state_style = this.state.style;
+        state_class = this.state["class"];
         init_style = this.state.init_style;
+        stagger_speed = this.state.staggerSpeed;
+        stagger_init = this.state.staggerInit;
         this.$container.css({
           height: this.grid.height
         });
@@ -149,28 +158,37 @@
           $child = child.el;
           position = positions[i];
           position_string = JSON.stringify(position);
-          if (!child.initialized) {
+          initialize = !child.initialized;
+          staggered = stagger_init || initialize;
+          if (initialize) {
             init_position = $.extend({}, position, init_style);
             $child.css(init_position);
             child.initialized = true;
           }
           if (position_string !== child.position) {
             $.extend(position, state_style);
-            this._move($child, position, 10 * i);
+            if (staggered) {
+              delay = stagger_init && initialize ? stagger_speed * i : 0;
+              this._stagger($child, position, delay, state_class);
+            } else {
+              this._move($child, position);
+            }
             child.position = position_string;
           }
         }
         return this;
       },
-      _move: function($child, position, delay) {
+      _stagger: function($child, position, delay, state_class) {
         var _this = this;
-        if (delay == null) {
-          delay = 0;
-        }
         return setTimeout(function() {
-          $child.addClass(_this.state["class"]);
-          return $child.css(position);
+          if (state_class) {
+            $child.addClass(_this.state["class"]);
+          }
+          return _this._move($child, position, state_class);
         }, delay);
+      },
+      _move: function($child, position) {
+        return $child.css(position);
       },
       _getPositions: function() {
         var child, child_count, children, col, col_heights, col_width, columns, gutter_y, i, left, offset_left, padding_top, positions, states, top, _i, _j;

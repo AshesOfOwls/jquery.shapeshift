@@ -1,8 +1,10 @@
+# ----------------------------------------------------------------------
 #  Project: jQuery.Shapeshift
 #  Description: Align elements to a column grid with drag and drop.
 #  Author: Scott Elwood
 #  Maintained By: We the Media, inc.
 #  License: MIT
+# ----------------------------------------------------------------------
 
 (($, window, document, undefined_) ->
   pluginName = "shapeshift"
@@ -10,7 +12,7 @@
   defaults = 
     # Features
     enableResize: true
-    cssAnimations: true
+    # cssAnimations: true
 
     # States
     state: 'default'
@@ -19,8 +21,10 @@
         class: 'default_state'
 
         animated: true
-        speed: 200
-        staggeredIntro: false
+        animateSpeed: 200
+
+        staggerInit: true
+        staggerSpeed: 500
 
         grid:
           align: 'center'
@@ -29,11 +33,13 @@
           gutter: [10, 10]
 
         style:
+          marginLeft: 0
           marginTop: 0
           opacity: 1
 
         init_style:
-          marginTop: -240
+          marginLeft: -200
+          marginTop: -20
           opacity: 0
 
   Plugin = (element, options) ->
@@ -43,30 +49,31 @@
     @$container = $(element)
     @children = []
 
-    @state = @options.states[@options.state]
+    @state = null
 
     @init()
 
   Plugin:: =
     init: ->
+      @_setState()
       @_enableFeatures()
       @_parseChildren()
       @_initializeGrid()
       @_arrange()
 
 
-    # --------------------------------------------------------------------
-    # -------------------------- Public Methods --------------------------
-    # --------------------------------------------------------------------
+    # ----------------------------------------------------------------------
+    # --------------------------- Public Methods ---------------------------
+    # ----------------------------------------------------------------------
 
-    # --------------------------------------------
+    # ----------------------------------------------
     # insert
     #
     # Insert a new child into the container
     #
     # $child: The element to be inserted 
     #      i: The position to be inserted into
-    # --------------------------------------------
+    # ----------------------------------------------
     insert: ($child, i) ->
       # Append to the end by default
       i = 999999 if i is undefined
@@ -76,7 +83,7 @@
       @_calculateGrid()
       @_arrange()
 
-    # --------------------------------------------
+    # ----------------------------------------------
     # insertMany
     #
     # Insert multiple new children into this 
@@ -85,7 +92,7 @@
     # children: An array of children which is
     #           formatted as such:
     #           [[$child, index], [$child, index]]
-    # --------------------------------------------
+    # ----------------------------------------------
     insertMany: (children) ->
       child_count = children.length
 
@@ -100,32 +107,32 @@
       @_arrange()
 
 
-    # --------------------------------------------------------------------
-    # ------------------------- Private Methods --------------------------
-    # --------------------------------------------------------------------
+    # ----------------------------------------------------------------------
+    # -------------------------- Private Methods ---------------------------
+    # ----------------------------------------------------------------------
 
-    # ----------------------------
+    # ----------------------------------------------
     # enableFeatures:
     # Enables options features
-    # ----------------------------
+    # ----------------------------------------------
     _enableFeatures: ->
       @enableResize() if @options.enableResize
 
 
-    # ----------------------------
+    # ----------------------------------------------
     # setState:
     # Enables options features
-    # ----------------------------
-    _setState: (state) ->
+    # ----------------------------------------------
+    _setState: (state = @options.state) ->
       @state = @options.states[state]
 
 
-    # --------------------------------------------
+    # ----------------------------------------------
     # parseAllChildren
     #
     # Go over every child element in the container
     # and add it to the global children array
-    # --------------------------------------------
+    # ----------------------------------------------
     _parseChildren: ->
       $children = @$container.children()
       child_count = $children.length
@@ -137,7 +144,7 @@
       @
 
 
-    # --------------------------------------------
+    # ----------------------------------------------
     # parseChild
     #
     # Add a single childs properties to a specific
@@ -145,7 +152,7 @@
     #
     # $child: The element to be inserted 
     #      i: The position to be inserted into
-    # --------------------------------------------
+    # ----------------------------------------------
     _parseChild: ($child, i) ->
       @children.splice i, 0,
         el: $child
@@ -155,11 +162,11 @@
         initialized: false
 
 
-    # --------------------------------------------
+    # ----------------------------------------------
     # initializeGrid
     #
     # Determines the initial grid properties
-    # --------------------------------------------
+    # ----------------------------------------------
     _initializeGrid: ->
       grid_state = @state.grid
       gutter_x = grid_state.gutter[0]
@@ -184,13 +191,13 @@
       @_calculateGrid()
 
 
-    # --------------------------------------------
+    # ----------------------------------------------
     # calculateGrid:
     #
     # Some properties of the grid have to be
     # calculated dynamically, such as when the
     # container is resized.
-    # --------------------------------------------
+    # ----------------------------------------------
     _calculateGrid: ->
       grid_state = @state.grid
       col_width = @grid.col_width
@@ -219,12 +226,12 @@
       @grid.child_offset = child_offset
 
 
-    # --------------------------------------------
+    # ----------------------------------------------
     # arrange
     #
     # Reclaculates the position of each element
     # and arranges them to those positions
-    # --------------------------------------------
+    # ----------------------------------------------
     _arrange: ->
       children = @children
       child_count = children.length
@@ -232,18 +239,25 @@
       positions = @_getPositions()
 
       state_style = @state.style
+      state_class = @state.class
       init_style = @state.init_style
 
+      stagger_speed = @state.staggerSpeed
+      stagger_init = @state.staggerInit
+
       # Animate the container to the appropriate height
-      @$container.css({ height: @grid.height })
+      @$container.css height: @grid.height
 
       for i in [0...child_count]
         child = children[i]
         $child = child.el
         position = positions[i]
         position_string = JSON.stringify(position)
+        initialize = !child.initialized
+        staggered = stagger_init or initialize
 
-        if !child.initialized
+        if initialize
+          # Assign initialization style
           init_position = $.extend({}, position, init_style)
           $child.css(init_position)
           child.initialized = true
@@ -251,30 +265,61 @@
         # Animate only if necessary
         if position_string isnt child.position
           $.extend(position, state_style)
-          @_move $child, position, 10 * i
+
+          if staggered
+            # When initializing we must use stagger because otherwise
+            # the CSS attributes for the initialization will not be
+            # applied yet, therefore set the delay to be 0 if trying
+            # to both initialize and not stagger.
+            delay = if stagger_init and initialize then stagger_speed * i else 0
+            @_stagger $child, position, delay, state_class
+          else
+            @_move $child, position
+
+          # Store the position for checking
           child.position = position_string
         
       @
 
 
-    # --------------------------------------------
-    # move:
+    # ----------------------------------------------
+    # stagger:
     #
-    # Move a single child to a position
-    # --------------------------------------------
-    _move: ($child, position, delay = 0) ->
+    # Uses a delay to move a child into position.
+    # Also useful for a 0 delay right after child
+    # initialization to compensate for the removal
+    # of CSS transitions.
+    #
+    # $child:      The element to be moved
+    # position:    The hash of CSS attributes
+    # delay:       The delay in moving. Duh.
+    # state_class: The CSS style to be applied
+    # ----------------------------------------------
+    _stagger: ($child, position, delay, state_class) ->
       setTimeout =>
-        $child.addClass(@state.class)
-        $child.css(position)
+        $child.addClass(@state.class) if state_class
+        @_move($child, position, state_class)
       , delay
 
 
-    # --------------------------------------------
+    # ----------------------------------------------
+    # move:
+    #
+    # Move a single child to a position
+    #
+    # $child:      The element to be moved
+    # position:    The hash of CSS attributes
+    # ----------------------------------------------
+    _move: ($child, position) ->
+      $child.css(position)
+
+
+    # ----------------------------------------------
     # getPositions:
     #
     # Iterate over all of the children and
     # calculate/save their x/y positions
-    # --------------------------------------------
+    # ----------------------------------------------
     _getPositions: ->
       children = @children
       col_width = @grid.col_width
@@ -312,39 +357,39 @@
       return positions
 
 
-    # --------------------------------------------
+    # ----------------------------------------------
     # lowestCol:
     #
     # Return the index position of the lowest
     # number from within a given array
     #
     # array: The array to process
-    # --------------------------------------------
+    # ----------------------------------------------
     lowestCol: (array) ->
       $.inArray Math.min.apply(window,array), array
 
 
-    # --------------------------------------------
+    # ----------------------------------------------
     # highestCol:
     #
     # Return the index position of the highest
     # number from within a given array
     #
     # array: The array to process
-    # --------------------------------------------
+    # ----------------------------------------------
     highestCol: (array) ->
       array[$.inArray Math.max.apply(window,array), array]
 
 
-    # --------------------------------------------------------------------
-    # ---------------------------- Features ------------------------------
-    # --------------------------------------------------------------------
+    # ----------------------------------------------------------------------
+    # ----------------------------- Features -------------------------------
+    # ----------------------------------------------------------------------
 
-    # --------------------------------------------
+    # ----------------------------------------------
     # enableResize:
     #
     # Arrange the grid upon resizing the window
-    # --------------------------------------------
+    # ----------------------------------------------
     enableResize: ->
       resizing = false
 
@@ -364,9 +409,9 @@
             resizing = false
           , speed * 1.1
 
-  # --------------------------------------------------------------------
-  # ----------------------- Dirty Initialization -----------------------
-  # --------------------------------------------------------------------
+  # ----------------------------------------------------------------------
+  # ------------------------ Dirty Initialization ------------------------
+  # ----------------------------------------------------------------------
   $.fn[pluginName] = (options) ->
     args = arguments
     scoped_name = "plugin_" + pluginName

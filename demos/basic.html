@@ -31,7 +31,7 @@
     }
 
     .default_state {
-      transition: all .2s;
+      transition: all 1.2s;
     }
 
     .container > .ss-placeholder-child {
@@ -52,13 +52,13 @@
       $newDiv = $("<div></div>")
       newDivs = []
 
-      for(var i=0;i<10;i++) {
+      for(var i=0;i<200;i++) {
         newDivs.push([$newDiv.clone().text(i), 5])
       }
 
       setTimeout(function() {
         $(".container").first().shapeshift('insertMany', newDivs);
-      }, 400)
+      }, 5000)
     })
   </script>
 </head>
