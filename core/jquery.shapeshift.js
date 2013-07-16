@@ -13,20 +13,18 @@
           animated: true,
           animateSpeed: 200,
           staggerInit: true,
-          staggerSpeed: 50,
+          staggerSpeed: 100,
           grid: {
             align: 'center',
             columns: null,
             colWidth: null,
-            gutter: [10, 10]
+            gutter: [20, 10]
           },
           init_style: {
-            background: "black",
             opacity: 0,
             transform: 'rotateY(180deg) rotateX(180deg)'
           },
           style: {
-            background: "red",
             opacity: 1,
             transform: 'rotateY(0deg) rotateX(0deg)'
           }
@@ -145,6 +143,7 @@
       _arrange: function() {
         var $child, child, child_count, children, i, init_position, init_style, initialize, position, position_string, positions, stagger_init, stagger_queue, stagger_speed, state_style, _i;
         this._clearStaggerQueue();
+        positions = this._getPositions();
         children = this.children;
         child_count = children.length;
         state_style = this.state.style;
@@ -152,7 +151,6 @@
         stagger_speed = this.state.staggerSpeed;
         stagger_init = this.state.staggerInit;
         stagger_queue = [];
-        positions = this._getPositions();
         this.$container.css({
           height: this.grid.height
         });
@@ -182,28 +180,6 @@
         }
         return this;
       },
-      _staggerMove: function(stagger_queue) {
-        var delay, i, state_class,
-          _this = this;
-        state_class = this.state["class"];
-        delay = this.state.staggerSpeed;
-        i = 0;
-        this.stagger_queue = stagger_queue;
-        return this.stagger_interval = setInterval(function() {
-          var $child, child, position;
-          child = stagger_queue[i];
-          if (child) {
-            $child = child[0];
-            position = child[1];
-            $child.addClass(state_class);
-            _this._move($child, position);
-            return i++;
-          } else {
-            clearInterval(_this.stagger_interval);
-            return _this.stagger_interval = null;
-          }
-        }, delay);
-      },
       _clearStaggerQueue: function() {
         var $child, child, child_count, i, position, stagger_queue, state_class, _i;
         clearInterval(this.stagger_interval);
@@ -214,13 +190,56 @@
           state_class = this.state["class"];
           for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
             child = stagger_queue[i];
-            $child = child[0];
-            position = child[1];
-            $child.addClass(state_class);
-            this._move($child, position);
+            if (child) {
+              $child = child[0];
+              position = child[1];
+              $child.addClass(state_class);
+              this._move($child, position);
+            }
           }
           return this.stagger_queue = [];
         }
+      },
+      _staggerMove: function(stagger_queue) {
+        var $child, child, child_count, i, position, state_class, _i, _results,
+          _this = this;
+        state_class = this.state["class"];
+        if (this.state.staggerInit) {
+          i = 0;
+          this.stagger_queue = stagger_queue;
+          return this.stagger_interval = setInterval(function() {
+            var $child, child, position;
+            child = stagger_queue[i];
+            if (child) {
+              $child = child[0];
+              position = child[1];
+              $child.addClass(state_class);
+              _this._move($child, position);
+              _this.stagger_queue[i] = null;
+              return i++;
+            } else {
+              clearInterval(_this.stagger_interval);
+              return _this.stagger_interval = null;
+            }
+          }, this.state.staggerSpeed);
+        } else {
+          child_count = stagger_queue.length;
+          _results = [];
+          for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
+            child = stagger_queue[i];
+            $child = child[0];
+            position = child[1];
+            _results.push(this._staggerTimeout($child, position, state_class));
+          }
+          return _results;
+        }
+      },
+      _staggerTimeout: function($child, position, state_class) {
+        var _this = this;
+        return setTimeout(function() {
+          $child.addClass(state_class);
+          return _this._move($child, position);
+        }, 0);
       },
       _move: function($child, position) {
         return $child.css(position);

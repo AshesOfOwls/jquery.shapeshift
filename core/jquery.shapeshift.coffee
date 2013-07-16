@@ -24,21 +24,19 @@
         animateSpeed: 200
 
         staggerInit: true
-        staggerSpeed: 50
+        staggerSpeed: 100
 
         grid:
           align: 'center'
           columns: null
           colWidth: null
-          gutter: [10, 10]
+          gutter: [20, 10]
 
         init_style:
-          background: "black"
           opacity: 0
           transform: 'rotateY(180deg) rotateX(180deg)'
           
         style:
-          background: "red"
           opacity: 1
           transform: 'rotateY(0deg) rotateX(0deg)'
 
@@ -238,6 +236,8 @@
     _arrange: ->
       @_clearStaggerQueue()
 
+      positions = @_getPositions()
+
       children = @children
       child_count = children.length
 
@@ -247,8 +247,6 @@
       stagger_speed = @state.staggerSpeed
       stagger_init = @state.staggerInit
       stagger_queue = []
-
-      positions = @_getPositions()
 
       # Animate the container to the appropriate height
       @$container.css height: @grid.height
@@ -286,43 +284,6 @@
 
 
     # ----------------------------------------------
-    # staggerMove:
-    #
-    # Uses a delay to move a child into position.
-    # Also useful for a 0 delay right after child
-    # initialization to compensate for the removal
-    # of CSS transitions.
-    #
-    # stagger_queue: An array containing the child
-    #                elements and the positions they
-    #                will be arranged to, e.g.:
-    #       [[$child, position], [$child, position]]
-    # ----------------------------------------------
-    _staggerMove: (stagger_queue) ->
-      state_class = @state.class
-      delay = @state.staggerSpeed
-
-      i = 0
-      @stagger_queue = stagger_queue
-      @stagger_interval = setInterval =>
-        child = stagger_queue[i]
-
-        if child
-          $child = child[0]
-          position = child[1]
-
-          $child.addClass(state_class)
-          @_move($child, position)
-
-          i++
-        else
-          clearInterval(@stagger_interval)
-          @stagger_interval = null
-
-      , delay
-
-
-    # ----------------------------------------------
     # clearStaggerQueue:
     #
     # If items are being staggered and another
@@ -345,13 +306,83 @@
         for i in [0...child_count]
           child = stagger_queue[i]
 
+          if child
+            $child = child[0]
+            position = child[1]
+
+            $child.addClass(state_class)
+            @_move($child, position)
+
+        @stagger_queue = []
+
+
+    # ----------------------------------------------
+    # staggerMove:
+    #
+    # Uses a delay to move a child into position.
+    # Also useful for a 0 delay right after child
+    # initialization to compensate for the removal
+    # of CSS transitions.
+    #
+    # stagger_queue: An array containing the child
+    #                elements and the positions they
+    #                will be arranged to, e.g.:
+    #       [[$child, position], [$child, position]]
+    # ----------------------------------------------
+    _staggerMove: (stagger_queue) ->
+      state_class = @state.class
+
+      if @state.staggerInit
+        i = 0
+        @stagger_queue = stagger_queue
+        @stagger_interval = setInterval =>
+          child = stagger_queue[i]
+
+          if child
+            $child = child[0]
+            position = child[1]
+
+            $child.addClass(state_class)
+            @_move($child, position)
+
+            # Prevent rearrangement when clearing queue
+            @stagger_queue[i] = null
+
+            i++
+          else
+            clearInterval(@stagger_interval)
+            @stagger_interval = null
+
+        , @state.staggerSpeed
+      else
+        child_count = stagger_queue.length
+        for i in [0...child_count]
+          child = stagger_queue[i]
           $child = child[0]
           position = child[1]
 
-          $child.addClass(state_class)
-          @_move($child, position)
+          @_staggerTimeout($child, position, state_class)
 
-        @stagger_queue = []
+
+    # ----------------------------------------------
+    # staggerTimeout:
+    #
+    # A special use case for when initializing items
+    # that aren't supossed to be staggered. They
+    # have to be put through a setTimeout of time 0
+    # because it allows for the initialization style
+    # to be fully added before arranging to the
+    # state style.
+    #
+    # $child:        The element to be moved
+    # position:      The hash of CSS attributes
+    # state_class:   The class of the current state
+    # ----------------------------------------------
+    _staggerTimeout: ($child, position, state_class) ->
+      setTimeout =>
+        $child.addClass(state_class)
+        @_move($child, position)
+      , 0
 
     # ----------------------------------------------
     # move:
