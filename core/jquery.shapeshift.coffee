@@ -22,7 +22,6 @@
 
         animated: false
         animateSpeed: 100
-        transitionsClass: 'default_state'
 
         staggerInit: true
         staggerSpeed: 20
@@ -33,16 +32,12 @@
           colWidth: null
           gutter: [10, 10]
 
-        initStyle:
-          opacity: 0
-          
-        style:
-          opacity: 1
+        initClass: 'default_init'
+        normalClass: 'default'
 
-      other:
+      secondary:
         animated: true
         animateSpeed: 100
-        transitionsClass: 'other_state'
 
         grid:
           align: 'center'
@@ -50,12 +45,7 @@
           colWidth: null
           gutter: [20, 10]
 
-        initStyle:
-          opacity: 0
-          
-        style:
-          background: 'blue'
-          opacity: 1
+        normalClass: 'secondary'
 
   Plugin = (element, options) ->
     @options = $.extend({}, defaults, options)
@@ -67,13 +57,12 @@
     @stagger_queue = []
     @stagger_interval = null
 
-    @state = null
+    @state = @options.states[@options.state]
 
     @init()
 
   Plugin:: =
     init: ->
-      @_setState()
       @_enableFeatures()
       @_parseChildren()
       @_initializeGrid()
@@ -131,7 +120,11 @@
       state = @options.states[state_name]
 
       if state
-        @_setState(state_name)
+        for child in @children
+          child.el.removeClass(@state.normalClass)
+        @state = state
+        for child in @children
+          child.el.addClass(@state.normalClass)
         @_arrange()
       else
         console.error("Shapeshift does not recognize the state '#{state_name}', are you sure it's defined?")
@@ -147,23 +140,6 @@
     # ----------------------------------------------
     _enableFeatures: ->
       @enableResize() if @options.enableResize
-
-
-    # ----------------------------------------------
-    # setState:
-    # Change the currently active state
-    # ----------------------------------------------
-    _setState: (state = @options.state) ->
-      if @state
-        # Clear the old state
-        @$container.find("." + @state.transitionsClass).removeClass(@state.transitionsClass)
-        add_classes = true
-
-      @state = @options.states[state]
-
-      if add_classes
-        for child in @children
-          child.el.addClass(@state.transitionsClass)
 
 
     # ----------------------------------------------
@@ -276,8 +252,8 @@
 
       positions = @_getPositions()
 
-      state_style = @state.style
-      init_style = @state.initStyle
+      init_class = @state.initClass
+      normal_class = @state.normalClass
 
       stagger_speed = @state.staggerSpeed
       stagger_init = @state.staggerInit
@@ -295,12 +271,10 @@
 
         if initialize
           # Assign initialization style
-          init_position = $.extend({}, position, init_style)
-          $child.css(init_position)
+          $child.addClass(init_class)
           child.initialized = true
 
         # Animate only if necessary
-        $.extend(position, state_style)
         position_string = JSON.stringify(position)
         if position_string isnt child.position
           if initialize
@@ -332,14 +306,12 @@
       @stagger_interval = null
 
       stagger_queue = @stagger_queue
-      state_class = @state.transitionsClass
 
       for child in stagger_queue
         if child
           $child = child[0]
           position = child[1]
 
-          $child.addClass(state_class)
           @_move($child, position)
 
       @stagger_queue = []
@@ -359,8 +331,6 @@
     #       [[$child, position], [$child, position]]
     # ----------------------------------------------
     _staggerMove: (stagger_queue) ->
-      state_class = @state.transitionsClass
-
       if @state.staggerInit
         i = 0
         @stagger_queue = stagger_queue
@@ -371,7 +341,6 @@
             $child = child[0]
             position = child[1]
 
-            $child.addClass(state_class)
             @_move($child, position)
 
             # Prevent rearrangement when clearing queue
@@ -388,7 +357,7 @@
           $child = child[0]
           position = child[1]
 
-          @_staggerTimeout($child, position, state_class)
+          @_staggerTimeout($child, position)
 
 
     # ----------------------------------------------
@@ -403,11 +372,9 @@
     #
     # $child:        The element to be moved
     # position:      The hash of CSS attributes
-    # state_class:   The class of the current state
     # ----------------------------------------------
-    _staggerTimeout: ($child, position, state_class) ->
+    _staggerTimeout: ($child, position) ->
       setTimeout =>
-        $child.addClass(state_class)
         @_move($child, position)
       , 0
 
@@ -421,6 +388,9 @@
     # ----------------------------------------------
     _move: ($child, position) ->
       $child.css(position)
+      setTimeout =>
+        $child.addClass(@state.normalClass).removeClass(@state.initClass)
+      , 0
 
 
     # ----------------------------------------------

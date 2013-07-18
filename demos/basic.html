@@ -23,32 +23,29 @@
     }
 
     .container > div {
-      background: #AAA;
       position: absolute;
       height: 100px;
       width: 100px;
 
     }
 
-    .default_state {
-      background: 'red'
-      opacity: 1
-      transform: 'rotateX(0deg)'
-      transition: all .4s;
-    }
-
-    .default_init_state {
-      background: 'orange'
-      opacity: 0
-      transform: 'rotateX(180deg)'
-      transition: all .4s;
-    }
-
-    .other_state {
-      background: blue !important;
-      background: 'blue';
+    .default {
+      background: red;
       opacity: 1;
-      -webkit-transform: scale(2) !important;
+      -webkit-transform: rotateX(0deg);
+      transition: all .4s;
+    }
+
+    .default_init {
+      background: orange;
+      opacity: 0;
+      -webkit-transform: rotateX(180deg);
+    }
+
+    .secondary {
+      background: blue;
+      opacity: 1;
+      -webkit-transform: scale(2);
       transition: all 3s;
     }
 
@@ -66,7 +63,7 @@
       $newDiv = $("<div></div>")
       newDivs = []
 
-      for(var i=0;i<50;i++) {
+      for(var i=0;i<40;i++) {
         newDivs.push([$newDiv.clone().text(i), 9 + i * 2])
       }
 

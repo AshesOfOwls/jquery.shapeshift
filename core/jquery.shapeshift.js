@@ -13,7 +13,6 @@
         "default": {
           animated: false,
           animateSpeed: 100,
-          transitionsClass: 'default_state',
           staggerInit: true,
           staggerSpeed: 20,
           grid: {
@@ -22,30 +21,19 @@
             colWidth: null,
             gutter: [10, 10]
           },
-          initStyle: {
-            opacity: 0
-          },
-          style: {
-            opacity: 1
-          }
+          initClass: 'default_init',
+          normalClass: 'default'
         },
-        other: {
+        secondary: {
           animated: true,
           animateSpeed: 100,
-          transitionsClass: 'other_state',
           grid: {
             align: 'center',
             columns: null,
             colWidth: null,
             gutter: [20, 10]
           },
-          initStyle: {
-            opacity: 0
-          },
-          style: {
-            background: 'blue',
-            opacity: 1
-          }
+          normalClass: 'secondary'
         }
       }
     };
@@ -56,12 +44,11 @@
       this.children = [];
       this.stagger_queue = [];
       this.stagger_interval = null;
-      this.state = null;
+      this.state = this.options.states[this.options.state];
       return this.init();
     };
     Plugin.prototype = {
       init: function() {
-        this._setState();
         this._enableFeatures();
         this._parseChildren();
         this._initializeGrid();
@@ -89,10 +76,20 @@
         return this._arrange();
       },
       setState: function(state_name) {
-        var state;
+        var child, state, _i, _j, _len, _len1, _ref, _ref1;
         state = this.options.states[state_name];
         if (state) {
-          this._setState(state_name);
+          _ref = this.children;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            child = _ref[_i];
+            child.el.removeClass(this.state.normalClass);
+          }
+          this.state = state;
+          _ref1 = this.children;
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            child = _ref1[_j];
+            child.el.addClass(this.state.normalClass);
+          }
           return this._arrange();
         } else {
           return console.error("Shapeshift does not recognize the state '" + state_name + "', are you sure it's defined?");
@@ -101,26 +98,6 @@
       _enableFeatures: function() {
         if (this.options.enableResize) {
           return this.enableResize();
-        }
-      },
-      _setState: function(state) {
-        var add_classes, child, _i, _len, _ref, _results;
-        if (state == null) {
-          state = this.options.state;
-        }
-        if (this.state) {
-          this.$container.find("." + this.state.transitionsClass).removeClass(this.state.transitionsClass);
-          add_classes = true;
-        }
-        this.state = this.options.states[state];
-        if (add_classes) {
-          _ref = this.children;
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            child = _ref[_i];
-            _results.push(child.el.addClass(this.state.transitionsClass));
-          }
-          return _results;
         }
       },
       _parseChildren: function() {
@@ -183,14 +160,14 @@
         return this.grid.child_offset = child_offset;
       },
       _arrange: function() {
-        var $child, child, i, init_position, init_style, initialize, position, position_string, positions, stagger_init, stagger_queue, stagger_speed, state_style, _i, _len, _ref;
+        var $child, child, i, init_class, initialize, normal_class, position, position_string, positions, stagger_init, stagger_queue, stagger_speed, _i, _len, _ref;
         console.time("arrange");
         if (this.stagger_queue.length) {
           this._clearStaggerQueue();
         }
         positions = this._getPositions();
-        state_style = this.state.style;
-        init_style = this.state.initStyle;
+        init_class = this.state.initClass;
+        normal_class = this.state.normalClass;
         stagger_speed = this.state.staggerSpeed;
         stagger_init = this.state.staggerInit;
         stagger_queue = [];
@@ -204,11 +181,9 @@
           initialize = !child.initialized;
           position = positions[i];
           if (initialize) {
-            init_position = $.extend({}, position, init_style);
-            $child.css(init_position);
+            $child.addClass(init_class);
             child.initialized = true;
           }
-          $.extend(position, state_style);
           position_string = JSON.stringify(position);
           if (position_string !== child.position) {
             if (initialize) {
@@ -226,26 +201,23 @@
         return this;
       },
       _clearStaggerQueue: function() {
-        var $child, child, position, stagger_queue, state_class, _i, _len;
+        var $child, child, position, stagger_queue, _i, _len;
         clearInterval(this.stagger_interval);
         this.stagger_interval = null;
         stagger_queue = this.stagger_queue;
-        state_class = this.state.transitionsClass;
         for (_i = 0, _len = stagger_queue.length; _i < _len; _i++) {
           child = stagger_queue[_i];
           if (child) {
             $child = child[0];
             position = child[1];
-            $child.addClass(state_class);
             this._move($child, position);
           }
         }
         return this.stagger_queue = [];
       },
       _staggerMove: function(stagger_queue) {
-        var $child, child, i, position, state_class, _i, _len, _results,
+        var $child, child, i, position, _i, _len, _results,
           _this = this;
-        state_class = this.state.transitionsClass;
         if (this.state.staggerInit) {
           i = 0;
           this.stagger_queue = stagger_queue;
@@ -255,7 +227,6 @@
             if (child) {
               $child = child[0];
               position = child[1];
-              $child.addClass(state_class);
               _this._move($child, position);
               _this.stagger_queue[i] = null;
               return i++;
@@ -270,20 +241,23 @@
             child = stagger_queue[_i];
             $child = child[0];
             position = child[1];
-            _results.push(this._staggerTimeout($child, position, state_class));
+            _results.push(this._staggerTimeout($child, position));
           }
           return _results;
         }
       },
-      _staggerTimeout: function($child, position, state_class) {
+      _staggerTimeout: function($child, position) {
         var _this = this;
         return setTimeout(function() {
-          $child.addClass(state_class);
           return _this._move($child, position);
         }, 0);
       },
       _move: function($child, position) {
-        return $child.css(position);
+        var _this = this;
+        $child.css(position);
+        return setTimeout(function() {
+          return $child.addClass(_this.state.normalClass).removeClass(_this.state.initClass);
+        }, 0);
       },
       _getPositions: function() {
         var child, col, col_heights, col_width, gutter_y, i, offset_left, padding_top, positions, _i, _j, _len, _ref, _ref1;
