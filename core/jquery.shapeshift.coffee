@@ -4,6 +4,8 @@
 #  Author: Scott Elwood
 #  Maintained By: We the Media, inc.
 #  License: MIT
+#
+#  Version: 3.0
 # ----------------------------------------------------------------------
 
 (($, window, document, undefined_) ->
@@ -24,16 +26,17 @@
         animateSpeed: 100
 
         staggerInit: true
-        staggerSpeed: 20
+        staggerSpeed: 1
 
         grid:
           align: 'center'
           columns: null
           colWidth: null
           gutter: [10, 10]
+          padding: [50, 50]
 
-        initClass: 'default_init'
-        normalClass: 'default'
+        class: 'default'
+        initClass: 'init'
 
       secondary:
         animated: true
@@ -43,9 +46,11 @@
           align: 'center'
           columns: null
           colWidth: null
-          gutter: [20, 10]
+          gutter: [10, 10]
+          padding: [400, 20]
 
-        normalClass: 'secondary'
+        class: 'secondary'
+        initClass: 'init'
 
   Plugin = (element, options) ->
     @options = $.extend({}, defaults, options)
@@ -121,13 +126,31 @@
 
       if state
         for child in @children
-          child.el.removeClass(@state.normalClass)
+          child.el.removeClass(@state.class).addClass(state.class)
         @state = state
-        for child in @children
-          child.el.addClass(@state.normalClass)
+        @_initializeGrid()
         @_arrange()
       else
         console.error("Shapeshift does not recognize the state '#{state_name}', are you sure it's defined?")
+
+
+    # ----------------------------------------------
+    # shuffle:
+    # Randomize the position of each item
+    # https://gist.github.com/ddgromit/859699
+    # ----------------------------------------------
+    shuffle: ->
+      a = @children
+
+      i = a.length
+      while --i > 0
+          j = ~~(Math.random() * (i + 1))
+          t = a[j]
+          a[j] = a[i]
+          a[i] = t
+
+      @children = a
+      @_arrange()
 
 
     # ----------------------------------------------------------------------
@@ -198,10 +221,8 @@
         @grid.col_width = single_width + gutter_x
 
       # Get the grid padding via CSS 
-      @grid.padding_left = parseInt @$container.css("padding-left")
-      @grid.padding_right = parseInt @$container.css("padding-right")
-      @grid.padding_top = parseInt @$container.css("padding-top")
-      @grid.padding_bottom = parseInt @$container.css("padding-bottom")
+      @grid.paddingX = grid_state.padding[0]
+      @grid.paddingY = grid_state.padding[1]
 
       @_calculateGrid()
 
@@ -216,10 +237,11 @@
     _calculateGrid: ->
       grid_state = @state.grid
       col_width = @grid.col_width
+      padding_x = grid_state.padding[0]
 
       # Determine how many columns can exist
-      container_inner_width = @$container.width()
-      columns = grid_state.columns || Math.floor container_inner_width / col_width
+      container_width = @$container.innerWidth() - (padding_x * 2)
+      columns = grid_state.columns || Math.floor container_width / col_width
 
       # The columns cannot outnumber the children
       columns = @children.length if columns > @children.length
@@ -227,15 +249,15 @@
       @grid.columns = columns
 
       # Determine the left offset of children
-      child_offset = @grid.padding_left
+      child_offset = @grid.paddingX
 
       grid_width = (columns * col_width) - grid_state.gutter[0]
       switch grid_state.align
         when "center"
-          child_offset += (container_inner_width - grid_width) / 2
+          child_offset += (container_width - grid_width) / 2
 
         when "right"
-          child_offset += (container_inner_width - grid_width)
+          child_offset += (container_width - grid_width)
 
       @grid.child_offset = child_offset
 
@@ -247,13 +269,12 @@
     # and arranges them to those positions
     # ----------------------------------------------
     _arrange: ->
-      console.time("arrange")
       @_clearStaggerQueue() if @stagger_queue.length
 
       positions = @_getPositions()
 
       init_class = @state.initClass
-      normal_class = @state.normalClass
+      normal_class = @state.class
 
       stagger_speed = @state.staggerSpeed
       stagger_init = @state.staggerInit
@@ -287,7 +308,6 @@
       
       @_staggerMove(stagger_queue) if stagger_queue.length
 
-      console.timeEnd("arrange")
       @
 
 
@@ -389,7 +409,7 @@
     _move: ($child, position) ->
       $child.css(position)
       setTimeout =>
-        $child.addClass(@state.normalClass).removeClass(@state.initClass)
+        $child.addClass(@state.class).removeClass(@state.initClass)
       , 0
 
 
@@ -402,11 +422,11 @@
     _getPositions: ->
       col_width = @grid.col_width
       gutter_y = @state.grid.gutter[1]
-      padding_top = @grid.padding_top
+      padding_y = @grid.paddingY
 
       # Array that stores the height of each column
       col_heights = []
-      col_heights.push padding_top for i in [0...@grid.columns]
+      col_heights.push padding_y for i in [0...@grid.columns]
 
       # Go over each child and determine its position
       positions = []
@@ -421,7 +441,7 @@
         col_heights[col] += child.height + gutter_y
 
       # Store the height of the grid
-      @grid.height = @highestCol(col_heights) - gutter_y - padding_top
+      @grid.height = @highestCol(col_heights) - gutter_y + padding_y
 
       return positions
 

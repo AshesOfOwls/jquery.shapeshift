@@ -14,15 +14,16 @@
           animated: false,
           animateSpeed: 100,
           staggerInit: true,
-          staggerSpeed: 20,
+          staggerSpeed: 1,
           grid: {
             align: 'center',
             columns: null,
             colWidth: null,
-            gutter: [10, 10]
+            gutter: [10, 10],
+            padding: [50, 50]
           },
-          initClass: 'default_init',
-          normalClass: 'default'
+          "class": 'default',
+          initClass: 'init'
         },
         secondary: {
           animated: true,
@@ -31,9 +32,11 @@
             align: 'center',
             columns: null,
             colWidth: null,
-            gutter: [20, 10]
+            gutter: [10, 10],
+            padding: [400, 20]
           },
-          normalClass: 'secondary'
+          "class": 'secondary',
+          initClass: 'init'
         }
       }
     };
@@ -76,24 +79,33 @@
         return this._arrange();
       },
       setState: function(state_name) {
-        var child, state, _i, _j, _len, _len1, _ref, _ref1;
+        var child, state, _i, _len, _ref;
         state = this.options.states[state_name];
         if (state) {
           _ref = this.children;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             child = _ref[_i];
-            child.el.removeClass(this.state.normalClass);
+            child.el.removeClass(this.state["class"]).addClass(state["class"]);
           }
           this.state = state;
-          _ref1 = this.children;
-          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-            child = _ref1[_j];
-            child.el.addClass(this.state.normalClass);
-          }
+          this._initializeGrid();
           return this._arrange();
         } else {
           return console.error("Shapeshift does not recognize the state '" + state_name + "', are you sure it's defined?");
         }
+      },
+      shuffle: function() {
+        var a, i, j, t;
+        a = this.children;
+        i = a.length;
+        while (--i > 0) {
+          j = ~~(Math.random() * (i + 1));
+          t = a[j];
+          a[j] = a[i];
+          a[i] = t;
+        }
+        this.children = a;
+        return this._arrange();
       },
       _enableFeatures: function() {
         if (this.options.enableResize) {
@@ -132,42 +144,40 @@
           single_width = (fc_width - ((fc_colspan - 1) * gutter_x)) / fc_colspan;
           this.grid.col_width = single_width + gutter_x;
         }
-        this.grid.padding_left = parseInt(this.$container.css("padding-left"));
-        this.grid.padding_right = parseInt(this.$container.css("padding-right"));
-        this.grid.padding_top = parseInt(this.$container.css("padding-top"));
-        this.grid.padding_bottom = parseInt(this.$container.css("padding-bottom"));
+        this.grid.paddingX = grid_state.padding[0];
+        this.grid.paddingY = grid_state.padding[1];
         return this._calculateGrid();
       },
       _calculateGrid: function() {
-        var child_offset, col_width, columns, container_inner_width, grid_state, grid_width;
+        var child_offset, col_width, columns, container_width, grid_state, grid_width, padding_x;
         grid_state = this.state.grid;
         col_width = this.grid.col_width;
-        container_inner_width = this.$container.width();
-        columns = grid_state.columns || Math.floor(container_inner_width / col_width);
+        padding_x = grid_state.padding[0];
+        container_width = this.$container.innerWidth() - (padding_x * 2);
+        columns = grid_state.columns || Math.floor(container_width / col_width);
         if (columns > this.children.length) {
           columns = this.children.length;
         }
         this.grid.columns = columns;
-        child_offset = this.grid.padding_left;
+        child_offset = this.grid.paddingX;
         grid_width = (columns * col_width) - grid_state.gutter[0];
         switch (grid_state.align) {
           case "center":
-            child_offset += (container_inner_width - grid_width) / 2;
+            child_offset += (container_width - grid_width) / 2;
             break;
           case "right":
-            child_offset += container_inner_width - grid_width;
+            child_offset += container_width - grid_width;
         }
         return this.grid.child_offset = child_offset;
       },
       _arrange: function() {
         var $child, child, i, init_class, initialize, normal_class, position, position_string, positions, stagger_init, stagger_queue, stagger_speed, _i, _len, _ref;
-        console.time("arrange");
         if (this.stagger_queue.length) {
           this._clearStaggerQueue();
         }
         positions = this._getPositions();
         init_class = this.state.initClass;
-        normal_class = this.state.normalClass;
+        normal_class = this.state["class"];
         stagger_speed = this.state.staggerSpeed;
         stagger_init = this.state.staggerInit;
         stagger_queue = [];
@@ -197,7 +207,6 @@
         if (stagger_queue.length) {
           this._staggerMove(stagger_queue);
         }
-        console.timeEnd("arrange");
         return this;
       },
       _clearStaggerQueue: function() {
@@ -256,17 +265,17 @@
         var _this = this;
         $child.css(position);
         return setTimeout(function() {
-          return $child.addClass(_this.state.normalClass).removeClass(_this.state.initClass);
+          return $child.addClass(_this.state["class"]).removeClass(_this.state.initClass);
         }, 0);
       },
       _getPositions: function() {
-        var child, col, col_heights, col_width, gutter_y, i, offset_left, padding_top, positions, _i, _j, _len, _ref, _ref1;
+        var child, col, col_heights, col_width, gutter_y, i, offset_left, padding_y, positions, _i, _j, _len, _ref, _ref1;
         col_width = this.grid.col_width;
         gutter_y = this.state.grid.gutter[1];
-        padding_top = this.grid.padding_top;
+        padding_y = this.grid.paddingY;
         col_heights = [];
         for (i = _i = 0, _ref = this.grid.columns; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-          col_heights.push(padding_top);
+          col_heights.push(padding_y);
         }
         positions = [];
         offset_left = this.grid.child_offset;
@@ -280,7 +289,7 @@
           });
           col_heights[col] += child.height + gutter_y;
         }
-        this.grid.height = this.highestCol(col_heights) - gutter_y - padding_top;
+        this.grid.height = this.highestCol(col_heights) - gutter_y + padding_y;
         return positions;
       },
       lowestCol: function(array) {

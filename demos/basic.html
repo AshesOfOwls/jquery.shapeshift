@@ -18,7 +18,6 @@
   <style>
     .container {
       border: 1px dashed #CCC;
-      padding: 40px;
       position: relative;
     }
 
@@ -36,8 +35,9 @@
       transition: all .4s;
     }
 
-    .default_init {
+    .init {
       background: orange;
+      margin-top: -150px;
       opacity: 0;
       -webkit-transform: rotateX(180deg);
     }
@@ -45,8 +45,8 @@
     .secondary {
       background: blue;
       opacity: 1;
-      -webkit-transform: scale(2);
-      transition: all 3s;
+      -webkit-transform: scale(.7);
+      transition: all .1s;
     }
 
     .container > .ss-placeholder-child {
@@ -63,7 +63,7 @@
       $newDiv = $("<div></div>")
       newDivs = []
 
-      for(var i=0;i<40;i++) {
+      for(var i=0;i<1000;i++) {
         newDivs.push([$newDiv.clone().text(i), 9 + i * 2])
       }
 
