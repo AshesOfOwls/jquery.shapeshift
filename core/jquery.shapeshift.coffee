@@ -15,7 +15,7 @@
     # Features
     enableResize: true
     resizeRate: 300
-    cssAnimations: false
+    cssAnimations: true
 
     # States
     state: 'default'
@@ -26,7 +26,7 @@
         animateSpeed: 100
 
         staggerInit: true
-        staggerSpeed: 1
+        staggerSpeed: 5
 
         grid:
           align: 'center'
@@ -47,7 +47,7 @@
           columns: null
           colWidth: null
           gutter: [10, 10]
-          padding: [400, 20]
+          padding: [50, 50]
 
         class: 'secondary'
         initClass: 'init'
@@ -125,8 +125,15 @@
       state = @options.states[state_name]
 
       if state
+        cssAnimations = @options.cssAnimations
+        old_state_class = @state.class
+        new_state_class = state.class
+
         for child in @children
-          child.el.removeClass(@state.class).addClass(state.class)
+          if cssAnimations
+            child.el.removeClass(old_state_class).addClass(new_state_class)
+          else
+            child.el.switchClass(old_state_class, new_state_class, @options.animateSpeed)
         @state = state
         @_initializeGrid()
         @_arrange()
@@ -245,6 +252,7 @@
 
       # The columns cannot outnumber the children
       columns = @children.length if columns > @children.length
+      columns = 1 if columns < 1
 
       @grid.columns = columns
 
@@ -332,7 +340,7 @@
           $child = child[0]
           position = child[1]
 
-          @_move($child, position)
+          @_move($child, position, true)
 
       @stagger_queue = []
 
@@ -361,7 +369,7 @@
             $child = child[0]
             position = child[1]
 
-            @_move($child, position)
+            @_move($child, position, true)
 
             # Prevent rearrangement when clearing queue
             @stagger_queue[i] = null
@@ -395,7 +403,7 @@
     # ----------------------------------------------
     _staggerTimeout: ($child, position) ->
       setTimeout =>
-        @_move($child, position)
+        @_move($child, position, true)
       , 0
 
     # ----------------------------------------------
@@ -406,11 +414,26 @@
     # $child:      The element to be moved
     # position:    The hash of CSS attributes
     # ----------------------------------------------
-    _move: ($child, position) ->
-      $child.css(position)
-      setTimeout =>
-        $child.addClass(@state.class).removeClass(@state.initClass)
-      , 0
+    _move: ($child, position, initialize_state = false) ->
+      css_animations = @options.cssAnimations
+
+      if css_animations
+        console.log("dot css")
+        $child.css(position)
+      else
+        console.log("dot animate")
+        animate_speed = @options.animateSpeed
+        $child.stop(true, false).animate(position, animate_speed)
+
+      if initialize_state
+        setTimeout =>
+          if css_animations
+            # CSS Transitions
+            $child.addClass(@state.class).removeClass(@state.initClass)
+          else
+            # jQuery Transitions
+            $child.switchClass(@state.initClass, @state.class, animate_speed)
+        , 0
 
 
     # ----------------------------------------------

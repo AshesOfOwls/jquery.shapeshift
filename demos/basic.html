@@ -39,14 +39,13 @@
       background: orange;
       margin-top: -150px;
       opacity: 0;
-      -webkit-transform: rotateX(180deg);
+      -webkit-transform: scale(0,0);
     }
 
     .secondary {
       background: blue;
       opacity: 1;
-      -webkit-transform: scale(.7);
-      transition: all .1s;
+      transition: all 1s;
     }
 
     .container > .ss-placeholder-child {
@@ -63,13 +62,13 @@
       $newDiv = $("<div></div>")
       newDivs = []
 
-      for(var i=0;i<1000;i++) {
+      for(var i=0;i<100;i++) {
         newDivs.push([$newDiv.clone().text(i), 9 + i * 2])
       }
 
       setTimeout(function() {
         $(".container").first().shapeshift('insertMany', newDivs);
-      }, 800)
+      }, 1200)
     })
   </script>
 </head>

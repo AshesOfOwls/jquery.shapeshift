@@ -7,14 +7,14 @@
     defaults = {
       enableResize: true,
       resizeRate: 300,
-      cssAnimations: false,
+      cssAnimations: true,
       state: 'default',
       states: {
         "default": {
           animated: false,
           animateSpeed: 100,
           staggerInit: true,
-          staggerSpeed: 1,
+          staggerSpeed: 5,
           grid: {
             align: 'center',
             columns: null,
@@ -33,7 +33,7 @@
             columns: null,
             colWidth: null,
             gutter: [10, 10],
-            padding: [400, 20]
+            padding: [50, 50]
           },
           "class": 'secondary',
           initClass: 'init'
@@ -79,13 +79,20 @@
         return this._arrange();
       },
       setState: function(state_name) {
-        var child, state, _i, _len, _ref;
+        var child, cssAnimations, new_state_class, old_state_class, state, _i, _len, _ref;
         state = this.options.states[state_name];
         if (state) {
+          cssAnimations = this.options.cssAnimations;
+          old_state_class = this.state["class"];
+          new_state_class = state["class"];
           _ref = this.children;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             child = _ref[_i];
-            child.el.removeClass(this.state["class"]).addClass(state["class"]);
+            if (cssAnimations) {
+              child.el.removeClass(old_state_class).addClass(new_state_class);
+            } else {
+              child.el.switchClass(old_state_class, new_state_class, this.options.animateSpeed);
+            }
           }
           this.state = state;
           this._initializeGrid();
@@ -158,6 +165,9 @@
         if (columns > this.children.length) {
           columns = this.children.length;
         }
+        if (columns < 1) {
+          columns = 1;
+        }
         this.grid.columns = columns;
         child_offset = this.grid.paddingX;
         grid_width = (columns * col_width) - grid_state.gutter[0];
@@ -219,7 +229,7 @@
           if (child) {
             $child = child[0];
             position = child[1];
-            this._move($child, position);
+            this._move($child, position, true);
           }
         }
         return this.stagger_queue = [];
@@ -236,7 +246,7 @@
             if (child) {
               $child = child[0];
               position = child[1];
-              _this._move($child, position);
+              _this._move($child, position, true);
               _this.stagger_queue[i] = null;
               return i++;
             } else {
@@ -258,15 +268,33 @@
       _staggerTimeout: function($child, position) {
         var _this = this;
         return setTimeout(function() {
-          return _this._move($child, position);
+          return _this._move($child, position, true);
         }, 0);
       },
-      _move: function($child, position) {
-        var _this = this;
-        $child.css(position);
-        return setTimeout(function() {
-          return $child.addClass(_this.state["class"]).removeClass(_this.state.initClass);
-        }, 0);
+      _move: function($child, position, initialize_state) {
+        var animate_speed, css_animations,
+          _this = this;
+        if (initialize_state == null) {
+          initialize_state = false;
+        }
+        css_animations = this.options.cssAnimations;
+        if (css_animations) {
+          console.log("dot css");
+          $child.css(position);
+        } else {
+          console.log("dot animate");
+          animate_speed = this.options.animateSpeed;
+          $child.stop(true, false).animate(position, animate_speed);
+        }
+        if (initialize_state) {
+          return setTimeout(function() {
+            if (css_animations) {
+              return $child.addClass(_this.state["class"]).removeClass(_this.state.initClass);
+            } else {
+              return $child.switchClass(_this.state.initClass, _this.state["class"], animate_speed);
+            }
+          }, 0);
+        }
       },
       _getPositions: function() {
         var child, col, col_heights, col_width, gutter_y, i, offset_left, padding_y, positions, _i, _j, _len, _ref, _ref1;
