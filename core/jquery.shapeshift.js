@@ -6,27 +6,45 @@
     pluginName = "shapeshift";
     defaults = {
       enableResize: true,
+      resizeRate: 300,
+      cssAnimations: false,
       state: 'default',
       states: {
         "default": {
-          "class": 'default_state',
-          animated: true,
-          animateSpeed: 200,
+          animated: false,
+          animateSpeed: 100,
+          transitionsClass: 'default_state',
           staggerInit: true,
-          staggerSpeed: 100,
+          staggerSpeed: 20,
+          grid: {
+            align: 'center',
+            columns: null,
+            colWidth: null,
+            gutter: [10, 10]
+          },
+          initStyle: {
+            opacity: 0
+          },
+          style: {
+            opacity: 1
+          }
+        },
+        other: {
+          animated: true,
+          animateSpeed: 100,
+          transitionsClass: 'other_state',
           grid: {
             align: 'center',
             columns: null,
             colWidth: null,
             gutter: [20, 10]
           },
-          init_style: {
-            opacity: 0,
-            transform: 'rotateY(180deg) rotateX(180deg)'
+          initStyle: {
+            opacity: 0
           },
           style: {
-            opacity: 1,
-            transform: 'rotateY(0deg) rotateX(0deg)'
+            background: 'blue',
+            opacity: 1
           }
         }
       }
@@ -59,16 +77,26 @@
         return this._arrange();
       },
       insertMany: function(children) {
-        var $child, child_count, i, index, _i;
-        child_count = children.length;
-        for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
-          $child = children[i][0];
-          index = children[i][1] || 999999;
+        var $child, child, index, _i, _len;
+        for (_i = 0, _len = children.length; _i < _len; _i++) {
+          child = children[_i];
+          $child = child[0];
+          index = child[1] || 999999;
           this.$container.append($child);
           this._parseChild($child, index);
         }
         this._calculateGrid();
         return this._arrange();
+      },
+      setState: function(state_name) {
+        var state;
+        state = this.options.states[state_name];
+        if (state) {
+          this._setState(state_name);
+          return this._arrange();
+        } else {
+          return console.error("Shapeshift does not recognize the state '" + state_name + "', are you sure it's defined?");
+        }
       },
       _enableFeatures: function() {
         if (this.options.enableResize) {
@@ -76,10 +104,24 @@
         }
       },
       _setState: function(state) {
+        var add_classes, child, _i, _len, _ref, _results;
         if (state == null) {
           state = this.options.state;
         }
-        return this.state = this.options.states[state];
+        if (this.state) {
+          this.$container.find("." + this.state.transitionsClass).removeClass(this.state.transitionsClass);
+          add_classes = true;
+        }
+        this.state = this.options.states[state];
+        if (add_classes) {
+          _ref = this.children;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            child = _ref[_i];
+            _results.push(child.el.addClass(this.state.transitionsClass));
+          }
+          return _results;
+        }
       },
       _parseChildren: function() {
         var $child, $children, child_count, i, _i;
@@ -141,32 +183,34 @@
         return this.grid.child_offset = child_offset;
       },
       _arrange: function() {
-        var $child, child, child_count, children, i, init_position, init_style, initialize, position, position_string, positions, stagger_init, stagger_queue, stagger_speed, state_style, _i;
-        this._clearStaggerQueue();
+        var $child, child, i, init_position, init_style, initialize, position, position_string, positions, stagger_init, stagger_queue, stagger_speed, state_style, _i, _len, _ref;
+        console.time("arrange");
+        if (this.stagger_queue.length) {
+          this._clearStaggerQueue();
+        }
         positions = this._getPositions();
-        children = this.children;
-        child_count = children.length;
         state_style = this.state.style;
-        init_style = this.state.init_style;
+        init_style = this.state.initStyle;
         stagger_speed = this.state.staggerSpeed;
         stagger_init = this.state.staggerInit;
         stagger_queue = [];
         this.$container.css({
           height: this.grid.height
         });
-        for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
-          child = children[i];
+        _ref = this.children;
+        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+          child = _ref[i];
           $child = child.el;
-          position = positions[i];
-          position_string = JSON.stringify(position);
           initialize = !child.initialized;
+          position = positions[i];
           if (initialize) {
             init_position = $.extend({}, position, init_style);
             $child.css(init_position);
             child.initialized = true;
           }
+          $.extend(position, state_style);
+          position_string = JSON.stringify(position);
           if (position_string !== child.position) {
-            $.extend(position, state_style);
             if (initialize) {
               stagger_queue.push([$child, position]);
             } else {
@@ -178,32 +222,30 @@
         if (stagger_queue.length) {
           this._staggerMove(stagger_queue);
         }
+        console.timeEnd("arrange");
         return this;
       },
       _clearStaggerQueue: function() {
-        var $child, child, child_count, i, position, stagger_queue, state_class, _i;
+        var $child, child, position, stagger_queue, state_class, _i, _len;
         clearInterval(this.stagger_interval);
         this.stagger_interval = null;
         stagger_queue = this.stagger_queue;
-        if (stagger_queue.length) {
-          child_count = stagger_queue.length;
-          state_class = this.state["class"];
-          for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
-            child = stagger_queue[i];
-            if (child) {
-              $child = child[0];
-              position = child[1];
-              $child.addClass(state_class);
-              this._move($child, position);
-            }
+        state_class = this.state.transitionsClass;
+        for (_i = 0, _len = stagger_queue.length; _i < _len; _i++) {
+          child = stagger_queue[_i];
+          if (child) {
+            $child = child[0];
+            position = child[1];
+            $child.addClass(state_class);
+            this._move($child, position);
           }
-          return this.stagger_queue = [];
         }
+        return this.stagger_queue = [];
       },
       _staggerMove: function(stagger_queue) {
-        var $child, child, child_count, i, position, state_class, _i, _results,
+        var $child, child, i, position, state_class, _i, _len, _results,
           _this = this;
-        state_class = this.state["class"];
+        state_class = this.state.transitionsClass;
         if (this.state.staggerInit) {
           i = 0;
           this.stagger_queue = stagger_queue;
@@ -223,10 +265,9 @@
             }
           }, this.state.staggerSpeed);
         } else {
-          child_count = stagger_queue.length;
           _results = [];
-          for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
-            child = stagger_queue[i];
+          for (_i = 0, _len = stagger_queue.length; _i < _len; _i++) {
+            child = stagger_queue[_i];
             $child = child[0];
             position = child[1];
             _results.push(this._staggerTimeout($child, position, state_class));
@@ -245,28 +286,23 @@
         return $child.css(position);
       },
       _getPositions: function() {
-        var child, child_count, children, col, col_heights, col_width, columns, gutter_y, i, left, offset_left, padding_top, positions, states, top, _i, _j;
-        children = this.children;
+        var child, col, col_heights, col_width, gutter_y, i, offset_left, padding_top, positions, _i, _j, _len, _ref, _ref1;
         col_width = this.grid.col_width;
         gutter_y = this.state.grid.gutter[1];
         padding_top = this.grid.padding_top;
-        states = this.states;
         col_heights = [];
-        columns = this.grid.columns;
-        for (i = _i = 0; 0 <= columns ? _i < columns : _i > columns; i = 0 <= columns ? ++_i : --_i) {
+        for (i = _i = 0, _ref = this.grid.columns; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
           col_heights.push(padding_top);
         }
         positions = [];
-        child_count = children.length;
         offset_left = this.grid.child_offset;
-        for (i = _j = 0; 0 <= child_count ? _j < child_count : _j > child_count; i = 0 <= child_count ? ++_j : --_j) {
-          child = children[i];
+        _ref1 = this.children;
+        for (i = _j = 0, _len = _ref1.length; _j < _len; i = ++_j) {
+          child = _ref1[i];
           col = this.lowestCol(col_heights);
-          left = (col * col_width) + offset_left;
-          top = col_heights[col];
           positions.push({
-            left: left,
-            top: top
+            left: (col * col_width) + offset_left,
+            top: col_heights[col]
           });
           col_heights[col] += child.height + gutter_y;
         }
@@ -280,13 +316,12 @@
         return array[$.inArray(Math.max.apply(window, array), array)];
       },
       enableResize: function() {
-        var resizing,
+        var resizing, speed,
           _this = this;
+        speed = this.options.resizeRate;
         resizing = false;
         return $(window).on("resize", function() {
-          var speed;
           if (!resizing) {
-            speed = 200;
             resizing = true;
             setTimeout(function() {
               _this._calculateGrid();

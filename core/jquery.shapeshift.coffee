@@ -12,19 +12,37 @@
   defaults = 
     # Features
     enableResize: true
-    # cssAnimations: true
+    resizeRate: 300
+    cssAnimations: false
 
     # States
     state: 'default'
     states:
       default:
-        class: 'default_state'
 
-        animated: true
-        animateSpeed: 200
+        animated: false
+        animateSpeed: 100
+        transitionsClass: 'default_state'
 
         staggerInit: true
-        staggerSpeed: 100
+        staggerSpeed: 20
+
+        grid:
+          align: 'center'
+          columns: null
+          colWidth: null
+          gutter: [10, 10]
+
+        initStyle:
+          opacity: 0
+          
+        style:
+          opacity: 1
+
+      other:
+        animated: true
+        animateSpeed: 100
+        transitionsClass: 'other_state'
 
         grid:
           align: 'center'
@@ -32,13 +50,12 @@
           colWidth: null
           gutter: [20, 10]
 
-        init_style:
+        initStyle:
           opacity: 0
-          transform: 'rotateY(180deg) rotateX(180deg)'
           
         style:
+          background: 'blue'
           opacity: 1
-          transform: 'rotateY(0deg) rotateX(0deg)'
 
   Plugin = (element, options) ->
     @options = $.extend({}, defaults, options)
@@ -95,17 +112,29 @@
     #           [[$child, index], [$child, index]]
     # ----------------------------------------------
     insertMany: (children) ->
-      child_count = children.length
-
-      for i in [0...child_count]
-        $child = children[i][0]
-        index = children[i][1] || 999999 # Append to the end by default
+      for child in children
+        $child = child[0]
+        index = child[1] || 999999 # Append to the end by default
 
         @$container.append($child)
         @_parseChild($child, index)
 
       @_calculateGrid()
       @_arrange()
+
+
+    # ----------------------------------------------
+    # setState:
+    # Change the currently active state
+    # ----------------------------------------------
+    setState: (state_name) ->
+      state = @options.states[state_name]
+
+      if state
+        @_setState(state_name)
+        @_arrange()
+      else
+        console.error("Shapeshift does not recognize the state '#{state_name}', are you sure it's defined?")
 
 
     # ----------------------------------------------------------------------
@@ -122,10 +151,19 @@
 
     # ----------------------------------------------
     # setState:
-    # Enables options features
+    # Change the currently active state
     # ----------------------------------------------
     _setState: (state = @options.state) ->
+      if @state
+        # Clear the old state
+        @$container.find("." + @state.transitionsClass).removeClass(@state.transitionsClass)
+        add_classes = true
+
       @state = @options.states[state]
+
+      if add_classes
+        for child in @children
+          child.el.addClass(@state.transitionsClass)
 
 
     # ----------------------------------------------
@@ -208,8 +246,7 @@
       columns = grid_state.columns || Math.floor container_inner_width / col_width
 
       # The columns cannot outnumber the children
-      if columns > @children.length
-        columns = @children.length
+      columns = @children.length if columns > @children.length
 
       @grid.columns = columns
 
@@ -234,15 +271,13 @@
     # and arranges them to those positions
     # ----------------------------------------------
     _arrange: ->
-      @_clearStaggerQueue()
+      console.time("arrange")
+      @_clearStaggerQueue() if @stagger_queue.length
 
       positions = @_getPositions()
 
-      children = @children
-      child_count = children.length
-
       state_style = @state.style
-      init_style = @state.init_style
+      init_style = @state.initStyle
 
       stagger_speed = @state.staggerSpeed
       stagger_init = @state.staggerInit
@@ -251,13 +286,12 @@
       # Animate the container to the appropriate height
       @$container.css height: @grid.height
 
-      for i in [0...child_count]
-        child = children[i]
+      for child, i in @children
         $child = child.el
-        position = positions[i]
-        position_string = JSON.stringify(position)
-
         initialize = !child.initialized
+        
+        # Get the x/y position of this child
+        position = positions[i]
 
         if initialize
           # Assign initialization style
@@ -266,9 +300,9 @@
           child.initialized = true
 
         # Animate only if necessary
+        $.extend(position, state_style)
+        position_string = JSON.stringify(position)
         if position_string isnt child.position
-          $.extend(position, state_style)
-
           if initialize
             stagger_queue.push [$child, position]
           else
@@ -277,9 +311,9 @@
           # Store the position string for checking
           child.position = position_string
       
-      if stagger_queue.length
-        @_staggerMove(stagger_queue)
+      @_staggerMove(stagger_queue) if stagger_queue.length
 
+      console.timeEnd("arrange")
       @
 
 
@@ -298,22 +332,17 @@
       @stagger_interval = null
 
       stagger_queue = @stagger_queue
+      state_class = @state.transitionsClass
 
-      if stagger_queue.length
-        child_count = stagger_queue.length
-        state_class = @state.class
+      for child in stagger_queue
+        if child
+          $child = child[0]
+          position = child[1]
 
-        for i in [0...child_count]
-          child = stagger_queue[i]
+          $child.addClass(state_class)
+          @_move($child, position)
 
-          if child
-            $child = child[0]
-            position = child[1]
-
-            $child.addClass(state_class)
-            @_move($child, position)
-
-        @stagger_queue = []
+      @stagger_queue = []
 
 
     # ----------------------------------------------
@@ -330,7 +359,7 @@
     #       [[$child, position], [$child, position]]
     # ----------------------------------------------
     _staggerMove: (stagger_queue) ->
-      state_class = @state.class
+      state_class = @state.transitionsClass
 
       if @state.staggerInit
         i = 0
@@ -355,9 +384,7 @@
 
         , @state.staggerSpeed
       else
-        child_count = stagger_queue.length
-        for i in [0...child_count]
-          child = stagger_queue[i]
+        for child in stagger_queue
           $child = child[0]
           position = child[1]
 
@@ -403,33 +430,23 @@
     # calculate/save their x/y positions
     # ----------------------------------------------
     _getPositions: ->
-      children = @children
       col_width = @grid.col_width
       gutter_y = @state.grid.gutter[1]
       padding_top = @grid.padding_top
-      states = @states
 
       # Array that stores the height of each column
       col_heights = []
-      columns = @grid.columns
-      for i in [0...columns]
-        col_heights.push(padding_top)
+      col_heights.push padding_top for i in [0...@grid.columns]
 
       # Go over each child and determine its position
       positions = []
-      child_count = children.length
       offset_left = @grid.child_offset
-      for i in [0...child_count]
-        child = children[i]
-        col = @lowestCol(col_heights)
+      for child, i in @children
+        col = @lowestCol col_heights
 
-        left = (col * col_width) + offset_left
-        top = col_heights[col]
-
-        positions.push { 
-          left: left, 
-          top: top
-        }
+        positions.push
+          left: (col * col_width) + offset_left, 
+          top: col_heights[col]
 
         col_heights[col] += child.height + gutter_y
 
@@ -473,11 +490,11 @@
     # Arrange the grid upon resizing the window
     # ----------------------------------------------
     enableResize: ->
+      speed = @options.resizeRate
       resizing = false
 
       $(window).on "resize", =>
         unless resizing
-          speed = 200
           resizing = true
 
           setTimeout =>

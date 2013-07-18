@@ -31,16 +31,30 @@
     }
 
     .default_state {
-      transition: all 1s;
+      background: 'red'
+      opacity: 1
+      transform: 'rotateX(0deg)'
+      transition: all .4s;
+    }
+
+    .default_init_state {
+      background: 'orange'
+      opacity: 0
+      transform: 'rotateX(180deg)'
+      transition: all .4s;
+    }
+
+    .other_state {
+      background: blue !important;
+      background: 'blue';
+      opacity: 1;
+      -webkit-transform: scale(2) !important;
+      transition: all 3s;
     }
 
     .container > .ss-placeholder-child {
       background: transparent;
       border: 1px dashed blue;
-    }
-
-    .no-transition {
-      transition: none !important;
     }
   </style>
 
@@ -53,12 +67,12 @@
       newDivs = []
 
       for(var i=0;i<50;i++) {
-        newDivs.push([$newDiv.clone().text(i), 4])
+        newDivs.push([$newDiv.clone().text(i), 9 + i * 2])
       }
 
       setTimeout(function() {
         $(".container").first().shapeshift('insertMany', newDivs);
-      }, 2020)
+      }, 800)
     })
   </script>
 </head>
