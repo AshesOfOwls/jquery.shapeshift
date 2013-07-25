@@ -14,13 +14,13 @@
           animated: false,
           animateSpeed: 100,
           staggerInit: true,
-          staggerSpeed: 5,
+          staggerSpeed: 50,
           grid: {
             align: 'center',
             columns: null,
-            colWidth: null,
-            gutter: [10, 10],
-            padding: [50, 50]
+            colWidth: 200,
+            gutter: ["auto", 10],
+            padding: [0, 0]
           },
           "class": 'default',
           initClass: 'init'
@@ -43,6 +43,7 @@
     Plugin = function(element, options) {
       this.options = $.extend({}, defaults, options);
       this.grid = {};
+      this.grid.percent_cols = false;
       this.$container = $(element);
       this.children = [];
       this.stagger_queue = [];
@@ -61,7 +62,6 @@
         if (i === void 0) {
           i = 999999;
         }
-        this.$container.append($child);
         this._parseChild($child, i);
         this._calculateGrid();
         return this._arrange();
@@ -139,46 +139,46 @@
         });
       },
       _initializeGrid: function() {
-        var fc_colspan, fc_width, first_child, grid_state, gutter_x, single_width;
-        grid_state = this.state.grid;
-        gutter_x = grid_state.gutter[0];
-        if (grid_state.colWidth) {
-          this.grid.col_width = grid_state.colWidth + gutter_x;
-        } else {
-          first_child = this.children[0];
-          fc_width = first_child.el.outerWidth();
-          fc_colspan = first_child.colspan;
-          single_width = (fc_width - ((fc_colspan - 1) * gutter_x)) / fc_colspan;
-          this.grid.col_width = single_width + gutter_x;
+        var col_width, first_child_width;
+        col_width = this.state.grid.colWidth;
+        this.grid.percent_cols = false;
+        if (col_width === null) {
+          first_child_width = this.children[0].el.outerWidth();
+          col_width = first_child_width;
+        } else if (typeof col_width === 'string') {
+          this.grid.percent_cols = col_width;
         }
-        this.grid.paddingX = grid_state.padding[0];
-        this.grid.paddingY = grid_state.padding[1];
+        this.grid.col_width = col_width;
         return this._calculateGrid();
       },
       _calculateGrid: function() {
-        var child_offset, col_width, columns, container_width, grid_state, grid_width, padding_x;
-        grid_state = this.state.grid;
-        col_width = this.grid.col_width;
-        padding_x = grid_state.padding[0];
-        container_width = this.$container.innerWidth() - (padding_x * 2);
-        columns = grid_state.columns || Math.floor(container_width / col_width);
-        if (columns > this.children.length) {
-          columns = this.children.length;
+        var col_width, columns, container_width, gutter_x, remainder;
+        container_width = this.$container.innerWidth() - (this.state.grid.padding[0] * 2);
+        col_width = this.state.grid.colWidth;
+        gutter_x = this.state.grid.gutter[0];
+        if (this.grid.percent_cols) {
+          col_width = Math.floor(container_width * (parseInt(col_width) * .01));
+        } else {
+          col_width = this.grid.col_width;
         }
-        if (columns < 1) {
-          columns = 1;
+        if (gutter_x === 'auto') {
+          columns = Math.floor(container_width / col_width);
+          if (columns > 1) {
+            remainder = container_width - (columns * col_width);
+            gutter_x = Math.floor(remainder / (columns - 1));
+          } else {
+            gutter_x = 0;
+          }
+        } else if (typeof gutter_x === 'string') {
+          gutter_x = Math.floor(container_width * (parseInt(gutter_x) * .01));
+          columns = Math.floor((container_width + gutter_x) / (col_width + gutter_x));
         }
         this.grid.columns = columns;
-        child_offset = this.grid.paddingX;
-        grid_width = (columns * col_width) - grid_state.gutter[0];
-        switch (grid_state.align) {
-          case "center":
-            child_offset += (container_width - grid_width) / 2;
-            break;
-          case "right":
-            child_offset += container_width - grid_width;
-        }
-        return this.grid.child_offset = child_offset;
+        this.grid.col_width = col_width;
+        this.grid.gutter_x = gutter_x;
+        this.grid.padding_x = 0;
+        this.grid.padding_y = 0;
+        return this.grid.child_offset = this.state.grid.padding[0];
       },
       _arrange: function() {
         var $child, child, i, init_class, initialize, normal_class, position, position_string, positions, stagger_init, stagger_queue, stagger_speed, _i, _len, _ref;
@@ -279,10 +279,8 @@
         }
         css_animations = this.options.cssAnimations;
         if (css_animations) {
-          console.log("dot css");
           $child.css(position);
         } else {
-          console.log("dot animate");
           animate_speed = this.options.animateSpeed;
           $child.stop(true, false).animate(position, animate_speed);
         }
@@ -298,9 +296,9 @@
       },
       _getPositions: function() {
         var child, col, col_heights, col_width, gutter_y, i, offset_left, padding_y, positions, _i, _j, _len, _ref, _ref1;
-        col_width = this.grid.col_width;
+        col_width = this.grid.col_width + this.grid.gutter_x;
         gutter_y = this.state.grid.gutter[1];
-        padding_y = this.grid.paddingY;
+        padding_y = this.grid.padding_y;
         col_heights = [];
         for (i = _i = 0, _ref = this.grid.columns; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
           col_heights.push(padding_y);

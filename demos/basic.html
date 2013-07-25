@@ -16,27 +16,31 @@
 
   <!-- CSS -->
   <style>
+    body {
+      overflow: scroll;
+    }
+
     .container {
       border: 1px dashed #CCC;
       position: relative;
+      width: 100%;
     }
 
     .container > div {
       position: absolute;
       height: 100px;
-      width: 100px;
-
+      width: 200px;
     }
 
     .default {
-      background: red;
+      background: #333;
       opacity: 1;
       -webkit-transform: rotateX(0deg);
-      transition: all .4s;
+      transition: all .2s;
     }
 
     .init {
-      background: orange;
+      background: rgb(35, 61, 14);
       margin-top: -150px;
       opacity: 0;
       -webkit-transform: scale(0,0);
@@ -57,23 +61,26 @@
   <!-- Javascript -->
   <script>
     $(document).ready(function() {
-      $(".container").shapeshift();
+      $containers = $(".container")
+      $containers.shapeshift();
 
       $newDiv = $("<div></div>")
       newDivs = []
 
       for(var i=0;i<100;i++) {
-        newDivs.push([$newDiv.clone().text(i), 9 + i * 2])
+        $clone = $newDiv.clone().text(i)
+        newDivs.push([$clone, 9 + i * 2])
       }
 
       setTimeout(function() {
-        $(".container").first().shapeshift('insertMany', newDivs);
-      }, 1200)
+        $containers.first().shapeshift('insertMany', newDivs);
+      }, 3000)
     })
   </script>
 </head>
 <body>
   <div class="container">
+    <div></div>
     <div></div>
     <div></div>
     <div></div>

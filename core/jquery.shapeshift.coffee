@@ -21,19 +21,18 @@
     state: 'default'
     states:
       default:
-
         animated: false
         animateSpeed: 100
 
         staggerInit: true
-        staggerSpeed: 5
+        staggerSpeed: 50
 
         grid:
           align: 'center'
           columns: null
-          colWidth: null
-          gutter: [10, 10]
-          padding: [50, 50]
+          colWidth: 200
+          gutter: ["auto", 10]
+          padding: [0, 0]
 
         class: 'default'
         initClass: 'init'
@@ -55,6 +54,7 @@
   Plugin = (element, options) ->
     @options = $.extend({}, defaults, options)
     @grid = {}
+    @grid.percent_cols = false
 
     @$container = $(element)
     @children = []
@@ -90,7 +90,6 @@
       # Append to the end by default
       i = 999999 if i is undefined
 
-      @$container.append($child)
       @_parseChild($child, i)
       @_calculateGrid()
       @_arrange()
@@ -106,6 +105,7 @@
     #           [[$child, index], [$child, index]]
     # ----------------------------------------------
     insertMany: (children) ->
+
       for child in children
         $child = child[0]
         index = child[1] || 999999 # Append to the end by default
@@ -134,6 +134,7 @@
             child.el.removeClass(old_state_class).addClass(new_state_class)
           else
             child.el.switchClass(old_state_class, new_state_class, @options.animateSpeed)
+
         @state = state
         @_initializeGrid()
         @_arrange()
@@ -213,23 +214,18 @@
     # Determines the initial grid properties
     # ----------------------------------------------
     _initializeGrid: ->
-      grid_state = @state.grid
-      gutter_x = grid_state.gutter[0]
+      col_width = @state.grid.colWidth
+      @grid.percent_cols = false
 
-      if grid_state.colWidth
-        # Column width is manually set
-        @grid.col_width = grid_state.colWidth + gutter_x
-      else
-        # Column width is automatically determined
-        first_child = @children[0]
-        fc_width = first_child.el.outerWidth()
-        fc_colspan = first_child.colspan
-        single_width = (fc_width - ((fc_colspan - 1) * gutter_x)) / fc_colspan
-        @grid.col_width = single_width + gutter_x
+      if col_width is null
+        # Automatically generate a column width
+        first_child_width = @children[0].el.outerWidth()
+        col_width = first_child_width
+      else if typeof col_width is 'string'
+        # Percentage column width
+        @grid.percent_cols = col_width
 
-      # Get the grid padding via CSS 
-      @grid.paddingX = grid_state.padding[0]
-      @grid.paddingY = grid_state.padding[1]
+      @grid.col_width = col_width
 
       @_calculateGrid()
 
@@ -242,32 +238,34 @@
     # container is resized.
     # ----------------------------------------------
     _calculateGrid: ->
-      grid_state = @state.grid
-      col_width = @grid.col_width
-      padding_x = grid_state.padding[0]
+      container_width = @$container.innerWidth() - (@state.grid.padding[0] * 2)
+      col_width = @state.grid.colWidth
+      gutter_x = @state.grid.gutter[0]
 
-      # Determine how many columns can exist
-      container_width = @$container.innerWidth() - (padding_x * 2)
-      columns = grid_state.columns || Math.floor container_width / col_width
+      if @grid.percent_cols
+        # TODO: Make sure to document the overflow: scroll on body
+        col_width = Math.floor container_width * (parseInt(col_width) * .01)
+      else
+        col_width = @grid.col_width
 
-      # The columns cannot outnumber the children
-      columns = @children.length if columns > @children.length
-      columns = 1 if columns < 1
+      if gutter_x is 'auto'
+        columns = Math.floor container_width / col_width
+        if columns > 1
+          remainder = container_width - (columns * col_width)
+          gutter_x = Math.floor remainder / (columns - 1)
+        else
+          gutter_x = 0
+      else if typeof gutter_x is 'string'
+        gutter_x = Math.floor container_width * (parseInt(gutter_x) * .01)
+        columns = Math.floor (container_width + gutter_x) / (col_width + gutter_x)
 
       @grid.columns = columns
 
-      # Determine the left offset of children
-      child_offset = @grid.paddingX
-
-      grid_width = (columns * col_width) - grid_state.gutter[0]
-      switch grid_state.align
-        when "center"
-          child_offset += (container_width - grid_width) / 2
-
-        when "right"
-          child_offset += (container_width - grid_width)
-
-      @grid.child_offset = child_offset
+      @grid.col_width = col_width
+      @grid.gutter_x = gutter_x
+      @grid.padding_x = 0
+      @grid.padding_y = 0
+      @grid.child_offset = @state.grid.padding[0]
 
 
     # ----------------------------------------------
@@ -418,10 +416,8 @@
       css_animations = @options.cssAnimations
 
       if css_animations
-        console.log("dot css")
         $child.css(position)
       else
-        console.log("dot animate")
         animate_speed = @options.animateSpeed
         $child.stop(true, false).animate(position, animate_speed)
 
@@ -443,9 +439,9 @@
     # calculate/save their x/y positions
     # ----------------------------------------------
     _getPositions: ->
-      col_width = @grid.col_width
+      col_width = @grid.col_width + @grid.gutter_x
       gutter_y = @state.grid.gutter[1]
-      padding_y = @grid.paddingY
+      padding_y = @grid.padding_y
 
       # Array that stores the height of each column
       col_heights = []
