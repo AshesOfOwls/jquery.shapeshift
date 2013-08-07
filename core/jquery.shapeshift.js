@@ -19,8 +19,8 @@
             align: 'center',
             columns: null,
             colWidth: 200,
-            gutter: ["auto", 10],
-            padding: [0, 0]
+            gutter: [20, 10],
+            padding: [20, 20]
           },
           "class": 'default',
           initClass: 'init'
@@ -139,46 +139,62 @@
         });
       },
       _initializeGrid: function() {
-        var col_width, first_child_width;
-        col_width = this.state.grid.colWidth;
-        this.grid.percent_cols = false;
+        var col_width, grid_state, percent_col_width;
+        grid_state = this.state.grid;
+        col_width = grid_state.colWidth;
+        percent_col_width = false;
         if (col_width === null) {
-          first_child_width = this.children[0].el.outerWidth();
-          col_width = first_child_width;
-        } else if (typeof col_width === 'string') {
-          this.grid.percent_cols = col_width;
+          col_width = this.children[0].el.innerWidth();
+        } else if (typeof col_width === "string") {
+          if (col_width.indexOf("%") >= 0) {
+            percent_col_width = true;
+          }
         }
+        this.grid.padding = grid_state.padding;
         this.grid.col_width = col_width;
+        this.grid.percent_col_width = percent_col_width;
         return this._calculateGrid();
       },
       _calculateGrid: function() {
-        var col_width, columns, container_width, gutter_x, remainder;
-        container_width = this.$container.innerWidth() - (this.state.grid.padding[0] * 2);
-        col_width = this.state.grid.colWidth;
-        gutter_x = this.state.grid.gutter[0];
-        if (this.grid.percent_cols) {
-          col_width = Math.floor(container_width * (parseInt(col_width) * .01));
-        } else {
-          col_width = this.grid.col_width;
+        var align, axis, child_offset, col_width, columns, container_width, full_width, grid_state, gutter, gutter_total, i, leftover_space, _i, _len;
+        grid_state = this.state.grid;
+        container_width = this.$container.innerWidth() - (this.grid.padding[0] * 2);
+        child_offset = this.grid.padding[0];
+        col_width = this.grid.col_width;
+        if (this.grid.percent_col_width) {
+          col_width = Math.floor(container_width * (parseInt(grid_state.colWidth) * .01));
         }
-        if (gutter_x === 'auto') {
-          columns = Math.floor(container_width / col_width);
-          if (columns > 1) {
-            remainder = container_width - (columns * col_width);
-            gutter_x = Math.floor(remainder / (columns - 1));
-          } else {
-            gutter_x = 0;
+        gutter = grid_state.gutter.slice(0);
+        for (i = _i = 0, _len = gutter.length; _i < _len; i = ++_i) {
+          axis = gutter[i];
+          if (typeof axis === "string") {
+            if (axis.indexOf('%') > 0) {
+              gutter[i] = Math.floor(container_width * (parseInt(axis) * .01));
+            }
           }
-        } else if (typeof gutter_x === 'string') {
-          gutter_x = Math.floor(container_width * (parseInt(gutter_x) * .01));
-          columns = Math.floor((container_width + gutter_x) / (col_width + gutter_x));
+        }
+        columns = grid_state.columns;
+        if (gutter[0] >= 0) {
+          full_width = col_width + gutter[0];
+          columns || (columns = Math.floor((container_width + gutter[0]) / full_width));
+        } else {
+          columns || (columns = Math.floor(container_width / col_width));
+          gutter_total = container_width - (columns * col_width);
+          gutter[0] = columns > 1 ? gutter_total / (columns - 1) : 0;
+          full_width = col_width + gutter[0];
+        }
+        align = grid_state.align;
+        if (align !== "left") {
+          leftover_space = (container_width + gutter[0]) - (columns * full_width);
+          if (leftover_space > 0) {
+            child_offset += align === "right" ? leftover_space : leftover_space / 2;
+          }
         }
         this.grid.columns = columns;
+        this.grid.gutter = gutter;
         this.grid.col_width = col_width;
-        this.grid.gutter_x = gutter_x;
-        this.grid.padding_x = 0;
-        this.grid.padding_y = 0;
-        return this.grid.child_offset = this.state.grid.padding[0];
+        this.grid.full_width = full_width;
+        return this.grid.child_offset = child_offset;
       },
       _arrange: function() {
         var $child, child, i, init_class, initialize, normal_class, position, position_string, positions, stagger_init, stagger_queue, stagger_speed, _i, _len, _ref;
@@ -295,10 +311,10 @@
         }
       },
       _getPositions: function() {
-        var child, col, col_heights, col_width, gutter_y, i, offset_left, padding_y, positions, _i, _j, _len, _ref, _ref1;
-        col_width = this.grid.col_width + this.grid.gutter_x;
-        gutter_y = this.state.grid.gutter[1];
-        padding_y = this.grid.padding_y;
+        var child, col, col_heights, full_width, gutter_y, i, offset_left, padding_y, positions, _i, _j, _len, _ref, _ref1;
+        full_width = this.grid.full_width;
+        gutter_y = this.grid.gutter[1];
+        padding_y = this.grid.padding[1];
         col_heights = [];
         for (i = _i = 0, _ref = this.grid.columns; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
           col_heights.push(padding_y);
@@ -310,7 +326,7 @@
           child = _ref1[i];
           col = this.lowestCol(col_heights);
           positions.push({
-            left: (col * col_width) + offset_left,
+            left: (col * full_width) + offset_left,
             top: col_heights[col]
           });
           col_heights[col] += child.height + gutter_y;

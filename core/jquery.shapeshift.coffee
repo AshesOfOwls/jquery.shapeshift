@@ -31,8 +31,8 @@
           align: 'center'
           columns: null
           colWidth: 200
-          gutter: ["auto", 10]
-          padding: [0, 0]
+          gutter: [20, 10]
+          padding: [20, 20]
 
         class: 'default'
         initClass: 'init'
@@ -214,18 +214,24 @@
     # Determines the initial grid properties
     # ----------------------------------------------
     _initializeGrid: ->
-      col_width = @state.grid.colWidth
-      @grid.percent_cols = false
+      grid_state = @state.grid
+
+      # Column width
+      col_width = grid_state.colWidth
+      percent_col_width = false
 
       if col_width is null
-        # Automatically generate a column width
-        first_child_width = @children[0].el.outerWidth()
-        col_width = first_child_width
-      else if typeof col_width is 'string'
-        # Percentage column width
-        @grid.percent_cols = col_width
+        col_width = @children[0].el.innerWidth()
+      else if typeof col_width is "string"
+        if col_width.indexOf("%") >= 0
+          percent_col_width = true
 
+      # Padding
+      @grid.padding = grid_state.padding
+
+      # Set grid properties
       @grid.col_width = col_width
+      @grid.percent_col_width = percent_col_width
 
       @_calculateGrid()
 
@@ -238,34 +244,46 @@
     # container is resized.
     # ----------------------------------------------
     _calculateGrid: ->
-      container_width = @$container.innerWidth() - (@state.grid.padding[0] * 2)
-      col_width = @state.grid.colWidth
-      gutter_x = @state.grid.gutter[0]
+      grid_state = @state.grid
+      container_width = @$container.innerWidth() - (@grid.padding[0] * 2)
+      child_offset = @grid.padding[0]
 
-      if @grid.percent_cols
-        # TODO: Make sure to document the overflow: scroll on body
-        col_width = Math.floor container_width * (parseInt(col_width) * .01)
+      # Column Width
+      col_width = @grid.col_width
+      if @grid.percent_col_width
+        col_width = Math.floor container_width * (parseInt(grid_state.colWidth) * .01)
+
+      # Gutter Width
+      gutter = grid_state.gutter.slice(0)
+      for axis, i in gutter
+        if typeof axis is "string"
+          if axis.indexOf('%') > 0
+            gutter[i] = Math.floor container_width * (parseInt(axis) * .01)
+
+      # Columns
+      columns = grid_state.columns
+      if gutter[0] >= 0
+        full_width = col_width + gutter[0]
+        columns ||= Math.floor (container_width + gutter[0]) / full_width
       else
-        col_width = @grid.col_width
+        columns ||= Math.floor container_width / col_width
+        gutter_total = container_width - (columns * col_width)
+        gutter[0] = if columns > 1 then gutter_total / (columns - 1) else 0
+        full_width = col_width + gutter[0]
 
-      if gutter_x is 'auto'
-        columns = Math.floor container_width / col_width
-        if columns > 1
-          remainder = container_width - (columns * col_width)
-          gutter_x = Math.floor remainder / (columns - 1)
-        else
-          gutter_x = 0
-      else if typeof gutter_x is 'string'
-        gutter_x = Math.floor container_width * (parseInt(gutter_x) * .01)
-        columns = Math.floor (container_width + gutter_x) / (col_width + gutter_x)
+      # Offset
+      align = grid_state.align
+      if align isnt "left"
+        leftover_space = (container_width + gutter[0]) - (columns * full_width)
+        if leftover_space > 0
+          child_offset += if align is "right" then leftover_space else leftover_space / 2
 
+      # Set grid properties
       @grid.columns = columns
-
+      @grid.gutter = gutter
       @grid.col_width = col_width
-      @grid.gutter_x = gutter_x
-      @grid.padding_x = 0
-      @grid.padding_y = 0
-      @grid.child_offset = @state.grid.padding[0]
+      @grid.full_width = full_width
+      @grid.child_offset = child_offset
 
 
     # ----------------------------------------------
@@ -439,9 +457,9 @@
     # calculate/save their x/y positions
     # ----------------------------------------------
     _getPositions: ->
-      col_width = @grid.col_width + @grid.gutter_x
-      gutter_y = @state.grid.gutter[1]
-      padding_y = @grid.padding_y
+      full_width = @grid.full_width
+      gutter_y = @grid.gutter[1]
+      padding_y = @grid.padding[1]
 
       # Array that stores the height of each column
       col_heights = []
@@ -454,7 +472,7 @@
         col = @lowestCol col_heights
 
         positions.push
-          left: (col * col_width) + offset_left, 
+          left: (col * full_width) + offset_left, 
           top: col_heights[col]
 
         col_heights[col] += child.height + gutter_y
