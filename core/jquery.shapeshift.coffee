@@ -27,6 +27,9 @@
         staggerInit: true
         staggerSpeed: 50
 
+        sortDir: 'horizontal'
+        sortAlg: 'grid'
+
         grid:
           align: 'center'
           columns: null
@@ -45,7 +48,7 @@
           align: 'center'
           columns: null
           colWidth: null
-          gutter: [10, 10]
+          gutter: ["auto", 10]
           padding: [50, 50]
 
         class: 'secondary'
@@ -87,11 +90,10 @@
     #      i: The position to be inserted into
     # ----------------------------------------------
     insert: ($child, i) ->
-      # Append to the end by default
-      i = 999999 if i is undefined
+      i = 999999 if i is undefined # Append to the end by default
 
       @_parseChild($child, i)
-      @_calculateGrid()
+      @_initializeGrid()
       @_arrange()
 
     # ----------------------------------------------
@@ -105,7 +107,6 @@
     #           [[$child, index], [$child, index]]
     # ----------------------------------------------
     insertMany: (children) ->
-
       for child in children
         $child = child[0]
         index = child[1] || 999999 # Append to the end by default
@@ -113,7 +114,7 @@
         @$container.append($child)
         @_parseChild($child, index)
 
-      @_calculateGrid()
+      @_initializeGrid()
       @_arrange()
 
 
@@ -200,9 +201,12 @@
     #      i: The position to be inserted into
     # ----------------------------------------------
     _parseChild: ($child, i) ->
+      colspan = parseInt($child.attr("data-ss-colspan")) || 1
+      @grid.maxColspan = colspan unless colspan <= @grid.maxColspan
+
       @children.splice i, 0,
         el: $child
-        colspan: parseInt($child.attr("data-ss-colspan")) || 1
+        colspan: colspan
         height: $child.outerHeight()
         position: null
         initialized: false
@@ -221,7 +225,8 @@
       percent_col_width = false
 
       if col_width is null
-        col_width = @children[0].el.innerWidth()
+        if @children.length > 0
+          col_width = @children[0].el.innerWidth()
       else if typeof col_width is "string"
         if col_width.indexOf("%") >= 0
           percent_col_width = true
@@ -245,8 +250,10 @@
     # ----------------------------------------------
     _calculateGrid: ->
       grid_state = @state.grid
-      container_width = @$container.innerWidth() - (@grid.padding[0] * 2)
-      child_offset = @grid.padding[0]
+      padding = @grid.padding
+
+      container_width = @$container.innerWidth() - (padding[0] * 2)
+      child_offset = padding[0]
 
       # Column Width
       col_width = @grid.col_width
@@ -263,13 +270,16 @@
       # Columns
       columns = grid_state.columns
       if gutter[0] >= 0
+        # Defined Gutter
         full_width = col_width + gutter[0]
         columns ||= Math.floor (container_width + gutter[0]) / full_width
       else
+        # Auto Gutter
         columns ||= Math.floor container_width / col_width
         gutter_total = container_width - (columns * col_width)
         gutter[0] = if columns > 1 then gutter_total / (columns - 1) else 0
         full_width = col_width + gutter[0]
+      columns = @grid.maxColspan if columns < @grid.maxColspan
 
       # Offset
       align = grid_state.align
@@ -465,17 +475,19 @@
       col_heights = []
       col_heights.push padding_y for i in [0...@grid.columns]
 
-      # Go over each child and determine its position
+      # Go over each child and determine/record its position
       positions = []
       offset_left = @grid.child_offset
       for child, i in @children
-        col = @lowestCol col_heights
+        col = @lowestCol col_heights, child.colspan
 
         positions.push
           left: (col * full_width) + offset_left, 
           top: col_heights[col]
 
-        col_heights[col] += child.height + gutter_y
+        child_height = child.height + gutter_y
+        for i in [0...child.colspan]
+          col_heights[col + i] += child_height
 
       # Store the height of the grid
       @grid.height = @highestCol(col_heights) - gutter_y + padding_y
@@ -491,7 +503,11 @@
     #
     # array: The array to process
     # ----------------------------------------------
-    lowestCol: (array) ->
+    lowestCol: (array, colspan) ->
+      if colspan
+        max_span = array.length + 1 - colspan
+        array = array.slice(0).splice(0, max_span)
+
       $.inArray Math.min.apply(window,array), array
 
 

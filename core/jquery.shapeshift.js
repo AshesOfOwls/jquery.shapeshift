@@ -15,6 +15,8 @@
           animateSpeed: 100,
           staggerInit: true,
           staggerSpeed: 50,
+          sortDir: 'horizontal',
+          sortAlg: 'grid',
           grid: {
             align: 'center',
             columns: null,
@@ -32,7 +34,7 @@
             align: 'center',
             columns: null,
             colWidth: null,
-            gutter: [10, 10],
+            gutter: ["auto", 10],
             padding: [50, 50]
           },
           "class": 'secondary',
@@ -63,7 +65,7 @@
           i = 999999;
         }
         this._parseChild($child, i);
-        this._calculateGrid();
+        this._initializeGrid();
         return this._arrange();
       },
       insertMany: function(children) {
@@ -75,7 +77,7 @@
           this.$container.append($child);
           this._parseChild($child, index);
         }
-        this._calculateGrid();
+        this._initializeGrid();
         return this._arrange();
       },
       setState: function(state_name) {
@@ -130,9 +132,14 @@
         return this;
       },
       _parseChild: function($child, i) {
+        var colspan;
+        colspan = parseInt($child.attr("data-ss-colspan")) || 1;
+        if (!(colspan <= this.grid.maxColspan)) {
+          this.grid.maxColspan = colspan;
+        }
         return this.children.splice(i, 0, {
           el: $child,
-          colspan: parseInt($child.attr("data-ss-colspan")) || 1,
+          colspan: colspan,
           height: $child.outerHeight(),
           position: null,
           initialized: false
@@ -144,7 +151,9 @@
         col_width = grid_state.colWidth;
         percent_col_width = false;
         if (col_width === null) {
-          col_width = this.children[0].el.innerWidth();
+          if (this.children.length > 0) {
+            col_width = this.children[0].el.innerWidth();
+          }
         } else if (typeof col_width === "string") {
           if (col_width.indexOf("%") >= 0) {
             percent_col_width = true;
@@ -156,10 +165,11 @@
         return this._calculateGrid();
       },
       _calculateGrid: function() {
-        var align, axis, child_offset, col_width, columns, container_width, full_width, grid_state, gutter, gutter_total, i, leftover_space, _i, _len;
+        var align, axis, child_offset, col_width, columns, container_width, full_width, grid_state, gutter, gutter_total, i, leftover_space, padding, _i, _len;
         grid_state = this.state.grid;
-        container_width = this.$container.innerWidth() - (this.grid.padding[0] * 2);
-        child_offset = this.grid.padding[0];
+        padding = this.grid.padding;
+        container_width = this.$container.innerWidth() - (padding[0] * 2);
+        child_offset = padding[0];
         col_width = this.grid.col_width;
         if (this.grid.percent_col_width) {
           col_width = Math.floor(container_width * (parseInt(grid_state.colWidth) * .01));
@@ -182,6 +192,9 @@
           gutter_total = container_width - (columns * col_width);
           gutter[0] = columns > 1 ? gutter_total / (columns - 1) : 0;
           full_width = col_width + gutter[0];
+        }
+        if (columns < this.grid.maxColspan) {
+          columns = this.grid.maxColspan;
         }
         align = grid_state.align;
         if (align !== "left") {
@@ -311,7 +324,7 @@
         }
       },
       _getPositions: function() {
-        var child, col, col_heights, full_width, gutter_y, i, offset_left, padding_y, positions, _i, _j, _len, _ref, _ref1;
+        var child, child_height, col, col_heights, full_width, gutter_y, i, offset_left, padding_y, positions, _i, _j, _k, _len, _ref, _ref1, _ref2;
         full_width = this.grid.full_width;
         gutter_y = this.grid.gutter[1];
         padding_y = this.grid.padding[1];
@@ -324,17 +337,25 @@
         _ref1 = this.children;
         for (i = _j = 0, _len = _ref1.length; _j < _len; i = ++_j) {
           child = _ref1[i];
-          col = this.lowestCol(col_heights);
+          col = this.lowestCol(col_heights, child.colspan);
           positions.push({
             left: (col * full_width) + offset_left,
             top: col_heights[col]
           });
-          col_heights[col] += child.height + gutter_y;
+          child_height = child.height + gutter_y;
+          for (i = _k = 0, _ref2 = child.colspan; 0 <= _ref2 ? _k < _ref2 : _k > _ref2; i = 0 <= _ref2 ? ++_k : --_k) {
+            col_heights[col + i] += child_height;
+          }
         }
         this.grid.height = this.highestCol(col_heights) - gutter_y + padding_y;
         return positions;
       },
-      lowestCol: function(array) {
+      lowestCol: function(array, colspan) {
+        var max_span;
+        if (colspan) {
+          max_span = array.length + 1 - colspan;
+          array = array.slice(0).splice(0, max_span);
+        }
         return $.inArray(Math.min.apply(window, array), array);
       },
       highestCol: function(array) {

@@ -5,8 +5,9 @@
   <title>Basic Demo</title>
 
   <!-- jQuery / jQuery UI -->
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
-  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+  <script src="../core/vendor/jquery.js"></script>
+  <!--script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script-->
 
   <!-- jQuery Touch Punch - Enable Touch Drag and Drop -->
   <script src="../core/vendor/jquery.touch-punch.min.js"></script>
@@ -32,17 +33,32 @@
       width: 200px;
     }
 
+    .container > div[data-ss-colspan="2"] {
+      height: 140px;
+      width: 420px;
+    }
+
+    .container > div[data-ss-colspan="3"] {
+      height: 200px;
+      width: 640px;
+    }
+
+    .container > div[data-ss-colspan="4"] {
+      width: 860px;
+    }
+
     .default {
       background: #888;
       opacity: 1;
-      -webkit-transform: rotateX(0deg);
-      transition: all .2s;
+      -webkit-transform: rotateY(0deg);
+      transition: all .5s;
     }
 
     .init {
-      margin-top: -150px;
+      margin-top: -60px;
       opacity: 0;
       -webkit-transform: scale(0,0);
+      -webkit-transform: rotateY(360deg);
     }
 
     .secondary {
@@ -66,9 +82,9 @@
       $newDiv = $("<div></div>")
       newDivs = []
 
-      for(var i=0;i<100;i++) {
+      for(var i=0;i<20;i++) {
         $clone = $newDiv.clone().text(i)
-        newDivs.push([$clone, 9 + i * 2])
+        newDivs.push([$clone, 20 + i * 2])
       }
 
       setTimeout(function() {
@@ -79,15 +95,20 @@
 </head>
 <body>
   <div class="container">
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
     <div></div>
     <div></div>
     <div></div>
     <div></div>
+    <div data-ss-colspan="3"></div>
     <div></div>
     <div></div>
     <div></div>
+    <div data-ss-colspan="2"></div>
     <div></div>
-    <div></div>
+    <div data-ss-colspan="3"></div>
   </div>
 
   <div class="container">
