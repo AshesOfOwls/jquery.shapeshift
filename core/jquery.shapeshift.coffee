@@ -27,8 +27,9 @@
         staggerInit: true
         staggerSpeed: 50
 
-        sortDir: 'horizontal'
-        sortAlg: 'grid'
+        sortDirection: 'horizontal'
+        sortAlgorithm: 'grid'
+        sortTolerance: 0
 
         grid:
           align: 'center'
@@ -290,10 +291,13 @@
 
       # Set grid properties
       @grid.columns = columns
+      @grid.container_width = container_width
       @grid.gutter = gutter
       @grid.col_width = col_width
       @grid.full_width = full_width
       @grid.child_offset = child_offset
+      @grid.col_heights_init = []
+      @grid.col_heights_init.push padding[1] for i in [0...columns]
 
 
     # ----------------------------------------------
@@ -305,7 +309,7 @@
     _arrange: ->
       @_clearStaggerQueue() if @stagger_queue.length
 
-      positions = @_getPositions()
+      positions = @_getPackPositions()
 
       init_class = @state.initClass
       normal_class = @state.class
@@ -324,21 +328,22 @@
         # Get the x/y position of this child
         position = positions[i]
 
-        if initialize
-          # Assign initialization style
-          $child.addClass(init_class)
-          child.initialized = true
-
-        # Animate only if necessary
-        position_string = JSON.stringify(position)
-        if position_string isnt child.position
+        if position
           if initialize
-            stagger_queue.push [$child, position]
-          else
-            @_move $child, position
+            # Assign initialization style
+            $child.addClass(init_class)
+            child.initialized = true
 
-          # Store the position string for checking
-          child.position = position_string
+          # Animate only if necessary
+          position_string = JSON.stringify(position)
+          if position_string isnt child.position
+            if initialize
+              stagger_queue.push [$child, position]
+            else
+              @_move $child, position
+
+            # Store the position string for checking
+            child.position = position_string
       
       @_staggerMove(stagger_queue) if stagger_queue.length
 
@@ -435,7 +440,7 @@
     # ----------------------------------------------
     # move:
     #
-    # Move a single child to a position
+    # Physically move a single child to a position
     #
     # $child:      The element to be moved
     # position:    The hash of CSS attributes
@@ -466,33 +471,106 @@
     # Iterate over all of the children and
     # calculate/save their x/y positions
     # ----------------------------------------------
-    _getPositions: ->
-      full_width = @grid.full_width
+    _getPackPositions: ->
       gutter_y = @grid.gutter[1]
-      padding_y = @grid.padding[1]
-
-      # Array that stores the height of each column
-      col_heights = []
-      col_heights.push padding_y for i in [0...@grid.columns]
-
-      # Go over each child and determine/record its position
-      positions = []
+      gutter_x = @grid.gutter[0]
+      packer = new Packer(@grid.container_width + gutter_x,9999)
+      full_width = @grid.full_width
       offset_left = @grid.child_offset
+      padding_y = @grid.padding[1]
+      
+      blocks = []
       for child, i in @children
-        col = @lowestCol col_heights, child.colspan
+        child.el.text(i)
+        block = 
+          h: child.height + gutter_y
+          w: child.colspan * full_width
 
-        positions.push
-          left: (col * full_width) + offset_left, 
-          top: col_heights[col]
+        blocks.push block
 
-        child_height = child.height + gutter_y
-        for i in [0...child.colspan]
-          col_heights[col + i] += child_height
+      packer.fit(blocks)
 
-      # Store the height of the grid
-      @grid.height = @highestCol(col_heights) - gutter_y + padding_y
+      positions = []
+      for block in blocks
+        if block.fit
+          left = block.fit.x + offset_left
+          top = block.fit.y + padding_y
+          positions.push
+            transform: "translate(#{left}px, #{top}px)"
+      positions
 
-      return positions
+    # _getPositions: ->
+    #   positions = []
+    #   hold_queue = []
+    #   col_heights = @grid.col_heights_init.slice(0)
+    #   columns = @grid.columns
+    #   current_i = 0
+
+    #   full_width = @grid.full_width
+    #   gutter_y = @grid.gutter[1]
+    #   padding_y = @grid.padding[1]
+    #   offset_left = @grid.child_offset
+
+    #   children = @children
+    #   total_children = children.length
+
+    #   savePosition = (col, child) ->
+    #     # Determine the X/Y Position and store it
+    #     left = (col * full_width) + offset_left
+    #     top = col_heights[col]
+    #     positions.push
+    #       transform: "translate(#{left}px, #{top}px)"
+
+    #     # Add this height to the columns array
+    #     child_height = child.height + gutter_y
+    #     col_height = col_heights[col] + child_height
+
+    #     for i in [0...child.colspan]
+    #       col_heights[col + i] = col_height
+
+    #   isNotBlocked = (col, colspan) ->
+    #     original_height = col_heights[col]
+
+    #     for i in [1...colspan]
+    #       if col_heights[col + i] <= original_height
+    #         return true
+
+    #     false
+
+    #   recalculateHoldQueue = =>
+    #     for child, i in hold_queue
+    #       if determinePosition(child)
+    #         hold_queue.splice(i, 0) # Remove from queue
+    #       else
+    #         console.log("nope")
+
+
+    #   determinePosition = (child) =>
+    #     # Get the lowest viable column
+    #     colspan = child.colspan
+    #     col = @lowestCol col_heights, colspan
+
+    #     if colspan is 1
+    #       savePosition(col, child)
+    #     else if isNotBlocked(col, colspan)
+    #       savePosition(col, child)
+    #     else
+    #       hold_queue.push child
+    #       return false
+    #     true
+
+    #   do calculate = =>
+    #     for child, i in children
+    #       current_i = i
+    #       child.el.text(i)
+
+    #       determinePosition(child)
+    #       recalculateHoldQueue()
+
+    #     # Store the height of the grid
+    #     @grid.height = @highestCol(col_heights) - gutter_y + padding_y
+
+    #   return positions
 
 
     # ----------------------------------------------
