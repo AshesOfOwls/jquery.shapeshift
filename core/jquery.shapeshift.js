@@ -6,13 +6,13 @@
     pluginName = "shapeshift";
     defaults = {
       enableResize: true,
-      resizeRate: 300,
+      resizeRate: 400,
       cssAnimations: true,
       state: 'default',
       states: {
         "default": {
           animated: false,
-          animateSpeed: 100,
+          animateSpeed: 400,
           staggerInit: true,
           staggerSpeed: 50,
           sortDirection: 'horizontal',
@@ -21,8 +21,8 @@
           grid: {
             align: 'center',
             columns: null,
-            colWidth: 200,
-            gutter: [20, 10],
+            colWidth: null,
+            gutter: [4, 4],
             padding: [20, 20]
           },
           "class": 'default',
@@ -222,7 +222,7 @@
         if (this.stagger_queue.length) {
           this._clearStaggerQueue();
         }
-        positions = this._getPackPositions();
+        positions = this._getPositions();
         init_class = this.state.initClass;
         normal_class = this.state["class"];
         stagger_speed = this.state.staggerSpeed;
@@ -257,6 +257,65 @@
           this._staggerMove(stagger_queue);
         }
         return this;
+      },
+      _getPositions: function() {
+        var calculate, children, col_heights, columns, current_i, full_width, gutter_y, hold_queue, offset_left, padding_y, positions, savePosition, total_children,
+          _this = this;
+        positions = [];
+        hold_queue = [];
+        col_heights = this.grid.col_heights_init.slice(0);
+        columns = this.grid.columns;
+        current_i = 0;
+        full_width = this.grid.full_width;
+        gutter_y = this.grid.gutter[1];
+        padding_y = this.grid.padding[1];
+        offset_left = this.grid.child_offset;
+        children = this.children;
+        total_children = children.length;
+        savePosition = function(col, child, i) {
+          var child_height, col_height, colspan, left, top, _i, _ref, _results;
+          colspan = child.colspan;
+          col_height = col_heights[col];
+          left = (col * full_width) + offset_left;
+          top = col_height;
+          positions[i] = {
+            transform: "translate(" + left + "px, " + top + "px)"
+          };
+          child_height = child.height + gutter_y;
+          col_height += child_height;
+          _results = [];
+          for (i = _i = 0, _ref = child.colspan; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+            _results.push(col_heights[col + i] = col_height);
+          }
+          return _results;
+        };
+        (calculate = function() {
+          var c, child, col, col_height, colspan, difference, i, offset, _i, _j, _k, _len, _len1;
+          for (_i = 0, _len = children.length; _i < _len; _i++) {
+            child = children[_i];
+            child.saved = false;
+          }
+          for (i = _j = 0, _len1 = children.length; _j < _len1; i = ++_j) {
+            child = children[i];
+            child.el.text(i);
+            colspan = child.colspan;
+            col = _this.lowestCol(col_heights, colspan);
+            if (colspan > 1) {
+              col_height = col_heights[col];
+              offset = 0;
+              for (c = _k = 1; 1 <= colspan ? _k < colspan : _k > colspan; c = 1 <= colspan ? ++_k : --_k) {
+                difference = col_heights[col + c] - col_height;
+                if (difference > 0) {
+                  offset = difference;
+                }
+              }
+              col_heights[col] += offset;
+            }
+            savePosition(col, child, i);
+          }
+          return _this.grid.height = _this.highestCol(col_heights) - gutter_y + padding_y;
+        })();
+        return positions;
       },
       _clearStaggerQueue: function() {
         var $child, child, position, stagger_queue, _i, _len;
@@ -333,46 +392,30 @@
           }, 0);
         }
       },
-      _getPackPositions: function() {
-        var block, blocks, child, full_width, gutter_x, gutter_y, i, left, offset_left, packer, padding_y, positions, top, _i, _j, _len, _len1, _ref;
-        gutter_y = this.grid.gutter[1];
-        gutter_x = this.grid.gutter[0];
-        packer = new Packer(this.grid.container_width + gutter_x, 9999);
-        full_width = this.grid.full_width;
-        offset_left = this.grid.child_offset;
-        padding_y = this.grid.padding[1];
-        blocks = [];
-        _ref = this.children;
-        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-          child = _ref[i];
-          child.el.text(i);
-          block = {
-            h: child.height + gutter_y,
-            w: child.colspan * full_width
-          };
-          blocks.push(block);
-        }
-        packer.fit(blocks);
-        positions = [];
-        for (_j = 0, _len1 = blocks.length; _j < _len1; _j++) {
-          block = blocks[_j];
-          if (block.fit) {
-            left = block.fit.x + offset_left;
-            top = block.fit.y + padding_y;
-            positions.push({
-              transform: "translate(" + left + "px, " + top + "px)"
-            });
-          }
-        }
-        return positions;
-      },
-      lowestCol: function(array, colspan) {
-        var max_span;
+      lowestCol: function(array, colspan, offset) {
+        var augmented_array, i, length, max_span, _i;
         if (colspan) {
           max_span = array.length + 1 - colspan;
           array = array.slice(0).splice(0, max_span);
         }
-        return $.inArray(Math.min.apply(window, array), array);
+        if (offset) {
+          length = array.length;
+          augmented_array = [];
+          for (i = _i = 0; 0 <= length ? _i < length : _i > length; i = 0 <= length ? ++_i : --_i) {
+            augmented_array.push([array[i], i]);
+          }
+          augmented_array.sort(function(a, b) {
+            var ret;
+            ret = a[0] - b[0];
+            if (ret === 0) {
+              ret = a[1] - b[1];
+            }
+            return ret;
+          });
+          return augmented_array[offset][1];
+        } else {
+          return $.inArray(Math.min.apply(window, array), array);
+        }
       },
       highestCol: function(array) {
         return array[$.inArray(Math.max.apply(window, array), array)];
@@ -385,15 +428,11 @@
         return $(window).on("resize", function() {
           if (!resizing) {
             resizing = true;
-            setTimeout(function() {
-              _this._calculateGrid();
-              return _this._arrange();
-            }, speed * .6);
             return setTimeout(function() {
               _this._calculateGrid();
               _this._arrange();
               return resizing = false;
-            }, speed * 1.1);
+            }, speed * .5);
           }
         });
       }

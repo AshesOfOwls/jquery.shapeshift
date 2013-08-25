@@ -11,8 +11,6 @@
 
   <!-- jQuery Touch Punch - Enable Touch Drag and Drop -->
   <script src="../core/vendor/jquery.touch-punch.min.js"></script>
-  <script src="../core/vendor/packer.js"></script>
-  <script src="../core/vendor/packer_growing.js"></script>
 
   <!-- jQuery.Shapeshift -->
   <script src="../core/jquery.shapeshift.js"></script>
@@ -31,29 +29,29 @@
 
     .container > div {
       position: absolute;
-      height: 100px;
-      width: 200px;
+      height: 20px;
+      width: 20px;
     }
 
     .container > div[data-ss-colspan="2"] {
-      height: 140px;
-      width: 420px;
+      height: 20px;
+      width: 44px;
     }
 
     .container > div[data-ss-colspan="3"] {
-      height: 200px;
-      width: 640px;
+      height: 120px;
+      width: 68px;
     }
 
     .container > div[data-ss-colspan="4"] {
-      width: 860px;
+      width: 92px;
     }
 
     .default {
       background: #888;
       opacity: 1;
       -webkit-transform: rotateY(0deg);
-      transition: all .5s;
+      transition: all .4s;
     }
 
     .init {
@@ -66,7 +64,7 @@
     .secondary {
       background: blue;
       opacity: 1;
-      transition: all 1s;
+      transition: all .4s;
     }
 
     .container > .ss-placeholder-child {
@@ -97,6 +95,17 @@
 </head>
 <body>
   <div class="container">
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
     <div data-ss-colspan="2"></div>
     <div></div>
     <div data-ss-colspan="3"></div>
@@ -108,9 +117,520 @@
     <div></div>
     <div></div>
     <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
     <div data-ss-colspan="2"></div>
     <div></div>
     <div data-ss-colspan="3"></div>
+    <div data-ss-colspan="2"></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div data-ss-colspan="2"></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div data-ss-colspan="2"></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div data-ss-colspan="4"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="4"></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div data-ss-colspan="3"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div data-ss-colspan="2"></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
   </div>
 
 <!--   <div class="container">
