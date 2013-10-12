@@ -112,6 +112,7 @@
       $container.off("ss-setTargetPosition").on "ss-setTargetPosition", => @setTargetPosition()
       $container.off("ss-destroy").on "ss-destroy", => @destroy()
       $container.off("ss-shuffle").on "ss-shuffle", => @shuffle()
+      $container.off("ss-enable-drag-n-drop").on "ss-enable-drag-n-drop", => @enableDragNDrop()
 
     # ----------------------------
     # setGlobals:
