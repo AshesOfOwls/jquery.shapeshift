@@ -29,6 +29,7 @@
       position: relative;
       float: left;
       width: 50%;
+      transition: all .4s;
     }
 
     .resizeToggle {
@@ -46,23 +47,23 @@
       background: blue;
       border: 1px solid black;
       position: absolute;
-      height: 30px;
-      width: 50px;
+      height: 50px;
+      width: 30px;
     }
 
     .container .medium {
-      height: 90px;
-      width: 110px;
+      height: 110px;
+      width: 70px;
     }
 
     .container .large {
-      height: 90px;
-      width: 170px;
+      height: 170px;
+      width: 110px;
     }
 
     .container .extra-large {
-      height: 90px;
-      width: 230px;
+      height: 230px;
+      width: 150px;
     }
 
 
@@ -70,7 +71,7 @@
       background: #888;
       opacity: 1;
       -webkit-transform: rotateY(0deg);
-      transition: all .35s, width 0s, height 0s;
+      transition: all .4s, width 0s, height 0s;
     }
 
     .init {

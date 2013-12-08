@@ -17,9 +17,9 @@
 
         grid:
           columns: null
-          itemWidth: 50
+          itemWidth: 30
           gutterX: 10
-          gutterY: 20
+          gutterY: 10
           paddingY: 30
           paddingX: 30
 
@@ -31,8 +31,8 @@
         grid:
           columns: null
           itemWidth: 40
-          gutterX: 30
-          gutterY: 40
+          gutterX: 10
+          gutterY: 10
           paddingY: 20
           paddingX: 20
 
@@ -41,7 +41,7 @@
 
     resize:
       refreshRate: 10
-      snapTo: [[100,100],[200,200],[300,300],[400,400]]
+      snapTo: [[30,50],[70,110],[110,170],[150,230]]
       increment: [60,60]
       minHeight: 40
       minWidth: 40
@@ -112,7 +112,7 @@
       @children.push
         id: id
         el: $child
-        h: $child.height() + @grid.gutterY
+        h: $child.outerHeight() + @grid.gutterY
         span: Math.round(width / @grid.colWidth)
         initialized: false
 
@@ -120,7 +120,7 @@
       child = @_getChildById(id)
       width ||= child.el.outerWidth()
       width += @grid.gutterX
-      height ||= child.el.height()
+      height ||= child.el.outerHeight()
       child.h = height + @grid.gutterY
       child.span = Math.ceil(width / @grid.colWidth)
 
@@ -196,6 +196,9 @@
     _arrange: ->
       staggerSpeed = @state.init.stagger
       stagger = 0
+      
+      @$container.height(@grid.maxHeight)
+      
       for child, i in @children
         $child = child.el
         initialize = !child.initialized 
@@ -208,7 +211,6 @@
         @_move(child)
         @_delayedMove(child, stagger) if initialize
 
-        @$container.height(@grid.maxHeight)
 
     _delayedMove: (child, speed = 0) ->
       setTimeout(=>
@@ -298,6 +300,7 @@
 
               newWidth = snapIncrements[closest][0]
               newHeight = snapIncrements[closest][1]
+              console.log(newHeight)
 
             $el.css({ width: newWidth })
             $el.css({ height: newHeight })

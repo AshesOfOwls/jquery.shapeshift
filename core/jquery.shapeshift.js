@@ -11,9 +11,9 @@
           "class": 'default',
           grid: {
             columns: null,
-            itemWidth: 50,
+            itemWidth: 30,
             gutterX: 10,
-            gutterY: 20,
+            gutterY: 10,
             paddingY: 30,
             paddingX: 30
           },
@@ -26,8 +26,8 @@
           grid: {
             columns: null,
             itemWidth: 40,
-            gutterX: 30,
-            gutterY: 40,
+            gutterX: 10,
+            gutterY: 10,
             paddingY: 20,
             paddingX: 20
           }
@@ -38,7 +38,7 @@
       },
       resize: {
         refreshRate: 10,
-        snapTo: [[100, 100], [200, 200], [300, 300], [400, 400]],
+        snapTo: [[30, 50], [70, 110], [110, 170], [150, 230]],
         increment: [60, 60],
         minHeight: 40,
         minWidth: 40
@@ -114,7 +114,7 @@
         return this.children.push({
           id: id,
           el: $child,
-          h: $child.height() + this.grid.gutterY,
+          h: $child.outerHeight() + this.grid.gutterY,
           span: Math.round(width / this.grid.colWidth),
           initialized: false
         });
@@ -124,7 +124,7 @@
         child = this._getChildById(id);
         width || (width = child.el.outerWidth());
         width += this.grid.gutterX;
-        height || (height = child.el.height());
+        height || (height = child.el.outerHeight());
         child.h = height + this.grid.gutterY;
         return child.span = Math.ceil(width / this.grid.colWidth);
       },
@@ -208,6 +208,7 @@
         var $child, child, i, initialize, stagger, staggerSpeed, _i, _len, _ref, _results;
         staggerSpeed = this.state.init.stagger;
         stagger = 0;
+        this.$container.height(this.grid.maxHeight);
         _ref = this.children;
         _results = [];
         for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
@@ -221,9 +222,10 @@
           }
           this._move(child);
           if (initialize) {
-            this._delayedMove(child, stagger);
+            _results.push(this._delayedMove(child, stagger));
+          } else {
+            _results.push(void 0);
           }
-          _results.push(this.$container.height(this.grid.maxHeight));
         }
         return _results;
       },
@@ -325,6 +327,7 @@
                 }
                 newWidth = snapIncrements[closest][0];
                 newHeight = snapIncrements[closest][1];
+                console.log(newHeight);
               }
               $el.css({
                 width: newWidth
