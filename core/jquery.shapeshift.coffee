@@ -1,4 +1,3 @@
-# ----------------------------------------------------------------------
 #  Project: jQuery.Shapeshift
 #  Description: Align elements to a column grid with drag and drop.
 #  Author: Scott Elwood
@@ -6,143 +5,290 @@
 #  License: MIT
 #
 #  Version: 3.0
-# ----------------------------------------------------------------------
 
 (($, window, document, undefined_) ->
   pluginName = "shapeshift"
 
-  defaults = 
-    # Features
-    enableResize: true
-    resizeRate: 400
-    cssAnimations: true
-
-    # States
+  defaults =
     state: 'default'
     states:
       default:
-        animated: false
-        animateSpeed: 400
-
-        staggerInit: true
-        staggerSpeed: 50
-
-        sortDirection: 'horizontal'
-        sortAlgorithm: 'grid'
-        sortTolerance: 0
+        class: 'default'
 
         grid:
-          align: 'center'
           columns: null
-          colWidth: null
-          gutter: [4, 4]
-          padding: [20, 20]
+          itemWidth: 50
+          gutterX: 10
+          gutterY: 20
+          paddingY: 30
+          paddingX: 30
 
-        class: 'default'
-        initClass: 'init'
+        init:
+          class: 'init'
+          stagger: 2
 
       secondary:
-        animated: true
-        animateSpeed: 100
-
         grid:
-          align: 'center'
           columns: null
-          colWidth: null
-          gutter: ["auto", 10]
-          padding: [50, 50]
+          itemWidth: 40
+          gutterX: 30
+          gutterY: 40
+          paddingY: 20
+          paddingX: 20
 
-        class: 'secondary'
-        initClass: 'init'
+    responsive:
+      refreshRate: 100
+
+    resize:
+      refreshRate: 10
+      snapTo: [[100,100],[200,200],[300,300],[400,400]]
+      increment: [60,60]
+      minHeight: 40
+      minWidth: 40
 
   Plugin = (element, options) ->
     @options = $.extend({}, defaults, options)
-    @grid = {}
-    @grid.percent_cols = false
-
     @$container = $(element)
-    @children = []
-
-    @stagger_queue = []
-    @stagger_interval = null
-
-    @state = @options.states[@options.state]
-
     @init()
+
+    @ # Return this
 
   Plugin:: =
     init: ->
+      @_createGlobals()
+      @_initializeGrid()
       @_enableFeatures()
       @_parseChildren()
-      @_initializeGrid()
-      @_arrange()
+      @render()
 
+    _createGlobals: ->
+      @idCount = 0
+      @children = []
 
-    # ----------------------------------------------------------------------
-    # --------------------------- Public Methods ---------------------------
-    # ----------------------------------------------------------------------
+      @state = @options.states[@options.state]
 
-    # ----------------------------------------------
-    # insert
-    #
-    # Insert a new child into the container
-    #
-    # $child: The element to be inserted 
-    #      i: The position to be inserted into
-    # ----------------------------------------------
-    insert: ($child, i) ->
-      i = 999999 if i is undefined # Append to the end by default
+    _initializeGrid: ->
+      @grid = $.extend({}, @state.grid)
 
-      @_parseChild($child, i)
-      @_initializeGrid()
-      @_arrange()
+      colWidth = @grid.itemWidth + @grid.gutterX
+      @grid.colWidth = colWidth
 
-    # ----------------------------------------------
-    # insertMany
-    #
-    # Insert multiple new children into this 
-    # container
-    #
-    # children: An array of children which is
-    #           formatted as such:
-    #           [[$child, index], [$child, index]]
-    # ----------------------------------------------
-    insertMany: (children) ->
-      for child in children
-        $child = child[0]
-        index = child[1] || 999999 # Append to the end by default
+      @grid.percentColWidth = false
+      if typeof colWidth is "string" && colWidth.indexOf("%") >= 0
+        @grid.percentColWidth = colWidth
 
-        @$container.append($child)
-        @_parseChild($child, index)
+      @_calculateGrid()
 
-      @_initializeGrid()
-      @_arrange()
+    _enableFeatures: ->
+      @_enableResponsive()
+      @_enableResizing()
 
+    _parseChildren: ->
+      $children = @$container.children()
 
-    # ----------------------------------------------
-    # setState:
-    # Change the currently active state
-    # ----------------------------------------------
+      for child in $children
+        @addChild(child)
+
+    addChild: (child) ->     
+      id = @idCount++
+      $child = $(child)
+      $child.attr('data-ss-id', id)
+      width = $child.outerWidth() + @grid.gutterX
+
+      @children.push
+        id: id
+        el: $child
+        h: $child.height() + @grid.gutterY
+        span: Math.round(width / @grid.colWidth)
+        initialized: false
+
+    _reparseChild: (id, width, height) ->
+      child = @_getChildById(id)
+      width ||= child.el.outerWidth()
+      width += @grid.gutterX
+      height ||= child.el.height()
+      child.h = height + @grid.gutterY
+      child.span = Math.ceil(width / @grid.colWidth)
+
+    _getChildById: (id) ->
+      return @children.filter((child) -> return child.id == id )[0]
+
+    render: ->
+      @_calculateGrid()
+      @_pack()
+      @arrange()
+
+    _calculateGrid: ->
+      if @grid.percentColWidth
+        @grid.colWidth = Math.floor @$container.width() * (parseInt(@grid.percentColWidth) * .01)
+
+      unless @state.grid.columns >= 1
+        width = @$container.width() + @grid.gutterX - (@state.grid.paddingX * 2)
+        @grid.columns = Math.floor(width / @grid.colWidth)
+
+    _pack: ->
+      colHeights = []
+      colHeights.push @grid.paddingY for c in [0...@grid.columns]
+      
+      for child, i in @children
+        span = child.span
+
+        if span > 1
+          position = @_fitMinArea(colHeights, span)
+          col = position.col
+          yPos = position.height
+        else
+          col = @_fitMinIndex(colHeights)
+          yPos = colHeights[col]
+
+        child.x = col * @grid.colWidth + @state.grid.paddingX
+        child.y = yPos
+
+        height = yPos + child.h
+        
+        for offset in [0...child.span]
+          colHeights[col + offset] = height
+
+    _fitMinIndex: (array) ->
+      array.indexOf(Math.min.apply(null, array))
+
+    _fitMinArea: (array, span) ->
+      positions = array.length - span + 1
+      areas = []
+      maxHeights = []
+
+      for offset in [0...positions]
+        heights = array.slice(0).splice(offset, span)
+        max = Math.max.apply(null, heights)
+
+        area = max
+        for h in heights
+          area += max - h
+
+        areas.push(area)
+        maxHeights.push(max)
+
+      col = @_fitMinIndex(areas)
+
+      return {
+        col: col
+        height: maxHeights[col]
+      }
+
+    arrange: ->
+      for child, i in @children
+        $child = child.el
+        initialize = !child.initialized 
+
+        if initialize
+          $child.addClass @state.init.class
+          child.initialized = true
+
+        @_move(child)
+        @_delayedMove(child, @state.init.stagger * i) if initialize
+
+    _delayedMove: (child, speed = 0) ->
+      setTimeout(=>
+        child.initialized = true
+        child.el.addClass(@state.class).removeClass(@state.init.class)
+        @_move(child)
+      , speed)
+
+    _move: (child, init) ->
+      child.el.css
+        transform: 'translate('+child.x+'px, '+child.y+'px)'
+
     setState: (state_name) ->
       state = @options.states[state_name]
 
       if state
-        cssAnimations = @options.cssAnimations
-        old_state_class = @state.class
-        new_state_class = state.class
-
-        for child in @children
-          if cssAnimations
-            child.el.removeClass(old_state_class).addClass(new_state_class)
-          else
-            child.el.switchClass(old_state_class, new_state_class, @options.animateSpeed)
-
         @state = state
         @_initializeGrid()
-        @_arrange()
+        @render()
       else
         console.error("Shapeshift does not recognize the state '#{state_name}', are you sure it's defined?")
 
+    _enableResponsive: ->
+      resizing = false
+      finalTimeout = null
+      speed = @options.responsive.refreshRate
+
+      $(window).on 'resize.ss-responsive', =>
+        unless resizing
+          resizing = true
+
+          clearTimeout(finalTimeout)
+          finalTimeout = setTimeout( =>
+            @render()
+          , speed * 2)
+
+          setTimeout( ->
+            resizing = false
+          , speed)
+
+          @render()
+
+    _enableResizing: ->
+      mousedown = resizing = false
+      startH = startW = startX = startY = $el = id = null
+      minWidth = @options.resize.minWidth
+      minHeight = @options.resize.minHeight
+      speed = @options.resize.refreshRate
+      snapIncrements = @options.resize.snapTo
+      
+      if snapIncrements is null
+        xIncrement = @options.resize.increment[0]
+        yIncrement = @options.resize.increment[1]
+
+      @$container.on "mousedown.ss-resize", ".resizeToggle", (e) ->
+        $el = $(this).closest("*[data-ss-id]")
+        id = parseInt($el.attr('data-ss-id'))
+
+        mousedown = true
+        startH = $el.height()
+        startW = $el.outerWidth()
+        startX = e.pageX
+        startY = e.pageY
+
+      $(window).on "mousemove.ss-resize mouseup.ss-resize", (e) =>
+        if mousedown
+          if e.type is "mousemove" && !resizing
+            resizing = true
+
+            if snapIncrements is null
+              newHeight = e.pageY - startY
+              newWidth = e.pageX - startX
+
+              newWidth = startW + (Math.ceil(newWidth / xIncrement) * xIncrement)
+              newWidth = minWidth if newWidth <= minWidth
+              newHeight = startH + (Math.ceil(newHeight / yIncrement) * yIncrement)
+              newHeight = newHeight if newHeight <= minHeight
+            else
+              newHeight = startH + e.pageY - startY
+              newWidth = startW + e.pageX - startX
+
+              closest = 0
+              minDistance = 9999999
+              for increment, i in snapIncrements
+                if increment[0] <= newWidth || increment[1] <= newHeight
+                  closest = i
+
+              newWidth = snapIncrements[closest][0]
+              newHeight = snapIncrements[closest][1]
+
+            $el.css({ width: newWidth })
+            $el.css({ height: newHeight })
+
+            @_reparseChild(id, newWidth, newHeight)
+            @render()
+
+            setTimeout( ->
+              resizing = false
+            , speed)
+
+          if e.type is "mouseup"
+            mousedown = false
+            startH = startW = startX = startY = $el = id = null
 
     # ----------------------------------------------
     # shuffle:
@@ -160,444 +306,12 @@
           a[i] = t
 
       @children = a
-      @_arrange()
-
-
-    # ----------------------------------------------------------------------
-    # -------------------------- Private Methods ---------------------------
-    # ----------------------------------------------------------------------
-
-    # ----------------------------------------------
-    # enableFeatures:
-    # Enables options features
-    # ----------------------------------------------
-    _enableFeatures: ->
-      @enableResize() if @options.enableResize
-
-
-    # ----------------------------------------------
-    # parseAllChildren
-    #
-    # Go over every child element in the container
-    # and add it to the global children array
-    # ----------------------------------------------
-    _parseChildren: ->
-      $children = @$container.children()
-      child_count = $children.length
-
-      for i in [0...child_count]
-        $child = $($children[i])
-        @_parseChild($child, i)
-
-      @
-
-
-    # ----------------------------------------------
-    # parseChild
-    #
-    # Add a single childs properties to a specific
-    # index position in the children array
-    #
-    # $child: The element to be inserted 
-    #      i: The position to be inserted into
-    # ----------------------------------------------
-    _parseChild: ($child, i) ->
-      colspan = parseInt($child.attr("data-ss-colspan")) || 1
-      @grid.maxColspan = colspan unless colspan <= @grid.maxColspan
-
-      @children.splice i, 0,
-        el: $child
-        colspan: colspan
-        height: $child.outerHeight()
-        position: null
-        initialized: false
-
-
-    # ----------------------------------------------
-    # initializeGrid
-    #
-    # Determines the initial grid properties
-    # ----------------------------------------------
-    _initializeGrid: ->
-      grid_state = @state.grid
-
-      # Column width
-      col_width = grid_state.colWidth
-      percent_col_width = false
-
-      if col_width is null
-        if @children.length > 0
-          col_width = @children[0].el.innerWidth()
-      else if typeof col_width is "string"
-        if col_width.indexOf("%") >= 0
-          percent_col_width = true
-
-      # Padding
-      @grid.padding = grid_state.padding
-
-      # Set grid properties
-      @grid.col_width = col_width
-      @grid.percent_col_width = percent_col_width
-
-      @_calculateGrid()
-
-
-    # ----------------------------------------------
-    # calculateGrid:
-    #
-    # Some properties of the grid have to be
-    # calculated dynamically, such as when the
-    # container is resized.
-    # ----------------------------------------------
-    _calculateGrid: ->
-      grid_state = @state.grid
-      padding = @grid.padding
-
-      container_width = @$container.innerWidth() - (padding[0] * 2)
-      child_offset = padding[0]
-
-      # Column Width
-      col_width = @grid.col_width
-      if @grid.percent_col_width
-        col_width = Math.floor container_width * (parseInt(grid_state.colWidth) * .01)
-
-      # Gutter Width
-      gutter = grid_state.gutter.slice(0)
-      for axis, i in gutter
-        if typeof axis is "string"
-          if axis.indexOf('%') > 0
-            gutter[i] = Math.floor container_width * (parseInt(axis) * .01)
-
-      # Columns
-      columns = grid_state.columns
-      if gutter[0] >= 0
-        # Defined Gutter
-        full_width = col_width + gutter[0]
-        columns ||= Math.floor (container_width + gutter[0]) / full_width
-      else
-        # Auto Gutter
-        columns ||= Math.floor container_width / col_width
-        gutter_total = container_width - (columns * col_width)
-        gutter[0] = if columns > 1 then gutter_total / (columns - 1) else 0
-        full_width = col_width + gutter[0]
-      columns = @grid.maxColspan if columns < @grid.maxColspan
-
-      # Offset
-      align = grid_state.align
-      if align isnt "left"
-        leftover_space = (container_width + gutter[0]) - (columns * full_width)
-        if leftover_space > 0
-          child_offset += if align is "right" then leftover_space else leftover_space / 2
-
-      # Set grid properties
-      @grid.columns = columns
-      @grid.container_width = container_width
-      @grid.gutter = gutter
-      @grid.col_width = col_width
-      @grid.full_width = full_width
-      @grid.child_offset = child_offset
-      @grid.col_heights_init = []
-      @grid.col_heights_init.push padding[1] for i in [0...columns]
-
-
-    # ----------------------------------------------
-    # arrange
-    #
-    # Reclaculates the position of each element
-    # and arranges them to those positions
-    # ----------------------------------------------
-    _arrange: ->
-      @_clearStaggerQueue() if @stagger_queue.length
-
-      positions = @_getPositions()
-
-      init_class = @state.initClass
-      normal_class = @state.class
-
-      stagger_speed = @state.staggerSpeed
-      stagger_init = @state.staggerInit
-      stagger_queue = []
-
-      # Animate the container to the appropriate height
-      @$container.css height: @grid.height
-
-      for child, i in @children
-        $child = child.el
-        initialize = !child.initialized
-        
-        # Get the x/y position of this child
-        position = positions[i]
-
-        if position
-          if initialize
-            # Assign initialization style
-            $child.addClass(init_class)
-            child.initialized = true
-
-          # Animate only if necessary
-          position_string = JSON.stringify(position)
-          if position_string isnt child.position
-            if initialize
-              stagger_queue.push [$child, position]
-            else
-              @_move $child, position
-
-            # Store the position string for checking
-            child.position = position_string
+      @render()
       
-      @_staggerMove(stagger_queue) if stagger_queue.length
-
-      @
-
-    _getPositions: ->
-      positions = []
-      hold_queue = []
-      col_heights = @grid.col_heights_init.slice(0)
-      columns = @grid.columns
-      current_i = 0
-
-      full_width = @grid.full_width
-      gutter_y = @grid.gutter[1]
-      padding_y = @grid.padding[1]
-      offset_left = @grid.child_offset
-
-      children = @children
-      total_children = children.length
-
-      savePosition = (col, child, i) ->
-        colspan = child.colspan
-        col_height = col_heights[col]
-
-        # Determine the X/Y Position and store it
-        left = (col * full_width) + offset_left
-        top = col_height
-        positions[i] =
-          transform: "translate(#{left}px, #{top}px)"
-
-        # Add this height to the columns array
-        child_height = child.height + gutter_y
-        col_height += child_height
-
-        for i in [0...child.colspan]
-          col_heights[col + i] = col_height
-
-      # Go over each child
-      # Skip if already saved
-      # If it is single column, force it into lowest col
-      # If it is multi column, determine the first feasible column
-      # If tolerance is set > 0, scan over the next children to see if they fit
-      # if they do, insert them and say they are saved
-
-
-      do calculate = =>
-        child.saved = false for child in children
-
-        # Go over each child
-        for child, i in children
-          child.el.text(i)
-
-          colspan = child.colspan
-          col = @lowestCol col_heights, colspan
-
-          if colspan > 1
-            # Bump the element up
-            col_height = col_heights[col]
-            offset = 0
-            for c in [1...colspan]
-              difference = col_heights[col + c] - col_height
-              offset = difference if difference > 0
-            col_heights[col] += offset
-
-          savePosition col, child, i
-
-        # Store the height of the grid
-        @grid.height = @highestCol(col_heights) - gutter_y + padding_y
-
-      return positions
-
-
-    # ----------------------------------------------
-    # clearStaggerQueue:
-    #
-    # If items are being staggered and another
-    # arrange is called then it will mess everything
-    # up by not allowing the timeouts to complete.
-    # To solve this, if another arrangement is
-    # called before a stagger finishes then all the
-    # staggered children get forced into position.
-    # ----------------------------------------------
-    _clearStaggerQueue: ->
-      clearInterval(@stagger_interval)
-      @stagger_interval = null
-
-      stagger_queue = @stagger_queue
-
-      for child in stagger_queue
-        if child
-          $child = child[0]
-          position = child[1]
-
-          @_move($child, position, true)
-
-      @stagger_queue = []
-
-
-    # ----------------------------------------------
-    # staggerMove:
-    #
-    # Uses a delay to move a child into position.
-    # Also useful for a 0 delay right after child
-    # initialization to compensate for the removal
-    # of CSS transitions.
-    #
-    # stagger_queue: An array containing the child
-    #                elements and the positions they
-    #                will be arranged to, e.g.:
-    #       [[$child, position], [$child, position]]
-    # ----------------------------------------------
-    _staggerMove: (stagger_queue) ->
-      if @state.staggerInit
-        i = 0
-        @stagger_queue = stagger_queue
-        @stagger_interval = setInterval =>
-          child = stagger_queue[i]
-
-          if child
-            $child = child[0]
-            position = child[1]
-
-            @_move($child, position, true)
-
-            # Prevent rearrangement when clearing queue
-            @stagger_queue[i] = null
-
-            i++
-          else
-            clearInterval(@stagger_interval)
-            @stagger_interval = null
-
-        , @state.staggerSpeed
-      else
-        for child in stagger_queue
-          $child = child[0]
-          position = child[1]
-
-          @_staggerTimeout($child, position)
-
-
-    # ----------------------------------------------
-    # staggerTimeout:
-    #
-    # A special use case for when initializing items
-    # that aren't supossed to be staggered. They
-    # have to be put through a setTimeout of time 0
-    # because it allows for the initialization style
-    # to be fully added before arranging to the
-    # state style.
-    #
-    # $child:        The element to be moved
-    # position:      The hash of CSS attributes
-    # ----------------------------------------------
-    _staggerTimeout: ($child, position) ->
-      setTimeout =>
-        @_move($child, position, true)
-      , 0
-
-    # ----------------------------------------------
-    # move:
-    #
-    # Physically move a single child to a position
-    #
-    # $child:      The element to be moved
-    # position:    The hash of CSS attributes
-    # ----------------------------------------------
-    _move: ($child, position, initialize_state = false) ->
-      css_animations = @options.cssAnimations
-
-      if css_animations
-        $child.css(position)
-      else
-        animate_speed = @options.animateSpeed
-        $child.stop(true, false).animate(position, animate_speed)
-
-      if initialize_state
-        setTimeout =>
-          if css_animations
-            # CSS Transitions
-            $child.addClass(@state.class).removeClass(@state.initClass)
-          else
-            # jQuery Transitions
-            $child.switchClass(@state.initClass, @state.class, animate_speed)
-        , 0
-
-
-    # ----------------------------------------------
-    # lowestCol:
-    #
-    # Return the index position of the lowest
-    # number from within a given array
-    #
-    # array: The array to process
-    # ----------------------------------------------
-    lowestCol: (array, colspan, offset) ->
-      if colspan
-        max_span = array.length + 1 - colspan
-        array = array.slice(0).splice(0, max_span)
-
-      if offset
-        length = array.length
-        augmented_array = []
-        
-        for i in [0...length]
-          augmented_array.push [array[i], i]
-
-        augmented_array.sort (a, b) ->
-            ret = a[0] - b[0]
-            ret = a[1] - b[1] if ret is 0
-            ret
-        augmented_array[offset][1]
-      else
-        $.inArray Math.min.apply(window,array), array
-
-
-    # ----------------------------------------------
-    # highestCol:
-    #
-    # Return the index position of the highest
-    # number from within a given array
-    #
-    # array: The array to process
-    # ----------------------------------------------
-    highestCol: (array) ->
-      array[$.inArray Math.max.apply(window,array), array]
-
-
-    # ----------------------------------------------------------------------
-    # ----------------------------- Features -------------------------------
-    # ----------------------------------------------------------------------
-
-    # ----------------------------------------------
-    # enableResize:
-    #
-    # Arrange the grid upon resizing the window
-    # ----------------------------------------------
-    enableResize: ->
-      speed = @options.resizeRate
-      resizing = false
-
-      $(window).on "resize", =>
-        unless resizing
-          resizing = true
-
-          setTimeout =>
-            @_calculateGrid()
-            @_arrange()
-            resizing = false
-          , speed * .5
-
-  # ----------------------------------------------------------------------
-  # ------------------------ Dirty Initialization ------------------------
-  # ----------------------------------------------------------------------
+  # -----------------------------------
+  # Initialization
+  # Allows private and public functions
+  # -----------------------------------
   $.fn[pluginName] = (options) ->
     args = arguments
     scoped_name = "plugin_" + pluginName

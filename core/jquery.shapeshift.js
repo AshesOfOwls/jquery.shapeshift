@@ -5,104 +5,328 @@
     var Plugin, defaults, pluginName;
     pluginName = "shapeshift";
     defaults = {
-      enableResize: true,
-      resizeRate: 400,
-      cssAnimations: true,
       state: 'default',
       states: {
         "default": {
-          animated: false,
-          animateSpeed: 400,
-          staggerInit: true,
-          staggerSpeed: 50,
-          sortDirection: 'horizontal',
-          sortAlgorithm: 'grid',
-          sortTolerance: 0,
-          grid: {
-            align: 'center',
-            columns: null,
-            colWidth: null,
-            gutter: [4, 4],
-            padding: [20, 20]
-          },
           "class": 'default',
-          initClass: 'init'
+          grid: {
+            columns: null,
+            itemWidth: 50,
+            gutterX: 10,
+            gutterY: 20,
+            paddingY: 30,
+            paddingX: 30
+          },
+          init: {
+            "class": 'init',
+            stagger: 2
+          }
         },
         secondary: {
-          animated: true,
-          animateSpeed: 100,
           grid: {
-            align: 'center',
             columns: null,
-            colWidth: null,
-            gutter: ["auto", 10],
-            padding: [50, 50]
-          },
-          "class": 'secondary',
-          initClass: 'init'
+            itemWidth: 40,
+            gutterX: 30,
+            gutterY: 40,
+            paddingY: 20,
+            paddingX: 20
+          }
         }
+      },
+      responsive: {
+        refreshRate: 100
+      },
+      resize: {
+        refreshRate: 10,
+        snapTo: [[100, 100], [200, 200], [300, 300], [400, 400]],
+        increment: [60, 60],
+        minHeight: 40,
+        minWidth: 40
       }
     };
     Plugin = function(element, options) {
       this.options = $.extend({}, defaults, options);
-      this.grid = {};
-      this.grid.percent_cols = false;
       this.$container = $(element);
-      this.children = [];
-      this.stagger_queue = [];
-      this.stagger_interval = null;
-      this.state = this.options.states[this.options.state];
-      return this.init();
+      this.init();
+      return this;
     };
     Plugin.prototype = {
       init: function() {
+        this._createGlobals();
+        this._initializeGrid();
         this._enableFeatures();
         this._parseChildren();
-        this._initializeGrid();
-        return this._arrange();
+        return this.render();
       },
-      insert: function($child, i) {
-        if (i === void 0) {
-          i = 999999;
-        }
-        this._parseChild($child, i);
-        this._initializeGrid();
-        return this._arrange();
+      _createGlobals: function() {
+        this.idCount = 0;
+        this.children = [];
+        return this.state = this.options.states[this.options.state];
       },
-      insertMany: function(children) {
-        var $child, child, index, _i, _len;
-        for (_i = 0, _len = children.length; _i < _len; _i++) {
-          child = children[_i];
-          $child = child[0];
-          index = child[1] || 999999;
-          this.$container.append($child);
-          this._parseChild($child, index);
+      _initializeGrid: function() {
+        var colWidth;
+        this.grid = $.extend({}, this.state.grid);
+        colWidth = this.grid.itemWidth + this.grid.gutterX;
+        this.grid.colWidth = colWidth;
+        this.grid.percentColWidth = false;
+        if (typeof colWidth === "string" && colWidth.indexOf("%") >= 0) {
+          this.grid.percentColWidth = colWidth;
         }
-        this._initializeGrid();
-        return this._arrange();
+        return this._calculateGrid();
+      },
+      _enableFeatures: function() {
+        this._enableResponsive();
+        return this._enableResizing();
+      },
+      _parseChildren: function() {
+        var $children, child, _i, _len, _results;
+        $children = this.$container.children();
+        _results = [];
+        for (_i = 0, _len = $children.length; _i < _len; _i++) {
+          child = $children[_i];
+          _results.push(this.addChild(child));
+        }
+        return _results;
+      },
+      addChild: function(child) {
+        var $child, id, width;
+        id = this.idCount++;
+        $child = $(child);
+        $child.attr('data-ss-id', id);
+        width = $child.outerWidth() + this.grid.gutterX;
+        return this.children.push({
+          id: id,
+          el: $child,
+          h: $child.height() + this.grid.gutterY,
+          span: Math.round(width / this.grid.colWidth),
+          initialized: false
+        });
+      },
+      _reparseChild: function(id, width, height) {
+        var child;
+        child = this._getChildById(id);
+        width || (width = child.el.outerWidth());
+        width += this.grid.gutterX;
+        height || (height = child.el.height());
+        child.h = height + this.grid.gutterY;
+        return child.span = Math.ceil(width / this.grid.colWidth);
+      },
+      _getChildById: function(id) {
+        return this.children.filter(function(child) {
+          return child.id === id;
+        })[0];
+      },
+      render: function() {
+        this._calculateGrid();
+        this._pack();
+        return this.arrange();
+      },
+      _calculateGrid: function() {
+        var width;
+        if (this.grid.percentColWidth) {
+          this.grid.colWidth = Math.floor(this.$container.width() * (parseInt(this.grid.percentColWidth) * .01));
+        }
+        if (!(this.state.grid.columns >= 1)) {
+          width = this.$container.width() + this.grid.gutterX - (this.state.grid.paddingX * 2);
+          return this.grid.columns = Math.floor(width / this.grid.colWidth);
+        }
+      },
+      _pack: function() {
+        var c, child, col, colHeights, height, i, offset, position, span, yPos, _i, _j, _len, _ref, _ref1, _results;
+        colHeights = [];
+        for (c = _i = 0, _ref = this.grid.columns; 0 <= _ref ? _i < _ref : _i > _ref; c = 0 <= _ref ? ++_i : --_i) {
+          colHeights.push(this.grid.paddingY);
+        }
+        _ref1 = this.children;
+        _results = [];
+        for (i = _j = 0, _len = _ref1.length; _j < _len; i = ++_j) {
+          child = _ref1[i];
+          span = child.span;
+          if (span > 1) {
+            position = this._fitMinArea(colHeights, span);
+            col = position.col;
+            yPos = position.height;
+          } else {
+            col = this._fitMinIndex(colHeights);
+            yPos = colHeights[col];
+          }
+          child.x = col * this.grid.colWidth + this.state.grid.paddingX;
+          child.y = yPos;
+          height = yPos + child.h;
+          _results.push((function() {
+            var _k, _ref2, _results1;
+            _results1 = [];
+            for (offset = _k = 0, _ref2 = child.span; 0 <= _ref2 ? _k < _ref2 : _k > _ref2; offset = 0 <= _ref2 ? ++_k : --_k) {
+              _results1.push(colHeights[col + offset] = height);
+            }
+            return _results1;
+          })());
+        }
+        return _results;
+      },
+      _fitMinIndex: function(array) {
+        return array.indexOf(Math.min.apply(null, array));
+      },
+      _fitMinArea: function(array, span) {
+        var area, areas, col, h, heights, max, maxHeights, offset, positions, _i, _j, _len;
+        positions = array.length - span + 1;
+        areas = [];
+        maxHeights = [];
+        for (offset = _i = 0; 0 <= positions ? _i < positions : _i > positions; offset = 0 <= positions ? ++_i : --_i) {
+          heights = array.slice(0).splice(offset, span);
+          max = Math.max.apply(null, heights);
+          area = max;
+          for (_j = 0, _len = heights.length; _j < _len; _j++) {
+            h = heights[_j];
+            area += max - h;
+          }
+          areas.push(area);
+          maxHeights.push(max);
+        }
+        col = this._fitMinIndex(areas);
+        return {
+          col: col,
+          height: maxHeights[col]
+        };
+      },
+      arrange: function() {
+        var $child, child, i, initialize, _i, _len, _ref, _results;
+        _ref = this.children;
+        _results = [];
+        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+          child = _ref[i];
+          $child = child.el;
+          initialize = !child.initialized;
+          if (initialize) {
+            $child.addClass(this.state.init["class"]);
+            child.initialized = true;
+          }
+          this._move(child);
+          if (initialize) {
+            _results.push(this._delayedMove(child, this.state.init.stagger * i));
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      },
+      _delayedMove: function(child, speed) {
+        var _this = this;
+        if (speed == null) {
+          speed = 0;
+        }
+        return setTimeout(function() {
+          child.initialized = true;
+          child.el.addClass(_this.state["class"]).removeClass(_this.state.init["class"]);
+          return _this._move(child);
+        }, speed);
+      },
+      _move: function(child, init) {
+        return child.el.css({
+          transform: 'translate(' + child.x + 'px, ' + child.y + 'px)'
+        });
       },
       setState: function(state_name) {
-        var child, cssAnimations, new_state_class, old_state_class, state, _i, _len, _ref;
+        var state;
         state = this.options.states[state_name];
         if (state) {
-          cssAnimations = this.options.cssAnimations;
-          old_state_class = this.state["class"];
-          new_state_class = state["class"];
-          _ref = this.children;
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            child = _ref[_i];
-            if (cssAnimations) {
-              child.el.removeClass(old_state_class).addClass(new_state_class);
-            } else {
-              child.el.switchClass(old_state_class, new_state_class, this.options.animateSpeed);
-            }
-          }
           this.state = state;
           this._initializeGrid();
-          return this._arrange();
+          return this.render();
         } else {
           return console.error("Shapeshift does not recognize the state '" + state_name + "', are you sure it's defined?");
         }
+      },
+      _enableResponsive: function() {
+        var finalTimeout, resizing, speed,
+          _this = this;
+        resizing = false;
+        finalTimeout = null;
+        speed = this.options.responsive.refreshRate;
+        return $(window).on('resize.ss-responsive', function() {
+          if (!resizing) {
+            resizing = true;
+            clearTimeout(finalTimeout);
+            finalTimeout = setTimeout(function() {
+              return _this.render();
+            }, speed * 2);
+            setTimeout(function() {
+              return resizing = false;
+            }, speed);
+            return _this.render();
+          }
+        });
+      },
+      _enableResizing: function() {
+        var $el, id, minHeight, minWidth, mousedown, resizing, snapIncrements, speed, startH, startW, startX, startY, xIncrement, yIncrement,
+          _this = this;
+        mousedown = resizing = false;
+        startH = startW = startX = startY = $el = id = null;
+        minWidth = this.options.resize.minWidth;
+        minHeight = this.options.resize.minHeight;
+        speed = this.options.resize.refreshRate;
+        snapIncrements = this.options.resize.snapTo;
+        if (snapIncrements === null) {
+          xIncrement = this.options.resize.increment[0];
+          yIncrement = this.options.resize.increment[1];
+        }
+        this.$container.on("mousedown.ss-resize", ".resizeToggle", function(e) {
+          $el = $(this).closest("*[data-ss-id]");
+          id = parseInt($el.attr('data-ss-id'));
+          mousedown = true;
+          startH = $el.height();
+          startW = $el.outerWidth();
+          startX = e.pageX;
+          return startY = e.pageY;
+        });
+        return $(window).on("mousemove.ss-resize mouseup.ss-resize", function(e) {
+          var closest, i, increment, minDistance, newHeight, newWidth, _i, _len;
+          if (mousedown) {
+            if (e.type === "mousemove" && !resizing) {
+              resizing = true;
+              if (snapIncrements === null) {
+                newHeight = e.pageY - startY;
+                newWidth = e.pageX - startX;
+                newWidth = startW + (Math.ceil(newWidth / xIncrement) * xIncrement);
+                if (newWidth <= minWidth) {
+                  newWidth = minWidth;
+                }
+                newHeight = startH + (Math.ceil(newHeight / yIncrement) * yIncrement);
+                if (newHeight <= minHeight) {
+                  newHeight = newHeight;
+                }
+              } else {
+                newHeight = startH + e.pageY - startY;
+                newWidth = startW + e.pageX - startX;
+                closest = 0;
+                minDistance = 9999999;
+                for (i = _i = 0, _len = snapIncrements.length; _i < _len; i = ++_i) {
+                  increment = snapIncrements[i];
+                  if (increment[0] <= newWidth || increment[1] <= newHeight) {
+                    closest = i;
+                  }
+                }
+                newWidth = snapIncrements[closest][0];
+                newHeight = snapIncrements[closest][1];
+              }
+              $el.css({
+                width: newWidth
+              });
+              $el.css({
+                height: newHeight
+              });
+              _this._reparseChild(id, newWidth, newHeight);
+              _this.render();
+              setTimeout(function() {
+                return resizing = false;
+              }, speed);
+            }
+            if (e.type === "mouseup") {
+              mousedown = false;
+              return startH = startW = startX = startY = $el = id = null;
+            }
+          }
+        });
       },
       shuffle: function() {
         var a, i, j, t;
@@ -115,326 +339,7 @@
           a[i] = t;
         }
         this.children = a;
-        return this._arrange();
-      },
-      _enableFeatures: function() {
-        if (this.options.enableResize) {
-          return this.enableResize();
-        }
-      },
-      _parseChildren: function() {
-        var $child, $children, child_count, i, _i;
-        $children = this.$container.children();
-        child_count = $children.length;
-        for (i = _i = 0; 0 <= child_count ? _i < child_count : _i > child_count; i = 0 <= child_count ? ++_i : --_i) {
-          $child = $($children[i]);
-          this._parseChild($child, i);
-        }
-        return this;
-      },
-      _parseChild: function($child, i) {
-        var colspan;
-        colspan = parseInt($child.attr("data-ss-colspan")) || 1;
-        if (!(colspan <= this.grid.maxColspan)) {
-          this.grid.maxColspan = colspan;
-        }
-        return this.children.splice(i, 0, {
-          el: $child,
-          colspan: colspan,
-          height: $child.outerHeight(),
-          position: null,
-          initialized: false
-        });
-      },
-      _initializeGrid: function() {
-        var col_width, grid_state, percent_col_width;
-        grid_state = this.state.grid;
-        col_width = grid_state.colWidth;
-        percent_col_width = false;
-        if (col_width === null) {
-          if (this.children.length > 0) {
-            col_width = this.children[0].el.innerWidth();
-          }
-        } else if (typeof col_width === "string") {
-          if (col_width.indexOf("%") >= 0) {
-            percent_col_width = true;
-          }
-        }
-        this.grid.padding = grid_state.padding;
-        this.grid.col_width = col_width;
-        this.grid.percent_col_width = percent_col_width;
-        return this._calculateGrid();
-      },
-      _calculateGrid: function() {
-        var align, axis, child_offset, col_width, columns, container_width, full_width, grid_state, gutter, gutter_total, i, leftover_space, padding, _i, _j, _len, _results;
-        grid_state = this.state.grid;
-        padding = this.grid.padding;
-        container_width = this.$container.innerWidth() - (padding[0] * 2);
-        child_offset = padding[0];
-        col_width = this.grid.col_width;
-        if (this.grid.percent_col_width) {
-          col_width = Math.floor(container_width * (parseInt(grid_state.colWidth) * .01));
-        }
-        gutter = grid_state.gutter.slice(0);
-        for (i = _i = 0, _len = gutter.length; _i < _len; i = ++_i) {
-          axis = gutter[i];
-          if (typeof axis === "string") {
-            if (axis.indexOf('%') > 0) {
-              gutter[i] = Math.floor(container_width * (parseInt(axis) * .01));
-            }
-          }
-        }
-        columns = grid_state.columns;
-        if (gutter[0] >= 0) {
-          full_width = col_width + gutter[0];
-          columns || (columns = Math.floor((container_width + gutter[0]) / full_width));
-        } else {
-          columns || (columns = Math.floor(container_width / col_width));
-          gutter_total = container_width - (columns * col_width);
-          gutter[0] = columns > 1 ? gutter_total / (columns - 1) : 0;
-          full_width = col_width + gutter[0];
-        }
-        if (columns < this.grid.maxColspan) {
-          columns = this.grid.maxColspan;
-        }
-        align = grid_state.align;
-        if (align !== "left") {
-          leftover_space = (container_width + gutter[0]) - (columns * full_width);
-          if (leftover_space > 0) {
-            child_offset += align === "right" ? leftover_space : leftover_space / 2;
-          }
-        }
-        this.grid.columns = columns;
-        this.grid.container_width = container_width;
-        this.grid.gutter = gutter;
-        this.grid.col_width = col_width;
-        this.grid.full_width = full_width;
-        this.grid.child_offset = child_offset;
-        this.grid.col_heights_init = [];
-        _results = [];
-        for (i = _j = 0; 0 <= columns ? _j < columns : _j > columns; i = 0 <= columns ? ++_j : --_j) {
-          _results.push(this.grid.col_heights_init.push(padding[1]));
-        }
-        return _results;
-      },
-      _arrange: function() {
-        var $child, child, i, init_class, initialize, normal_class, position, position_string, positions, stagger_init, stagger_queue, stagger_speed, _i, _len, _ref;
-        if (this.stagger_queue.length) {
-          this._clearStaggerQueue();
-        }
-        positions = this._getPositions();
-        init_class = this.state.initClass;
-        normal_class = this.state["class"];
-        stagger_speed = this.state.staggerSpeed;
-        stagger_init = this.state.staggerInit;
-        stagger_queue = [];
-        this.$container.css({
-          height: this.grid.height
-        });
-        _ref = this.children;
-        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-          child = _ref[i];
-          $child = child.el;
-          initialize = !child.initialized;
-          position = positions[i];
-          if (position) {
-            if (initialize) {
-              $child.addClass(init_class);
-              child.initialized = true;
-            }
-            position_string = JSON.stringify(position);
-            if (position_string !== child.position) {
-              if (initialize) {
-                stagger_queue.push([$child, position]);
-              } else {
-                this._move($child, position);
-              }
-              child.position = position_string;
-            }
-          }
-        }
-        if (stagger_queue.length) {
-          this._staggerMove(stagger_queue);
-        }
-        return this;
-      },
-      _getPositions: function() {
-        var calculate, children, col_heights, columns, current_i, full_width, gutter_y, hold_queue, offset_left, padding_y, positions, savePosition, total_children,
-          _this = this;
-        positions = [];
-        hold_queue = [];
-        col_heights = this.grid.col_heights_init.slice(0);
-        columns = this.grid.columns;
-        current_i = 0;
-        full_width = this.grid.full_width;
-        gutter_y = this.grid.gutter[1];
-        padding_y = this.grid.padding[1];
-        offset_left = this.grid.child_offset;
-        children = this.children;
-        total_children = children.length;
-        savePosition = function(col, child, i) {
-          var child_height, col_height, colspan, left, top, _i, _ref, _results;
-          colspan = child.colspan;
-          col_height = col_heights[col];
-          left = (col * full_width) + offset_left;
-          top = col_height;
-          positions[i] = {
-            transform: "translate(" + left + "px, " + top + "px)"
-          };
-          child_height = child.height + gutter_y;
-          col_height += child_height;
-          _results = [];
-          for (i = _i = 0, _ref = child.colspan; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-            _results.push(col_heights[col + i] = col_height);
-          }
-          return _results;
-        };
-        (calculate = function() {
-          var c, child, col, col_height, colspan, difference, i, offset, _i, _j, _k, _len, _len1;
-          for (_i = 0, _len = children.length; _i < _len; _i++) {
-            child = children[_i];
-            child.saved = false;
-          }
-          for (i = _j = 0, _len1 = children.length; _j < _len1; i = ++_j) {
-            child = children[i];
-            child.el.text(i);
-            colspan = child.colspan;
-            col = _this.lowestCol(col_heights, colspan);
-            if (colspan > 1) {
-              col_height = col_heights[col];
-              offset = 0;
-              for (c = _k = 1; 1 <= colspan ? _k < colspan : _k > colspan; c = 1 <= colspan ? ++_k : --_k) {
-                difference = col_heights[col + c] - col_height;
-                if (difference > 0) {
-                  offset = difference;
-                }
-              }
-              col_heights[col] += offset;
-            }
-            savePosition(col, child, i);
-          }
-          return _this.grid.height = _this.highestCol(col_heights) - gutter_y + padding_y;
-        })();
-        return positions;
-      },
-      _clearStaggerQueue: function() {
-        var $child, child, position, stagger_queue, _i, _len;
-        clearInterval(this.stagger_interval);
-        this.stagger_interval = null;
-        stagger_queue = this.stagger_queue;
-        for (_i = 0, _len = stagger_queue.length; _i < _len; _i++) {
-          child = stagger_queue[_i];
-          if (child) {
-            $child = child[0];
-            position = child[1];
-            this._move($child, position, true);
-          }
-        }
-        return this.stagger_queue = [];
-      },
-      _staggerMove: function(stagger_queue) {
-        var $child, child, i, position, _i, _len, _results,
-          _this = this;
-        if (this.state.staggerInit) {
-          i = 0;
-          this.stagger_queue = stagger_queue;
-          return this.stagger_interval = setInterval(function() {
-            var $child, child, position;
-            child = stagger_queue[i];
-            if (child) {
-              $child = child[0];
-              position = child[1];
-              _this._move($child, position, true);
-              _this.stagger_queue[i] = null;
-              return i++;
-            } else {
-              clearInterval(_this.stagger_interval);
-              return _this.stagger_interval = null;
-            }
-          }, this.state.staggerSpeed);
-        } else {
-          _results = [];
-          for (_i = 0, _len = stagger_queue.length; _i < _len; _i++) {
-            child = stagger_queue[_i];
-            $child = child[0];
-            position = child[1];
-            _results.push(this._staggerTimeout($child, position));
-          }
-          return _results;
-        }
-      },
-      _staggerTimeout: function($child, position) {
-        var _this = this;
-        return setTimeout(function() {
-          return _this._move($child, position, true);
-        }, 0);
-      },
-      _move: function($child, position, initialize_state) {
-        var animate_speed, css_animations,
-          _this = this;
-        if (initialize_state == null) {
-          initialize_state = false;
-        }
-        css_animations = this.options.cssAnimations;
-        if (css_animations) {
-          $child.css(position);
-        } else {
-          animate_speed = this.options.animateSpeed;
-          $child.stop(true, false).animate(position, animate_speed);
-        }
-        if (initialize_state) {
-          return setTimeout(function() {
-            if (css_animations) {
-              return $child.addClass(_this.state["class"]).removeClass(_this.state.initClass);
-            } else {
-              return $child.switchClass(_this.state.initClass, _this.state["class"], animate_speed);
-            }
-          }, 0);
-        }
-      },
-      lowestCol: function(array, colspan, offset) {
-        var augmented_array, i, length, max_span, _i;
-        if (colspan) {
-          max_span = array.length + 1 - colspan;
-          array = array.slice(0).splice(0, max_span);
-        }
-        if (offset) {
-          length = array.length;
-          augmented_array = [];
-          for (i = _i = 0; 0 <= length ? _i < length : _i > length; i = 0 <= length ? ++_i : --_i) {
-            augmented_array.push([array[i], i]);
-          }
-          augmented_array.sort(function(a, b) {
-            var ret;
-            ret = a[0] - b[0];
-            if (ret === 0) {
-              ret = a[1] - b[1];
-            }
-            return ret;
-          });
-          return augmented_array[offset][1];
-        } else {
-          return $.inArray(Math.min.apply(window, array), array);
-        }
-      },
-      highestCol: function(array) {
-        return array[$.inArray(Math.max.apply(window, array), array)];
-      },
-      enableResize: function() {
-        var resizing, speed,
-          _this = this;
-        speed = this.options.resizeRate;
-        resizing = false;
-        return $(window).on("resize", function() {
-          if (!resizing) {
-            resizing = true;
-            return setTimeout(function() {
-              _this._calculateGrid();
-              _this._arrange();
-              return resizing = false;
-            }, speed * .5);
-          }
-        });
+        return this.render();
       }
     };
     return $.fn[pluginName] = function(options) {
