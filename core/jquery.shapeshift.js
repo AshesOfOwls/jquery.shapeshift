@@ -19,7 +19,7 @@
           },
           init: {
             "class": 'init',
-            stagger: 2
+            stagger: 100
           }
         },
         secondary: {
@@ -119,7 +119,7 @@
       render: function() {
         this._calculateGrid();
         this._pack();
-        return this.arrange();
+        return this._arrange();
       },
       _calculateGrid: function() {
         var width;
@@ -132,13 +132,13 @@
         }
       },
       _pack: function() {
-        var c, child, col, colHeights, height, i, offset, position, span, yPos, _i, _j, _len, _ref, _ref1, _results;
+        var c, child, col, colHeights, height, i, maxHeight, offset, position, span, yPos, _i, _j, _k, _len, _ref, _ref1, _ref2;
+        maxHeight = 0;
         colHeights = [];
         for (c = _i = 0, _ref = this.grid.columns; 0 <= _ref ? _i < _ref : _i > _ref; c = 0 <= _ref ? ++_i : --_i) {
           colHeights.push(this.grid.paddingY);
         }
         _ref1 = this.children;
-        _results = [];
         for (i = _j = 0, _len = _ref1.length; _j < _len; i = ++_j) {
           child = _ref1[i];
           span = child.span;
@@ -153,16 +153,14 @@
           child.x = col * this.grid.colWidth + this.state.grid.paddingX;
           child.y = yPos;
           height = yPos + child.h;
-          _results.push((function() {
-            var _k, _ref2, _results1;
-            _results1 = [];
-            for (offset = _k = 0, _ref2 = child.span; 0 <= _ref2 ? _k < _ref2 : _k > _ref2; offset = 0 <= _ref2 ? ++_k : --_k) {
-              _results1.push(colHeights[col + offset] = height);
+          for (offset = _k = 0, _ref2 = child.span; 0 <= _ref2 ? _k < _ref2 : _k > _ref2; offset = 0 <= _ref2 ? ++_k : --_k) {
+            colHeights[col + offset] = height;
+            if (height > maxHeight) {
+              maxHeight = height;
             }
-            return _results1;
-          })());
+          }
         }
-        return _results;
+        return this.grid.maxHeight = maxHeight - this.state.grid.gutterY + this.state.grid.paddingY;
       },
       _fitMinIndex: function(array) {
         return array.indexOf(Math.min.apply(null, array));
@@ -189,7 +187,7 @@
           height: maxHeights[col]
         };
       },
-      arrange: function() {
+      _arrange: function() {
         var $child, child, i, initialize, _i, _len, _ref, _results;
         _ref = this.children;
         _results = [];
@@ -203,10 +201,9 @@
           }
           this._move(child);
           if (initialize) {
-            _results.push(this._delayedMove(child, this.state.init.stagger * i));
-          } else {
-            _results.push(void 0);
+            this._delayedMove(child, this.state.init.stagger * i);
           }
+          _results.push(this.$container.height(this.grid.maxHeight));
         }
         return _results;
       },

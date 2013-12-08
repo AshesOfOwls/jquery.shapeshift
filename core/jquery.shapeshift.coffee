@@ -25,7 +25,7 @@
 
         init:
           class: 'init'
-          stagger: 2
+          stagger: 100
 
       secondary:
         grid:
@@ -116,7 +116,7 @@
     render: ->
       @_calculateGrid()
       @_pack()
-      @arrange()
+      @_arrange()
 
     _calculateGrid: ->
       if @grid.percentColWidth
@@ -127,6 +127,7 @@
         @grid.columns = Math.floor(width / @grid.colWidth)
 
     _pack: ->
+      maxHeight = 0
       colHeights = []
       colHeights.push @grid.paddingY for c in [0...@grid.columns]
       
@@ -148,6 +149,9 @@
         
         for offset in [0...child.span]
           colHeights[col + offset] = height
+          maxHeight = height if height > maxHeight
+
+      @grid.maxHeight = maxHeight - @state.grid.gutterY + @state.grid.paddingY
 
     _fitMinIndex: (array) ->
       array.indexOf(Math.min.apply(null, array))
@@ -175,7 +179,7 @@
         height: maxHeights[col]
       }
 
-    arrange: ->
+    _arrange: ->
       for child, i in @children
         $child = child.el
         initialize = !child.initialized 
@@ -186,6 +190,8 @@
 
         @_move(child)
         @_delayedMove(child, @state.init.stagger * i) if initialize
+
+        @$container.height(@grid.maxHeight)
 
     _delayedMove: (child, speed = 0) ->
       setTimeout(=>
