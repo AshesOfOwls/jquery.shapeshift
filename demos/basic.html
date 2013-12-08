@@ -101,10 +101,14 @@
       $newDiv = $("<div></div>")
       newDivs = []
 
-      for(var i=0;i<20;i++) {
-        $clone = $newDiv.clone().text(i)
-        newDivs.push([$clone, 20 + i * 2])
-      }
+      setTimeout(function() {
+        $container = $containers.first()
+          for(var i=0;i<100;i++) {
+            $clone = $newDiv.clone()
+            newDivs.push($clone)
+          }
+        $container.shapeshift('insertMany', newDivs)
+      }, 700)
     })
   </script>
 </head>

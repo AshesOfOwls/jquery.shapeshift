@@ -25,7 +25,7 @@
 
         init:
           class: 'init'
-          stagger: 100
+          stagger: 10
 
       secondary:
         grid:
@@ -87,9 +87,23 @@
       $children = @$container.children()
 
       for child in $children
-        @addChild(child)
+        @_parse(child)
 
-    addChild: (child) ->     
+    add: (child) ->
+      @_parse(child)
+      @render()
+
+    insert: ($child) ->
+      @$container.append($child)
+      @add($child)
+
+    insertMany: ($children) ->
+      @$container.append($children)
+      for child in $children
+        @_parse(child)
+      @render()
+
+    _parse: (child) ->     
       id = @idCount++
       $child = $(child)
       $child.attr('data-ss-id', id)
@@ -102,7 +116,7 @@
         span: Math.round(width / @grid.colWidth)
         initialized: false
 
-    _reparseChild: (id, width, height) ->
+    _reparse: (id, width, height) ->
       child = @_getChildById(id)
       width ||= child.el.outerWidth()
       width += @grid.gutterX
@@ -180,6 +194,8 @@
       }
 
     _arrange: ->
+      staggerSpeed = @state.init.stagger
+      stagger = 0
       for child, i in @children
         $child = child.el
         initialize = !child.initialized 
@@ -187,9 +203,10 @@
         if initialize
           $child.addClass @state.init.class
           child.initialized = true
+          stagger += staggerSpeed
 
         @_move(child)
-        @_delayedMove(child, @state.init.stagger * i) if initialize
+        @_delayedMove(child, stagger) if initialize
 
         @$container.height(@grid.maxHeight)
 
@@ -285,7 +302,7 @@
             $el.css({ width: newWidth })
             $el.css({ height: newHeight })
 
-            @_reparseChild(id, newWidth, newHeight)
+            @_reparse(id, newWidth, newHeight)
             @render()
 
             setTimeout( ->

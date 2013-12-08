@@ -19,7 +19,7 @@
           },
           init: {
             "class": 'init',
-            stagger: 100
+            stagger: 10
           }
         },
         secondary: {
@@ -84,11 +84,28 @@
         _results = [];
         for (_i = 0, _len = $children.length; _i < _len; _i++) {
           child = $children[_i];
-          _results.push(this.addChild(child));
+          _results.push(this._parse(child));
         }
         return _results;
       },
-      addChild: function(child) {
+      add: function(child) {
+        this._parse(child);
+        return this.render();
+      },
+      insert: function($child) {
+        this.$container.append($child);
+        return this.add($child);
+      },
+      insertMany: function($children) {
+        var child, _i, _len;
+        this.$container.append($children);
+        for (_i = 0, _len = $children.length; _i < _len; _i++) {
+          child = $children[_i];
+          this._parse(child);
+        }
+        return this.render();
+      },
+      _parse: function(child) {
         var $child, id, width;
         id = this.idCount++;
         $child = $(child);
@@ -102,7 +119,7 @@
           initialized: false
         });
       },
-      _reparseChild: function(id, width, height) {
+      _reparse: function(id, width, height) {
         var child;
         child = this._getChildById(id);
         width || (width = child.el.outerWidth());
@@ -188,7 +205,9 @@
         };
       },
       _arrange: function() {
-        var $child, child, i, initialize, _i, _len, _ref, _results;
+        var $child, child, i, initialize, stagger, staggerSpeed, _i, _len, _ref, _results;
+        staggerSpeed = this.state.init.stagger;
+        stagger = 0;
         _ref = this.children;
         _results = [];
         for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
@@ -198,10 +217,11 @@
           if (initialize) {
             $child.addClass(this.state.init["class"]);
             child.initialized = true;
+            stagger += staggerSpeed;
           }
           this._move(child);
           if (initialize) {
-            this._delayedMove(child, this.state.init.stagger * i);
+            this._delayedMove(child, stagger);
           }
           _results.push(this.$container.height(this.grid.maxHeight));
         }
@@ -312,7 +332,7 @@
               $el.css({
                 height: newHeight
               });
-              _this._reparseChild(id, newWidth, newHeight);
+              _this._reparse(id, newWidth, newHeight);
               _this.render();
               setTimeout(function() {
                 return resizing = false;
