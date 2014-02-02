@@ -365,13 +365,44 @@
         (determinePositions = function() {
           var child, _j, _results;
           _results = [];
+          
+          
+           // Create an array of the # of items than need to go in
+           // each column vertically
+           // (ex: [3, 2, 2] if 7 items going in 3 columns)
+           var floor = Math.floor( total_children / globals.columns );
+           var mod = total_children % globals.columns;
+           var arr = [], item_comparator = 0, col_in_order = 0;
+           for (var x = 0; x < globals.columns; x++) {
+              var y = floor;
+              if (x+1 <= mod) y++;
+              arr.push(y);
+           }
+           // Get the first column's required number of items
+           // less 1 for zero-based item index used in the following
+           // for loop
+           item_comparator = arr[col_in_order] - 1;
+          
+          
           for (i = _j = 0; 0 <= total_children ? _j < total_children : _j > total_children; i = 0 <= total_children ? ++_j : --_j) {
             child = parsed_children[i];
             if (!(!include_dragged && child.el.hasClass(dragged_class))) {
               if (child.colspan > 1) {
                 child.col = determineMultiposition(child);
               } else {
-                child.col = _this.lowestCol(col_heights);
+                
+                // When the current item being placed is in
+                // the next column, refresh the comparator by
+                // adding the next column's required # of items
+                if ( item_comparator == i - 1 ) {
+                   col_in_order++;
+                   item_comparator += arr[col_in_order];
+                }
+                 
+                // Place the item in the lower index column (to the left)
+                // based on the default lowestCol or by order as calculated above
+                child.col = Math.min(_this.lowestCol(col_heights), col_in_order);
+                
               }
               if (child.col === void 0) {
                 saved_children.push(child);
