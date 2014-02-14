@@ -30,7 +30,7 @@
       dragRate: 100,
       dragWhitelist: "*",
       crossDropWhitelist: "*",
-      cutoffStart: null,
+      cutoffStart: 1,
       cutoffEnd: null,
       handle: false,
       cloneClass: "ss-cloned-child",
@@ -64,6 +64,10 @@
             errors = true;
             console.error("" + error_msg + " option colWidth must be specified if Shapeshift is initialized with no active children.");
           }
+        }
+        if (options.cutoffStart<1) {
+          errors = true;
+          console.error("" + error_msg + " cutoffStart must be >0.");
         }
         return !errors;
       };
@@ -512,7 +516,7 @@
           selected_x = $selected.offset().left - $start_container.offset().left + (this.globals.col_width / 2);
           selected_y = $selected.offset().top - $start_container.offset().top + ($selected.height() / 2);
           shortest_distance = 9999999;
-          target_position = 0;
+          target_position = options.cutoffStart-1;
           if (total_positions > 1) {
             cutoff_start = options.cutoffStart + 1 || 0;
             cutoff_end = options.cutoffEnd || total_positions;
