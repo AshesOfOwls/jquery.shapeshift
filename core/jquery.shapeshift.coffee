@@ -60,58 +60,50 @@
       @render()
       @loaded = true
 
-    # 
-    # Global variable initialization
-    #
     _createGlobals: ->
       @idCount = 1
       @children = []
       @state = @grid = null
 
-    # Changes to a different state defined in the properties.
+
+    # ----------------
+    # Public Functions
+    # ----------------
+
+    # A full render of the grid
     #
-    # @param [String] name the name of the state
+    render: ->
+      @_pack()
+      @_arrange()
+    
+    # Reverses the children
     #
-    _setState: (name) ->
-      @options.state = name || @options.state || "default"
-      @state = @options.states[@options.state]
+    reverse: ->
+      @children.reverse()
+      @render()
+      @children
 
-      @_setGrid()
-      @_toggleFeatures() if @loaded
-
-    # Sets the grid to match the current state
+    # Randomly shuffles the children
+    # @note see: https://gist.github.com/ddgromit/859699
     #
-    _setGrid: ->
-      @grid = $.extend({}, @state.grid)
-      @grid.colWidth = @grid.itemWidth + @grid.gutter.x
+    shuffle: ->
+      a = @children
 
-    # Calculates the properties of the grid according to the
-    # options set by the current state.
-    #
-    _calculateGrid: ->
-      col_width = @grid.colWidth
-      width = @$container.width()
-      inner_width = width - (@grid.padding.x * 2)
+      i = a.length
+      while --i > 0
+          j = ~~(Math.random() * (i + 1))
+          t = a[j]
+          a[j] = a[i]
+          a[i] = t
 
-      columns = @state.grid.columns || Math.floor((inner_width + @grid.gutter.x) / col_width)
-      if columns > @children.length
-        child_span = 0
-        child_span += child.span for child in @children
-        columns = child_span if columns > child_span
-        
-      @grid.columns = columns
-      @grid.innerWidth = inner_width
-      @grid.width = width
+      @children = a
+      @render()
+      @children
 
-      if @grid.align is "center"
-        @grid.whiteSpace = (@grid.gutter.x / 2) + (inner_width - (columns * col_width)) / 2
 
-    # Toggles extra features on and off
-    #
-    _toggleFeatures: ->
-      @_toggleResponsive()
-      @_toggleResizing()
-      @_toggleDraggable()
+    # -----------------
+    # Private Functions
+    # -----------------
 
     # Adds all of the children in the current container to the app
     #
@@ -137,22 +129,88 @@
 
       @_parseChild(id)
 
-    # Calculates the dynamic properties of the child
+    # Iterates over all of the children and moves them to their
+    # physical position
     #
-    # @param [Integer] id the child id
-    #
-    _parseChild: (id) ->
-      child = @_getChildById(id)
+    _arrange: ->
+      @$container.height(@maxHeight)
+      
+      for child in @children
+        unless child.dragging
+          $child = child.el
+          $child.addClass @state.class # TODO: Is this necessary?
+          @_move(child)
 
+    # Calculates the properties of the grid according to the
+    # options set by the current state.
+    #
+    _calculateGrid: ->
       col_width = @grid.colWidth
-      gutter_x = @grid.gutter.x
+      width = @$container.width()
+      inner_width = width - (@grid.padding.x * 2)
 
-      span = Math.ceil((child.el.outerWidth() + gutter_x) / col_width)
-      width = (span * col_width) - gutter_x
+      columns = @state.grid.columns || Math.floor((inner_width + @grid.gutter.x) / col_width)
+      if columns > @children.length
+        child_span = 0
+        child_span += child.span for child in @children
+        columns = child_span if columns > child_span
+        
+      @grid.columns = columns
+      @grid.innerWidth = inner_width
+      @grid.width = width
 
-      child.h = child.el.outerHeight()
-      child.w = width
-      child.span = span
+      if @grid.align is "center"
+        @grid.whiteSpace = (@grid.gutter.x / 2) + (inner_width - (columns * col_width)) / 2
+
+    # Moves a child to a different position in the @children array
+    # @note see: http://stackoverflow.com/questions/5839134
+    #
+    # @param [Integer] id the id of the child to move
+    # @param [Integer] index the index position to move to
+    #
+    _changePosition: (id, index) ->
+      child = @_getChildById id
+      prev_index = @children.indexOf child
+      new_index = index
+      @children.splice(new_index, 0, @children.splice(prev_index, 1)[0])
+
+    # Iterates over all the feasible locations for the child and creates
+    # an array containing the amount of unused area if the child was positioned
+    # there. It then chooses the column with the lowest unused area.
+    #
+    # @param [Array] array the array of column heights
+    # @param [Integer] span the column span of the child
+    #
+    _fitMinArea: (array, span) ->
+      columns = array.length
+      positions = array.length - span + 1
+      areas = []
+      max_heights = []
+
+      for offset in [0...positions]
+        heights = array.slice(0).splice(offset, span)
+        max = Math.max.apply(null, heights)
+
+        area = max
+        for h in heights
+          area += max - h
+
+        areas.push(area)
+        max_heights.push(max)
+
+      col = @_fitMinIndex(areas)
+
+      return {
+        col: col
+        height: max_heights[col]
+      }
+
+    # Finds the index of the lowest, left most column in the array.
+    #
+    # @param [array] array the array of column heights
+    #
+    _fitMinIndex: (array) ->
+      array.indexOf(Math.min.apply(null, array))
 
     # Returns the child object with the corresponding id
     #
@@ -161,11 +219,13 @@
     _getChildById: (id) ->
       return @children.filter((child) -> return child.id == id )[0]
 
-    # A full render of the grid
+    # Moves a child to its determined position
     #
-    render: ->
-      @_pack()
-      @_arrange()
+    # @param [Object] child the child to move
+    #
+    _move: (child) ->
+      child.el.css
+        transform: 'translate('+child.x+'px, '+child.y+'px)'
 
     # Iterates over all of the children and determines their
     # coordinates in the grid.
@@ -218,88 +278,106 @@
         for child in @children
           child.y = @maxHeight - child.y - child.h
 
-    # Finds the index of the lowest, left most column in the array.
+    # Calculates the dynamic properties of the child
     #
-    # @param [array] array the array of column heights
+    # @param [Integer] id the child id
     #
-    _fitMinIndex: (array) ->
-      array.indexOf(Math.min.apply(null, array))
+    _parseChild: (id) ->
+      child = @_getChildById(id)
 
-    # Iterates over all the feasible locations for the child and creates
-    # an array containing the amount of unused area if the child was positioned
-    # there. It then chooses the column with the lowest unused area.
+      col_width = @grid.colWidth
+      gutter_x = @grid.gutter.x
+
+      span = Math.ceil((child.el.outerWidth() + gutter_x) / col_width)
+      width = (span * col_width) - gutter_x
+
+      child.h = child.el.outerHeight()
+      child.w = width
+      child.span = span
+
+    # Sets the grid to match the current state
     #
-    # @param [Array] array the array of column heights
-    # @param [Integer] span the column span of the child
+    _setGrid: ->
+      @grid = $.extend({}, @state.grid)
+      @grid.colWidth = @grid.itemWidth + @grid.gutter.x
+
+    # Changes to a different state defined in the properties.
     #
-    _fitMinArea: (array, span) ->
-      columns = array.length
-      positions = array.length - span + 1
-      areas = []
-      max_heights = []
-
-      for offset in [0...positions]
-        heights = array.slice(0).splice(offset, span)
-        max = Math.max.apply(null, heights)
-
-        area = max
-        for h in heights
-          area += max - h
-
-        areas.push(area)
-        max_heights.push(max)
-
-      col = @_fitMinIndex(areas)
-
-      return {
-        col: col
-        height: max_heights[col]
-      }
-
-    # Iterates over all of the children and moves them to their
-    # physical position
+    # @param [String] name the name of the state
     #
-    _arrange: ->
-      @$container.height(@maxHeight)
-      
-      for child in @children
-        unless child.dragging
-          $child = child.el
-          $child.addClass @state.class # TODO: Is this necessary?
-          @_move(child)
+    _setState: (name) ->
+      @options.state = name || @options.state || "default"
+      @state = @options.states[@options.state]
 
-    # Moves a child to its determined position
+      @_setGrid()
+      @_toggleFeatures() if @loaded
+
+    # Toggles whether a child is active, such as when dragging 
+    # or resizing
     #
-    # @param [Object] child the child to move
-    #
-    _move: (child) ->
-      child.el.css
-        transform: 'translate('+child.x+'px, '+child.y+'px)'
+    # @param [Integer] id the id of the child
+    # @param [Boolean] active true if the child is active
+    _toggleActive: (id, active) ->
+      child = @_getChildById(id)
 
-    # Creates or destroys the ability to have the container rearrange
-    # upon resize of the window.
-    #
-    # @param [Boolean] enabled True to enable repsonsiveness
-    #
-    _toggleResponsive: (enabled) ->
-      if @state.responsive.enabled && enabled isnt false
-        refresh_rate = @state.responsive.refreshRate
-        resizing = false
-        timeout = null
-
-        $(window).off('.ss-responsive').on 'resize.ss-responsive', =>
-          unless resizing
-            resizing = true
-
-            clearTimeout(timeout)
-            timeout = setTimeout( =>
-              @_calculateGrid()
-              @render()
-              resizing = false
-            , refresh_rate)
-
+      if active 
+        child.el.addClass("no-transitions").css
+          zIndex: @idCount + 1
       else
-        $(window).off '.ss-responsive'
+        child.el.removeClass("no-transitions").css
+          zIndex: child.id
+
+    # Toggles extra features on and off
+    #
+    _toggleFeatures: ->
+      @_toggleDraggable()
+      @_toggleResizing()
+      @_toggleResponsive()
+
+    # Creates or destroys the ability to have the children be draggable.
+    #
+    # @param [Boolean] enabled True to enable dragging of children
+    #
+    _toggleDraggable: (enabled) ->
+      @drag = { child: null }
+      if @state.draggable.enabled && enabled isnt false
+        for child in @children
+          child.el.draggable
+            start: (e, ui) =>
+              return false if $(e.originalEvent.target).is @state.resize.handle
+
+              $child = ui.helper
+              id = parseInt $child.attr "data-ssid"
+              @drag.child = @_getChildById id
+              @drag.child.dragging = true
+
+              @_toggleActive id, true
+              @drag.child.el.css transform: "none"
+            drag: (e, ui) =>
+              x = e.pageX + @$container.offset().left
+              y = e.pageY + @$container.offset().top
+              min_distance = 999999
+              spot = null
+
+              for child, i in @children
+                dx = x - child.x
+                dy = y - child.y
+                distance = Math.sqrt(dx * dx + dy * dy)
+
+                if distance < min_distance
+                  min_distance = distance
+                  spot = i
+
+              console.log @children[spot].dragging
+              if spot isnt null and @children[spot].dragging isnt true
+                @_changePosition @drag.child.id, spot
+                @render()
+            stop: (e, ui) =>
+              child = @drag.child
+              child.dragging = false
+              child.el.css { left: 0, top: 0 }
+
+              @_toggleActive child.id, false
 
     # Creates or destroys the ability to have the children resize
     # when their handle is clicked on.
@@ -390,101 +468,30 @@
         @$container.off '.ss-resize'
         $(window).off '.ss-resize'
 
-    # Creates or destroys the ability to have the children be draggable.
+    # Creates or destroys the ability to have the container rearrange
+    # upon resize of the window.
     #
-    # @param [Boolean] enabled True to enable dragging of children
+    # @param [Boolean] enabled True to enable repsonsiveness
     #
-    _toggleDraggable: (enabled) ->
-      @drag = { child: null }
-      if @state.draggable.enabled && enabled isnt false
-        for child in @children
-          child.el.draggable
-            start: (e, ui) =>
-              return false if $(e.originalEvent.target).is @state.resize.handle
+    _toggleResponsive: (enabled) ->
+      if @state.responsive.enabled && enabled isnt false
+        refresh_rate = @state.responsive.refreshRate
+        resizing = false
+        timeout = null
 
-              $child = ui.helper
-              id = parseInt $child.attr "data-ssid"
-              @drag.child = @_getChildById id
-              @drag.child.dragging = true
+        $(window).off('.ss-responsive').on 'resize.ss-responsive', =>
+          unless resizing
+            resizing = true
 
-              @_toggleActive id, true
-              @drag.child.el.css transform: "none"
-            drag: (e, ui) =>
-              x = e.pageX + @$container.offset().left
-              y = e.pageY + @$container.offset().top
-              min_distance = 999999
-              spot = null
+            clearTimeout(timeout)
+            timeout = setTimeout( =>
+              @_calculateGrid()
+              @render()
+              resizing = false
+            , refresh_rate)
 
-              for child, i in @children
-                dx = x - child.x
-                dy = y - child.y
-                distance = Math.sqrt(dx * dx + dy * dy)
-
-                if distance < min_distance
-                  min_distance = distance
-                  spot = i
-
-              console.log @children[spot].dragging
-              if spot isnt null and @children[spot].dragging isnt true
-                @_changePosition @drag.child.id, spot
-                @render()
-            stop: (e, ui) =>
-              child = @drag.child
-              child.dragging = false
-              child.el.css { left: 0, top: 0 }
-
-              @_toggleActive child.id, false
-
-    # Moves a child to a different position in the @children array
-    # @note see: http://stackoverflow.com/questions/5839134
-    #
-    # @param [Integer] id the id of the child to move
-    # @param [Integer] index the index position to move to
-    #
-    _changePosition: (id, index) ->
-      child = @_getChildById id
-      prev_index = @children.indexOf child
-      new_index = index
-      @children.splice(new_index, 0, @children.splice(prev_index, 1)[0])
-
-    # Toggles whether a child is active, such as when dragging 
-    # or resizing
-    #
-    # @param [Integer] id the id of the child
-    # @param [Boolean] active true if the child is active
-    _toggleActive: (id, active) ->
-      child = @_getChildById(id)
-
-      if active 
-        child.el.addClass("no-transitions").css
-          zIndex: @idCount + 1
       else
-        child.el.removeClass("no-transitions").css
-          zIndex: child.id
-
-    # Randomly shuffles the children
-    # @note see: https://gist.github.com/ddgromit/859699
-    #
-    shuffle: ->
-      a = @children
-
-      i = a.length
-      while --i > 0
-          j = ~~(Math.random() * (i + 1))
-          t = a[j]
-          a[j] = a[i]
-          a[i] = t
-
-      @children = a
-      @render()
-      @children
-    
-    # Reverses the children
-    #
-    reverse: ->
-      @children.reverse()
-      @render()
-      @children
+        $(window).off '.ss-responsive'
 
   # -----------------------------------
   # Initialization
