@@ -84,19 +84,22 @@
         return _results;
       },
       addChild: function(child) {
-        var $child, id;
-        id = this.idCount++;
+        var $child, currentId, id;
         $child = $(child);
-        $child.attr('data-ssid', id);
-        this.children.push({
-          id: id,
-          el: $child,
-          x: 0,
-          y: 0,
-          initialized: false,
-          state: null
-        });
-        return this._parseChild(id);
+        currentId = parseInt($child.attr("data-ssid"));
+        if (isNaN(currentId)) {
+          id = this.idCount++;
+          $child.attr('data-ssid', id);
+          this.children.push({
+            id: id,
+            el: $child,
+            x: 0,
+            y: 0,
+            initialized: false,
+            state: null
+          });
+          return this._parseChild(id);
+        }
       },
       render: function() {
         this._pack();
@@ -313,9 +316,7 @@
       },
       _toggleDraggable: function(enabled) {
         var child, _i, _len, _ref, _results;
-        this.drag = {
-          child: null
-        };
+        this.drag = null;
         if (this.state.draggable.enabled && enabled !== false) {
           _ref = this.children;
           _results = [];
@@ -330,7 +331,11 @@
                   }
                   $child = ui.helper;
                   id = parseInt($child.attr("data-ssid"));
-                  _this.drag.child = _this._getChildById(id);
+                  _this.drag = {
+                    child: _this._getChildById(id),
+                    offsetX: _this.$container.offset().left + _this.grid.padding.x,
+                    offsetY: _this.$container.offset().top + _this.grid.padding.y
+                  };
                   _this._toggleChildState(id, true, "dragging");
                   return _this.drag.child.el.css({
                     transform: "none"
@@ -340,8 +345,8 @@
               drag: (function(_this) {
                 return function(e, ui) {
                   var distance, dx, dy, i, min_distance, spot, x, y, _j, _len1, _ref1;
-                  x = e.pageX + _this.$container.offset().left;
-                  y = e.pageY + _this.$container.offset().top;
+                  x = e.pageX + _this.drag.offsetX;
+                  y = e.pageY + _this.drag.offsetY;
                   min_distance = 999999;
                   spot = null;
                   _ref1 = _this.children;
@@ -368,7 +373,9 @@
                     left: 0,
                     top: 0
                   });
-                  return _this._toggleChildState(child.id, false);
+                  _this._toggleChildState(child.id, false);
+                  _this.render();
+                  return _this.drag = null;
                 };
               })(this)
             }));

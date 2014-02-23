@@ -84,20 +84,23 @@
     # @param [Object] child jQuery object of the child element
     #
     addChild: (child) ->
-      id = @idCount++
       $child = $(child)
+      currentId = parseInt $child.attr("data-ssid")
 
-      $child.attr 'data-ssid', id
+      if isNaN currentId
+        id = @idCount++
 
-      @children.push
-        id: id
-        el: $child
-        x: 0
-        y: 0
-        initialized: false
-        state: null
+        $child.attr 'data-ssid', id
 
-      @_parseChild(id)
+        @children.push
+          id: id
+          el: $child
+          x: 0
+          y: 0
+          initialized: false
+          state: null
+
+        @_parseChild(id)
 
     # A full render of the grid
     #
@@ -368,25 +371,36 @@
     # @param [Boolean] enabled True to enable dragging of children
     #
     _toggleDraggable: (enabled) ->
-      @drag = { child: null }
+      @drag = null
+
       if @state.draggable.enabled && enabled isnt false
         for child in @children
           child.el.draggable
             start: (e, ui) =>
+              # Do not drag if resize handle is clicked
               return false if $(e.originalEvent.target).is @state.resize.handle
 
+              # Determine the dragged child
               $child = ui.helper
               id = parseInt $child.attr "data-ssid"
-              @drag.child = @_getChildById id
+
+              # Set the child to be dragging
+              @drag =
+                child: @_getChildById id
+                offsetX: @$container.offset().left + @grid.padding.x
+                offsetY: @$container.offset().top + @grid.padding.y
 
               @_toggleChildState id, true, "dragging"
               @drag.child.el.css transform: "none"
+
             drag: (e, ui) =>
-              x = e.pageX + @$container.offset().left
-              y = e.pageY + @$container.offset().top
+              x = e.pageX + @drag.offsetX
+              y = e.pageY + @drag.offsetY
               min_distance = 999999
               spot = null
 
+              # Iterate over the children and determine
+              # which has the least distance to the cursor.
               for child, i in @children
                 dx = x - child.x
                 dy = y - child.y
@@ -396,14 +410,19 @@
                   min_distance = distance
                   spot = i
 
+              # If a spot is found, change the position of the child
               if spot isnt null and @children[spot].state is null
                 @_changePosition @drag.child.id, spot
                 @render()
+
             stop: (e, ui) =>
               child = @drag.child
               child.el.css { left: 0, top: 0 }
 
               @_toggleChildState child.id, false
+              @render()
+
+              @drag = null
 
     # Creates or destroys the ability to have the children resize
     # when their handle is clicked on.
