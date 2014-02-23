@@ -62,7 +62,7 @@
         this.loaded = false;
         this._createGlobals();
         this._setState();
-        this._addChildren();
+        this.addChildren();
         this._calculateGrid();
         this._toggleFeatures();
         this.render();
@@ -72,6 +72,31 @@
         this.idCount = 1;
         this.children = [];
         return this.state = this.grid = null;
+      },
+      addChildren: function($children) {
+        var child, _i, _len, _results;
+        $children || ($children = this.$container.children());
+        _results = [];
+        for (_i = 0, _len = $children.length; _i < _len; _i++) {
+          child = $children[_i];
+          _results.push(this.addChild(child));
+        }
+        return _results;
+      },
+      addChild: function(child) {
+        var $child, id;
+        id = this.idCount++;
+        $child = $(child);
+        $child.attr('data-ssid', id);
+        this.children.push({
+          id: id,
+          el: $child,
+          x: 0,
+          y: 0,
+          initialized: false,
+          state: null
+        });
+        return this._parseChild(id);
       },
       render: function() {
         this._pack();
@@ -96,40 +121,14 @@
         this.render();
         return this.children;
       },
-      _addChildren: function() {
-        var $children, child, _i, _len, _results;
-        $children = this.$container.children();
-        _results = [];
-        for (_i = 0, _len = $children.length; _i < _len; _i++) {
-          child = $children[_i];
-          _results.push(this._addChild(child));
-        }
-        return _results;
-      },
-      _addChild: function(child) {
-        var $child, id;
-        id = this.idCount++;
-        $child = $(child);
-        $child.attr('data-ssid', id);
-        this.children.push({
-          id: id,
-          el: $child,
-          x: 0,
-          y: 0,
-          dragging: false
-        });
-        return this._parseChild(id);
-      },
       _arrange: function() {
-        var $child, child, _i, _len, _ref, _results;
+        var child, _i, _len, _ref, _results;
         this.$container.height(this.maxHeight);
         _ref = this.children;
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           child = _ref[_i];
-          if (!child.dragging) {
-            $child = child.el;
-            $child.addClass(this.state["class"]);
+          if (child.state === null) {
             _results.push(this._move(child));
           } else {
             _results.push(void 0);
@@ -138,11 +137,13 @@
         return _results;
       },
       _calculateGrid: function() {
-        var child, child_span, col_width, columns, inner_width, width, _i, _len, _ref;
+        var child, child_span, col_width, columns, gutter_x, inner_width, padding_x, width, _i, _len, _ref;
         col_width = this.grid.colWidth;
+        gutter_x = this.grid.gutter.x;
+        padding_x = this.grid.padding.x;
         width = this.$container.width();
-        inner_width = width - (this.grid.padding.x * 2);
-        columns = this.state.grid.columns || Math.floor((inner_width + this.grid.gutter.x) / col_width);
+        inner_width = width - (padding_x * 2);
+        columns = this.state.grid.columns || Math.floor((inner_width + gutter_x) / col_width);
         if (columns > this.children.length) {
           child_span = 0;
           _ref = this.children;
@@ -158,7 +159,7 @@
         this.grid.innerWidth = inner_width;
         this.grid.width = width;
         if (this.grid.align === "center") {
-          return this.grid.whiteSpace = (this.grid.gutter.x / 2) + (inner_width - (columns * col_width)) / 2;
+          return this.grid.whiteSpace = (gutter_x / 2) + (inner_width - (columns * col_width)) / 2;
         }
       },
       _changePosition: function(id, index) {
@@ -169,21 +170,21 @@
         return this.children.splice(new_index, 0, this.children.splice(prev_index, 1)[0]);
       },
       _fitMinArea: function(array, span) {
-        var area, areas, col, columns, h, heights, max, max_heights, offset, positions, _i, _j, _len;
+        var area, areas, col, columns, h, heights, max_heights, offset, positions, tallest, _i, _j, _len;
         columns = array.length;
         positions = array.length - span + 1;
         areas = [];
         max_heights = [];
         for (offset = _i = 0; 0 <= positions ? _i < positions : _i > positions; offset = 0 <= positions ? ++_i : --_i) {
           heights = array.slice(0).splice(offset, span);
-          max = Math.max.apply(null, heights);
-          area = max;
+          tallest = Math.max.apply(null, heights);
+          area = tallest;
           for (_j = 0, _len = heights.length; _j < _len; _j++) {
             h = heights[_j];
-            area += max - h;
+            area += tallest - h;
           }
           areas.push(area);
-          max_heights.push(max);
+          max_heights.push(tallest);
         }
         col = this._fitMinIndex(areas);
         return {
@@ -200,9 +201,17 @@
         })[0];
       },
       _move: function(child) {
-        return child.el.css({
+        child.el.css({
           transform: 'translate(' + child.x + 'px, ' + child.y + 'px)'
         });
+        if (!child.initialized) {
+          return setTimeout((function(_this) {
+            return function() {
+              child.initialized = true;
+              return child.el.addClass(_this.state["class"]);
+            };
+          })(this), 0);
+        }
       },
       _pack: function(return_children) {
         var c, child, children, col, colHeights, col_width, columns, gutter_y, height, maxHeight, offset, padding_x, padding_y, position, span, x, y, _i, _j, _k, _l, _len, _len1, _ref, _results;
@@ -219,7 +228,7 @@
         }
         for (_j = 0, _len = children.length; _j < _len; _j++) {
           child = children[_j];
-          if (!(return_children && child.dragging)) {
+          if (!(return_children && child.state !== null)) {
             span = child.span;
             if (span > columns) {
               span = columns;
@@ -287,18 +296,15 @@
           return this._toggleFeatures();
         }
       },
-      _toggleActive: function(id, active) {
-        var child;
+      _toggleChildState: function(id, state, enabled) {
+        var $child, child;
         child = this._getChildById(id);
-        if (active) {
-          return child.el.addClass("no-transitions").css({
-            zIndex: this.idCount + 1
-          });
-        } else {
-          return child.el.removeClass("no-transitions").css({
-            zIndex: child.id
-          });
-        }
+        $child = child.el;
+        child.state = state ? state : null;
+        $child.toggleClass("no-transitions", enabled);
+        return $child.css({
+          zIndex: enabled ? this.idCount + 1 : child.id
+        });
       },
       _toggleFeatures: function() {
         this._toggleDraggable();
@@ -325,8 +331,7 @@
                   $child = ui.helper;
                   id = parseInt($child.attr("data-ssid"));
                   _this.drag.child = _this._getChildById(id);
-                  _this.drag.child.dragging = true;
-                  _this._toggleActive(id, true);
+                  _this._toggleChildState(id, true, "dragging");
                   return _this.drag.child.el.css({
                     transform: "none"
                   });
@@ -350,8 +355,7 @@
                       spot = i;
                     }
                   }
-                  console.log(_this.children[spot].dragging);
-                  if (spot !== null && _this.children[spot].dragging !== true) {
+                  if (spot !== null && _this.children[spot].state === null) {
                     _this._changePosition(_this.drag.child.id, spot);
                     return _this.render();
                   }
@@ -360,12 +364,11 @@
               stop: (function(_this) {
                 return function(e, ui) {
                   child = _this.drag.child;
-                  child.dragging = false;
                   child.el.css({
                     left: 0,
                     top: 0
                   });
-                  return _this._toggleActive(child.id, false);
+                  return _this._toggleChildState(child.id, false);
                 };
               })(this)
             }));
@@ -400,7 +403,7 @@
               x: e.pageX,
               y: e.pageY
             };
-            return self._toggleActive(id, true);
+            return self._toggleChildState(id, true, "resizing");
           });
           $(window).off('.ss-resize').on("mousemove.ss-resize mouseup.ss-resize", (function(_this) {
             return function(e) {
@@ -412,7 +415,7 @@
                   }, refresh_rate);
                 }
                 if (e.type === "mouseup") {
-                  _this._toggleActive(id, false);
+                  _this._toggleChildState(id, false);
                   resize(e);
                   if (!render_on_move) {
                     _this.render();

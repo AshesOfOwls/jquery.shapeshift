@@ -53,7 +53,7 @@
       @loaded = false
       @_createGlobals()
       @_setState()
-      @_addChildren()
+      @addChildren()
       @_calculateGrid()
       @_toggleFeatures()
 
@@ -69,6 +69,35 @@
     # ----------------
     # Public Functions
     # ----------------
+
+    # Takes an array of jQuery elements and adds them to shapeshift.
+    #
+    # @param [Array] children array of jQuery objects for the children
+    #
+    addChildren: ($children) ->
+      $children ||= @$container.children()
+      @addChild(child) for child in $children
+
+    # Sets the initial properties of the new child and adds 
+    # them to the collection.
+    #
+    # @param [Object] child jQuery object of the child element
+    #
+    addChild: (child) ->
+      id = @idCount++
+      $child = $(child)
+
+      $child.attr 'data-ssid', id
+
+      @children.push
+        id: id
+        el: $child
+        x: 0
+        y: 0
+        initialized: false
+        state: null
+
+      @_parseChild(id)
 
     # A full render of the grid
     #
@@ -105,30 +134,6 @@
     # Private Functions
     # -----------------
 
-    # Adds all of the children in the current container to the app
-    #
-    _addChildren: ->
-      $children = @$container.children()
-      @_addChild(child) for child in $children
-
-    # Sets the initial properties of the new child
-    #
-    _addChild: (child) ->
-      id = @idCount++
-      $child = $(child)
-
-      $child.attr 'data-ssid', id
-      # $child.html(id)
-
-      @children.push
-        id: id
-        el: $child
-        x: 0
-        y: 0
-        dragging: false
-
-      @_parseChild(id)
-
     # Iterates over all of the children and moves them to their
     # physical position
     #
@@ -136,20 +141,23 @@
       @$container.height(@maxHeight)
       
       for child in @children
-        unless child.dragging
-          $child = child.el
-          $child.addClass @state.class # TODO: Is this necessary?
-          @_move(child)
+        @_move(child) if child.state is null
 
     # Calculates the properties of the grid according to the
     # options set by the current state.
     #
     _calculateGrid: ->
       col_width = @grid.colWidth
+      gutter_x = @grid.gutter.x
+      padding_x = @grid.padding.x
       width = @$container.width()
-      inner_width = width - (@grid.padding.x * 2)
 
-      columns = @state.grid.columns || Math.floor((inner_width + @grid.gutter.x) / col_width)
+      inner_width = width - (padding_x * 2)
+      columns = @state.grid.columns || Math.floor((inner_width + gutter_x) / col_width)
+      
+      # If there are more columns than children, determine if
+      # their cumulative span is more than the column count.
+      # If not, set the column count to the span cumulation.
       if columns > @children.length
         child_span = 0
         child_span += child.span for child in @children
@@ -160,10 +168,11 @@
       @grid.width = width
 
       if @grid.align is "center"
-        @grid.whiteSpace = (@grid.gutter.x / 2) + (inner_width - (columns * col_width)) / 2
+        @grid.whiteSpace = (gutter_x / 2) + (inner_width - (columns * col_width)) / 2
 
     # Moves a child to a different position in the @children array
     # @note see: http://stackoverflow.com/questions/5839134
+    # TODO: Probably needs refactoring
     #
     # @param [Integer] id the id of the child to move
     # @param [Integer] index the index position to move to
@@ -189,14 +198,14 @@
 
       for offset in [0...positions]
         heights = array.slice(0).splice(offset, span)
-        max = Math.max.apply(null, heights)
+        tallest = Math.max.apply(null, heights)
 
-        area = max
+        area = tallest
         for h in heights
-          area += max - h
+          area += tallest - h
 
         areas.push(area)
-        max_heights.push(max)
+        max_heights.push(tallest)
 
       col = @_fitMinIndex(areas)
 
@@ -227,6 +236,12 @@
       child.el.css
         transform: 'translate('+child.x+'px, '+child.y+'px)'
 
+      unless child.initialized
+        setTimeout =>
+          child.initialized = true
+          child.el.addClass(@state.class)
+        , 0
+
     # Iterates over all of the children and determines their
     # coordinates in the grid.
     #
@@ -240,22 +255,30 @@
       col_width = @grid.colWidth
       columns = @grid.columns
 
+      # Stores the height value for each column
       colHeights = []
       colHeights.push padding_y for c in [0...columns]
       
       for child in children
-        unless (return_children and child.dragging)
+        unless (return_children and child.state isnt null)
           span = child.span
           span = columns if span > columns
 
           if span > 1
+            # If the span is only one, then we just need to
+            # find the column with the lowest height
             position = @_fitMinArea(colHeights, span)
             col = position.col
             y = position.height
           else
+            # If the span is greater than one, we have to find 
+            # the position that the child can be placed which will 
+            # leave the least amount of unused space below it.
             col = @_fitMinIndex(colHeights)
             y = colHeights[col]
 
+          # We can calculate the physical position
+          # based on the column data
           x = padding_x + (col * col_width)
           height = y + child.h + gutter_y
 
@@ -263,17 +286,21 @@
           x += @grid.whiteSpace if @grid.align is "center"
           x = @grid.width - x - child.w if @grid.sort.x is "right"
 
+          # Set the position data on the child object
           child.x = x
           child.y = y
 
+          # Adjust the column heights to fit the child
           for offset in [0...span]
             colHeights[col + offset] = height
             maxHeight = height if height > maxHeight
 
       return children if return_children
 
+      # Set the max height for the container height
       @maxHeight = @state.grid.maxHeight || maxHeight - gutter_y + padding_y
 
+      # Custom alignment / sorting
       if @grid.sort.y is "bottom"
         for child in @children
           child.y = @maxHeight - child.y - child.h
@@ -312,22 +339,24 @@
       @_setGrid()
       @_toggleFeatures() if @loaded
 
-    # Toggles whether a child is active, such as when dragging 
+    # Toggles whether a child has a state, such as when dragging 
     # or resizing
     #
     # @param [Integer] id the id of the child
     # @param [Boolean] active true if the child is active
-    _toggleActive: (id, active) ->
+    #
+    _toggleChildState: (id, state, enabled) ->
       child = @_getChildById(id)
+      $child = child.el
 
-      if active 
-        child.el.addClass("no-transitions").css
-          zIndex: @idCount + 1
-      else
-        child.el.removeClass("no-transitions").css
-          zIndex: child.id
+      child.state = if state then state else null
+
+      $child.toggleClass "no-transitions", enabled
+      $child.css
+        zIndex: if enabled then @idCount + 1 else child.id
 
     # Toggles extra features on and off
+    # TODO: All the features need refactoring
     #
     _toggleFeatures: ->
       @_toggleDraggable()
@@ -349,9 +378,8 @@
               $child = ui.helper
               id = parseInt $child.attr "data-ssid"
               @drag.child = @_getChildById id
-              @drag.child.dragging = true
 
-              @_toggleActive id, true
+              @_toggleChildState id, true, "dragging"
               @drag.child.el.css transform: "none"
             drag: (e, ui) =>
               x = e.pageX + @$container.offset().left
@@ -368,16 +396,14 @@
                   min_distance = distance
                   spot = i
 
-              console.log @children[spot].dragging
-              if spot isnt null and @children[spot].dragging isnt true
+              if spot isnt null and @children[spot].state is null
                 @_changePosition @drag.child.id, spot
                 @render()
             stop: (e, ui) =>
               child = @drag.child
-              child.dragging = false
               child.el.css { left: 0, top: 0 }
 
-              @_toggleActive child.id, false
+              @_toggleChildState child.id, false
 
     # Creates or destroys the ability to have the children resize
     # when their handle is clicked on.
@@ -413,7 +439,7 @@
             x: e.pageX
             y: e.pageY
 
-          self._toggleActive(id, true)
+          self._toggleChildState id, true, "resizing"
 
         $(window).off('.ss-resize').on "mousemove.ss-resize mouseup.ss-resize", (e) =>
           if mousedown
@@ -425,7 +451,7 @@
               , refresh_rate)
 
             if e.type is "mouseup"
-              @_toggleActive(id, false)
+              @_toggleChildState id, false
               resize(e)
               @render() unless render_on_move
               mousedown = resizing = false
