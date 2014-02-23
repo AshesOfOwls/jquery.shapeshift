@@ -5,12 +5,11 @@
   <title>Basic Demo</title>
 
   <!-- jQuery / jQuery UI -->
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
-  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+  <script src="../core/vendor/jquery.js"></script>
+  <script src="../core/vendor/jquery-ui-1.10.4.custom.min.js"></script>
 
   <!-- jQuery Touch Punch - Enable Touch Drag and Drop -->
   <script src="../core/vendor/jquery.touch-punch.min.js"></script>
-  <script src="../core/vendor/packer.js"></script>
 
   <!-- jQuery.Shapeshift -->
   <script src="../core/jquery.shapeshift.js"></script>
@@ -24,11 +23,15 @@
       overflow: scroll;
     }
 
+    .no-transitions {
+      transition: none !important;
+    }
+
     .container {
       border: 1px dashed #CCC;
       position: relative;
       float: left;
-      width: 50%;
+      width: 100%;
       transition: all .4s;
     }
 
@@ -47,22 +50,22 @@
       background: blue;
       border: 1px solid black;
       position: absolute;
-      height: 50px;
+      height: 30px;
       width: 30px;
     }
 
     .container .medium {
-      height: 110px;
+      height: 30px;
       width: 70px;
     }
 
     .container .large {
-      height: 170px;
+      height: 30px;
       width: 110px;
     }
 
     .container .extra-large {
-      height: 230px;
+      height: 30px;
       width: 150px;
     }
 
@@ -131,7 +134,7 @@
     <div></div>
     <div class="large"></div>
   </div>
-
+<!-- 
   <div class="container">
     <div></div>
     <div class="medium"></div>
@@ -148,6 +151,6 @@
     <div class="medium"><div class="resizeToggle"></div></div>
     <div></div>
     <div class="large"></div>
-  </div>
+  </div> -->
 </body>
 </html>
