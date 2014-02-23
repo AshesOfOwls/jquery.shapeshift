@@ -60,11 +60,18 @@
       @render()
       @loaded = true
 
+    # 
+    # Global variable initialization
+    #
     _createGlobals: ->
       @idCount = 1
       @children = []
       @state = @grid = null
 
+    # Changes to a different state defined in the properties.
+    #
+    # @param [String] name the name of the state
+    #
     _setState: (name) ->
       @options.state = name || @options.state || "default"
       @state = @options.states[@options.state]
@@ -72,10 +79,15 @@
       @_setGrid()
       @_toggleFeatures() if @loaded
 
+    # Sets the grid to match the current state
+    #
     _setGrid: ->
       @grid = $.extend({}, @state.grid)
       @grid.colWidth = @grid.itemWidth + @grid.gutter.x
 
+    # Calculates the properties of the grid according to the
+    # options set by the current state.
+    #
     _calculateGrid: ->
       col_width = @grid.colWidth
       width = @$container.width()
@@ -94,15 +106,21 @@
       if @grid.align is "center"
         @grid.whiteSpace = (@grid.gutter.x / 2) + (inner_width - (columns * col_width)) / 2
 
+    # Toggles extra features on and off
+    #
     _toggleFeatures: ->
       @_toggleResponsive()
       @_toggleResizing()
       @_toggleDraggable()
 
+    # Adds all of the children in the current container to the app
+    #
     _addChildren: ->
       $children = @$container.children()
       @_addChild(child) for child in $children
 
+    # Sets the initial properties of the new child
+    #
     _addChild: (child) ->
       id = @idCount++
       $child = $(child)
@@ -119,6 +137,10 @@
 
       @_parseChild(id)
 
+    # Calculates the dynamic properties of the child
+    #
+    # @param [Integer] id the child id
+    #
     _parseChild: (id) ->
       child = @_getChildById(id)
 
@@ -132,14 +154,22 @@
       child.w = width
       child.span = span
 
-
+    # Returns the child object with the corresponding id
+    #
+    # @param [Integer] id the child id
+    #
     _getChildById: (id) ->
       return @children.filter((child) -> return child.id == id )[0]
 
+    # A full render of the grid
+    #
     render: ->
       @_pack()
       @_arrange()
 
+    # Iterates over all of the children and determines their
+    # coordinates in the grid.
+    #
     _pack: (return_children) ->
       children = if return_children then @children.slice(0) else @children
 
@@ -188,9 +218,20 @@
         for child in @children
           child.y = @maxHeight - child.y - child.h
 
+    # Finds the index of the lowest, left most column in the array.
+    #
+    # @param [array] array the array of column heights
+    #
     _fitMinIndex: (array) ->
       array.indexOf(Math.min.apply(null, array))
 
+    # Iterates over all the feasible locations for the child and creates
+    # an array containing the amount of unused area if the child was positioned
+    # there. It then chooses the column with the lowest unused area.
+    #
+    # @param [Array] array the array of column heights
+    # @param [Integer] span the column span of the child
+    #
     _fitMinArea: (array, span) ->
       columns = array.length
       positions = array.length - span + 1
@@ -215,6 +256,9 @@
         height: max_heights[col]
       }
 
+    # Iterates over all of the children and moves them to their
+    # physical position
+    #
     _arrange: ->
       @$container.height(@maxHeight)
       
@@ -224,10 +268,19 @@
           $child.addClass @state.class # TODO: Is this necessary?
           @_move(child)
 
-    _move: (child, init) ->
+    # Moves a child to its determined position
+    #
+    # @param [Object] child the child to move
+    #
+    _move: (child) ->
       child.el.css
         transform: 'translate('+child.x+'px, '+child.y+'px)'
 
+    # Creates or destroys the ability to have the container rearrange
+    # upon resize of the window.
+    #
+    # @param [Boolean] enabled True to enable repsonsiveness
+    #
     _toggleResponsive: (enabled) ->
       if @state.responsive.enabled && enabled isnt false
         refresh_rate = @state.responsive.refreshRate
@@ -248,6 +301,11 @@
       else
         $(window).off '.ss-responsive'
 
+    # Creates or destroys the ability to have the children resize
+    # when their handle is clicked on.
+    #
+    # @param [Boolean] enabled True to enable resizing of children
+    #
     _toggleResizing: (enabled) ->
       if @state.resize.enabled && enabled isnt false
         self = @
@@ -332,6 +390,10 @@
         @$container.off '.ss-resize'
         $(window).off '.ss-resize'
 
+    # Creates or destroys the ability to have the children be draggable.
+    #
+    # @param [Boolean] enabled True to enable dragging of children
+    #
     _toggleDraggable: (enabled) ->
       @drag = { child: null }
       if @state.draggable.enabled && enabled isnt false
@@ -373,14 +435,23 @@
 
               @_toggleActive child.id, false
 
-    # Needs refactoring
-    # http://stackoverflow.com/questions/5839134
+    # Moves a child to a different position in the @children array
+    # @note see: http://stackoverflow.com/questions/5839134
+    #
+    # @param [Integer] id the id of the child to move
+    # @param [Integer] index the index position to move to
+    #
     _changePosition: (id, index) ->
       child = @_getChildById id
       prev_index = @children.indexOf child
       new_index = index
       @children.splice(new_index, 0, @children.splice(prev_index, 1)[0])
 
+    # Toggles whether a child is active, such as when dragging 
+    # or resizing
+    #
+    # @param [Integer] id the id of the child
+    # @param [Boolean] active true if the child is active
     _toggleActive: (id, active) ->
       child = @_getChildById(id)
 
@@ -391,11 +462,9 @@
         child.el.removeClass("no-transitions").css
           zIndex: child.id
 
-    # ----------------------------------------------
-    # shuffle:
-    # Randomize the position of each item
-    # https://gist.github.com/ddgromit/859699
-    # ----------------------------------------------
+    # Randomly shuffles the children
+    # @note see: https://gist.github.com/ddgromit/859699
+    #
     shuffle: ->
       a = @children
 
@@ -410,6 +479,8 @@
       @render()
       @children
     
+    # Reverses the children
+    #
     reverse: ->
       @children.reverse()
       @render()

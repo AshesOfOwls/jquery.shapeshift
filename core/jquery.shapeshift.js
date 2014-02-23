@@ -261,7 +261,7 @@
         }
         return _results;
       },
-      _move: function(child, init) {
+      _move: function(child) {
         return child.el.css({
           transform: 'translate(' + child.x + 'px, ' + child.y + 'px)'
         });
