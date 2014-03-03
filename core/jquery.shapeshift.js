@@ -216,9 +216,9 @@
           })(this), 0);
         }
       },
-      _pack: function(return_children) {
+      _pack: function() {
         var c, child, children, col, colHeights, col_width, columns, gutter_y, height, maxHeight, offset, padding_x, padding_y, position, span, x, y, _i, _j, _k, _l, _len, _len1, _ref, _results;
-        children = return_children ? this.children.slice(0) : this.children;
+        children = this.children;
         maxHeight = 0;
         padding_y = this.grid.padding.y;
         padding_x = this.grid.padding.x;
@@ -231,39 +231,34 @@
         }
         for (_j = 0, _len = children.length; _j < _len; _j++) {
           child = children[_j];
-          if (!(return_children && child.state !== null)) {
-            span = child.span;
-            if (span > columns) {
-              span = columns;
-            }
-            if (span > 1) {
-              position = this._fitMinArea(colHeights, span);
-              col = position.col;
-              y = position.height;
-            } else {
-              col = this._fitMinIndex(colHeights);
-              y = colHeights[col];
-            }
-            x = padding_x + (col * col_width);
-            height = y + child.h + gutter_y;
-            if (this.grid.align === "center") {
-              x += this.grid.whiteSpace;
-            }
-            if (this.grid.sort.x === "right") {
-              x = this.grid.width - x - child.w;
-            }
-            child.x = x;
-            child.y = y;
-            for (offset = _k = 0; 0 <= span ? _k < span : _k > span; offset = 0 <= span ? ++_k : --_k) {
-              colHeights[col + offset] = height;
-              if (height > maxHeight) {
-                maxHeight = height;
-              }
+          span = child.span;
+          if (span > columns) {
+            span = columns;
+          }
+          if (span > 1) {
+            position = this._fitMinArea(colHeights, span);
+            col = position.col;
+            y = position.height;
+          } else {
+            col = this._fitMinIndex(colHeights);
+            y = colHeights[col];
+          }
+          x = padding_x + (col * col_width);
+          height = y + child.h + gutter_y;
+          if (this.grid.align === "center") {
+            x += this.grid.whiteSpace;
+          }
+          if (this.grid.sort.x === "right") {
+            x = this.grid.width - x - child.w;
+          }
+          child.x = x;
+          child.y = y;
+          for (offset = _k = 0; 0 <= span ? _k < span : _k > span; offset = 0 <= span ? ++_k : --_k) {
+            colHeights[col + offset] = height;
+            if (height > maxHeight) {
+              maxHeight = height;
             }
           }
-        }
-        if (return_children) {
-          return children;
         }
         this.maxHeight = this.state.grid.maxHeight || maxHeight - gutter_y + padding_y;
         if (this.grid.sort.y === "bottom") {
@@ -348,7 +343,6 @@
               drag: (function(_this) {
                 return function(e, ui) {
                   var distance, dx, dy, i, min_distance, spot, x, y, _j, _len1, _ref1;
-                  console.log("drag");
                   x = _this.drag.child.el.offset().left + _this.drag.offsetX;
                   y = _this.drag.child.el.offset().top + _this.drag.offsetY;
                   min_distance = 999999;

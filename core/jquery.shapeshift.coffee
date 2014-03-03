@@ -248,8 +248,8 @@
     # Iterates over all of the children and determines their
     # coordinates in the grid.
     #
-    _pack: (return_children) ->
-      children = if return_children then @children.slice(0) else @children
+    _pack: ->
+      children = @children
 
       maxHeight = 0
       padding_y = @grid.padding.y
@@ -263,42 +263,39 @@
       colHeights.push padding_y for c in [0...columns]
       
       for child in children
-        unless (return_children and child.state isnt null)
-          span = child.span
-          span = columns if span > columns
+        span = child.span
+        span = columns if span > columns
 
-          if span > 1
-            # If the span is only one, then we just need to
-            # find the column with the lowest height
-            position = @_fitMinArea(colHeights, span)
-            col = position.col
-            y = position.height
-          else
-            # If the span is greater than one, we have to find 
-            # the position that the child can be placed which will 
-            # leave the least amount of unused space below it.
-            col = @_fitMinIndex(colHeights)
-            y = colHeights[col]
+        if span > 1
+          # If the span is only one, then we just need to
+          # find the column with the lowest height
+          position = @_fitMinArea(colHeights, span)
+          col = position.col
+          y = position.height
+        else
+          # If the span is greater than one, we have to find 
+          # the position that the child can be placed which will 
+          # leave the least amount of unused space below it.
+          col = @_fitMinIndex(colHeights)
+          y = colHeights[col]
 
-          # We can calculate the physical position
-          # based on the column data
-          x = padding_x + (col * col_width)
-          height = y + child.h + gutter_y
+        # We can calculate the physical position
+        # based on the column data
+        x = padding_x + (col * col_width)
+        height = y + child.h + gutter_y
 
-          # Custom alignment / sorting
-          x += @grid.whiteSpace if @grid.align is "center"
-          x = @grid.width - x - child.w if @grid.sort.x is "right"
+        # Custom alignment / sorting
+        x += @grid.whiteSpace if @grid.align is "center"
+        x = @grid.width - x - child.w if @grid.sort.x is "right"
 
-          # Set the position data on the child object
-          child.x = x
-          child.y = y
+        # Set the position data on the child object
+        child.x = x
+        child.y = y
 
-          # Adjust the column heights to fit the child
-          for offset in [0...span]
-            colHeights[col + offset] = height
-            maxHeight = height if height > maxHeight
-
-      return children if return_children
+        # Adjust the column heights to fit the child
+        for offset in [0...span]
+          colHeights[col + offset] = height
+          maxHeight = height if height > maxHeight
 
       # Set the max height for the container height
       @maxHeight = @state.grid.maxHeight || maxHeight - gutter_y + padding_y
@@ -398,7 +395,6 @@
               child.el.css transform: "none"
 
             drag: (e, ui) =>
-              console.log "drag"
               x = @drag.child.el.offset().left + @drag.offsetX
               y = @drag.child.el.offset().top + @drag.offsetY
               min_distance = 999999
