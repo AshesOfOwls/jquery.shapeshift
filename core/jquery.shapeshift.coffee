@@ -237,7 +237,7 @@
     #
     _move: (child) ->
       child.el.css
-        transform: 'translate('+child.x+'px, '+child.y+'px)'
+        transform: "translate(#{child.x}px, #{child.y}px)"
 
       unless child.initialized
         setTimeout =>
@@ -370,14 +370,11 @@
       child = @_getChildById(id)
       $child = child.el
 
-      child.state = if state then state else null
+      child.state = if state and enabled then state else null
 
       $child.toggleClass "no-transitions", enabled
       $child.css
         zIndex: if enabled then @idCount + 1 else child.id
-
-      if enabled and state is "dragging"
-        child.el.css transform: "none"
 
     # Toggles extra features on and off
     # TODO: All the features need refactoring
@@ -399,7 +396,7 @@
     _toggleDraggable: (enabled) ->
       @drag = null
 
-      if @state.draggable.enabled && enabled isnt false
+      if @state.draggable.enabled and enabled isnt false
         for child in @children
           child.el.draggable
             start: (e, ui) =>
@@ -408,9 +405,12 @@
 
               # Determine the dragged child
               child = @_getChildByElement ui.helper
-              @_toggleChildState child.id, true, "dragging"
+              $child = child.el
 
               # Set the child to be dragging
+              @_toggleChildState child.id, true, "dragging"
+
+              # Global properties needed
               @drag =
                 child: child
                 offsetX: -1 * (@$container.offset().left + @grid.padding.x)
@@ -418,32 +418,43 @@
                 positions: @_pack(false)
 
             drag: (e, ui) =>
-              x = @drag.child.el.offset().left + @drag.offsetX
-              y = @drag.child.el.offset().top + @drag.offsetY
+              $child = @drag.child.el
               min_distance = 999999
               spot = null
+
+              grid_x = $child.offset().left + @drag.offsetX
+              grid_y = $child.offset().top + @drag.offsetY
 
               # Iterate over the children and determine
               # which has the least distance to the cursor.
               for position, i in @drag.positions
-                dx = x - position.x
-                dy = y - position.y
+                dx = grid_x - position.x
+                dy = grid_y - position.y
                 distance = Math.sqrt(dx * dx + dy * dy)
-
                 if distance < min_distance
                   min_distance = distance
                   spot = i
 
               # If a spot is found, change the position of the child
-              if spot isnt null and @children[spot].state is null
+              if spot isnt null
                 @_changePosition @drag.child.id, spot
                 @render()
 
+              # Manually set the jQuery ui drag position
+              # so that we can use CSS3 translate
+              ui.position.top = 0
+              ui.position.left = 0
+              $child.css
+                transform: "translate(#{e.pageX}px, #{e.pageY}px)"
+
             stop: (e, ui) =>
               child = @drag.child
-              child.el.css { left: 0, top: 0 }
+              $child = child.el
 
-              @_toggleChildState child.id, false
+              x = $child.offset().left - @drag.offsetX
+              y = $child.offset().top - @drag.offsetY
+
+              @_toggleChildState child.id, false, "dragging"
               @render()
 
               @drag = null

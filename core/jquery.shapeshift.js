@@ -202,7 +202,7 @@
       },
       _move: function(child) {
         child.el.css({
-          transform: 'translate(' + child.x + 'px, ' + child.y + 'px)'
+          transform: "translate(" + child.x + "px, " + child.y + "px)"
         });
         if (!child.initialized) {
           return setTimeout((function(_this) {
@@ -325,16 +325,11 @@
         var $child, child;
         child = this._getChildById(id);
         $child = child.el;
-        child.state = state ? state : null;
+        child.state = state && enabled ? state : null;
         $child.toggleClass("no-transitions", enabled);
-        $child.css({
+        return $child.css({
           zIndex: enabled ? this.idCount + 1 : child.id
         });
-        if (enabled && state === "dragging") {
-          return child.el.css({
-            transform: "none"
-          });
-        }
       },
       _toggleFeatures: function() {
         this._toggleDraggable();
@@ -357,10 +352,12 @@
             _results.push(child.el.draggable({
               start: (function(_this) {
                 return function(e, ui) {
+                  var $child;
                   if ($(e.originalEvent.target).is(_this.state.resize.handle)) {
                     return false;
                   }
                   child = _this._getChildByElement(ui.helper);
+                  $child = child.el;
                   _this._toggleChildState(child.id, true, "dragging");
                   return _this.drag = {
                     child: child,
@@ -372,36 +369,42 @@
               })(this),
               drag: (function(_this) {
                 return function(e, ui) {
-                  var distance, dx, dy, i, min_distance, position, spot, x, y, _j, _len1, _ref1;
-                  x = _this.drag.child.el.offset().left + _this.drag.offsetX;
-                  y = _this.drag.child.el.offset().top + _this.drag.offsetY;
+                  var $child, distance, dx, dy, grid_x, grid_y, i, min_distance, position, spot, _j, _len1, _ref1;
+                  $child = _this.drag.child.el;
                   min_distance = 999999;
                   spot = null;
+                  grid_x = $child.offset().left + _this.drag.offsetX;
+                  grid_y = $child.offset().top + _this.drag.offsetY;
                   _ref1 = _this.drag.positions;
                   for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
                     position = _ref1[i];
-                    dx = x - position.x;
-                    dy = y - position.y;
+                    dx = grid_x - position.x;
+                    dy = grid_y - position.y;
                     distance = Math.sqrt(dx * dx + dy * dy);
                     if (distance < min_distance) {
                       min_distance = distance;
                       spot = i;
                     }
                   }
-                  if (spot !== null && _this.children[spot].state === null) {
+                  if (spot !== null) {
                     _this._changePosition(_this.drag.child.id, spot);
-                    return _this.render();
+                    _this.render();
                   }
+                  ui.position.top = 0;
+                  ui.position.left = 0;
+                  return $child.css({
+                    transform: "translate(" + e.pageX + "px, " + e.pageY + "px)"
+                  });
                 };
               })(this),
               stop: (function(_this) {
                 return function(e, ui) {
+                  var $child, x, y;
                   child = _this.drag.child;
-                  child.el.css({
-                    left: 0,
-                    top: 0
-                  });
-                  _this._toggleChildState(child.id, false);
+                  $child = child.el;
+                  x = $child.offset().left - _this.drag.offsetX;
+                  y = $child.offset().top - _this.drag.offsetY;
+                  _this._toggleChildState(child.id, false, "dragging");
                   _this.render();
                   return _this.drag = null;
                 };
