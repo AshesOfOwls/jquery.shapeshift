@@ -436,29 +436,38 @@
                 child: child
                 offsetX: -1 * (@$container.offset().left + @grid.padding.x)
                 offsetY: -1 * (@$container.offset().top + @grid.padding.y)
-                positions: @_pack(false)
+                positions: [@_pack(false), @_pack(true)]
 
             drag: (e, ui) =>
               $child = @drag.child.el
-              min_distance = 999999
-              spot = null
+
+              estimates = [{distance: 999999, spot: null},
+                          {distance: 999999, spot: null}]
 
               grid_x = $child.offset().left + @drag.offsetX
               grid_y = $child.offset().top + @drag.offsetY
 
-              # Iterate over the children and determine
-              # which has the least distance to the cursor.
-              for position, i in @drag.positions
-                dx = grid_x - position.x
-                dy = grid_y - position.y
-                distance = Math.sqrt(dx * dx + dy * dy)
-                if distance < min_distance
-                  min_distance = distance
-                  spot = i
+              for positions, i in @drag.positions
+                # Iterate over the children and determine
+                # which has the least distance to the cursor.
+                for position, j in positions
+                  dx = grid_x - position.x
+                  dy = grid_y - position.y
+                  distance = Math.sqrt(dx * dx + dy * dy)
+                  if distance < estimates[i].distance
+                    estimates[i].distance = distance
+                    estimates[i].spot = j
+
+              lowest_distance = 9999999
+              selection = null
+              for estimate, i in estimates
+                if estimate.distance < lowest_distance
+                  selection = estimate
+                  lowest_distance = estimate.distance
 
               # If a spot is found, change the position of the child
-              if spot isnt null
-                @_changePosition @drag.child.id, spot
+              if selection isnt null
+                @_changePosition @drag.child.id, selection.spot
                 @render()
 
               # Manually set the jQuery ui drag position

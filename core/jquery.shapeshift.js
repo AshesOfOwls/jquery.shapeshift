@@ -388,31 +388,50 @@
                     child: child,
                     offsetX: -1 * (_this.$container.offset().left + _this.grid.padding.x),
                     offsetY: -1 * (_this.$container.offset().top + _this.grid.padding.y),
-                    positions: _this._pack(false)
+                    positions: [_this._pack(false), _this._pack(true)]
                   };
                 };
               })(this),
               drag: (function(_this) {
                 return function(e, ui) {
-                  var $child, distance, dx, dy, grid_x, grid_y, i, min_distance, position, spot, _j, _len1, _ref1;
+                  var $child, distance, dx, dy, estimate, estimates, grid_x, grid_y, i, j, lowest_distance, position, positions, selection, _j, _k, _l, _len1, _len2, _len3, _ref1;
                   $child = _this.drag.child.el;
-                  min_distance = 999999;
-                  spot = null;
+                  estimates = [
+                    {
+                      distance: 999999,
+                      spot: null
+                    }, {
+                      distance: 999999,
+                      spot: null
+                    }
+                  ];
                   grid_x = $child.offset().left + _this.drag.offsetX;
                   grid_y = $child.offset().top + _this.drag.offsetY;
                   _ref1 = _this.drag.positions;
                   for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
-                    position = _ref1[i];
-                    dx = grid_x - position.x;
-                    dy = grid_y - position.y;
-                    distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < min_distance) {
-                      min_distance = distance;
-                      spot = i;
+                    positions = _ref1[i];
+                    for (j = _k = 0, _len2 = positions.length; _k < _len2; j = ++_k) {
+                      position = positions[j];
+                      dx = grid_x - position.x;
+                      dy = grid_y - position.y;
+                      distance = Math.sqrt(dx * dx + dy * dy);
+                      if (distance < estimates[i].distance) {
+                        estimates[i].distance = distance;
+                        estimates[i].spot = j;
+                      }
                     }
                   }
-                  if (spot !== null) {
-                    _this._changePosition(_this.drag.child.id, spot);
+                  lowest_distance = 9999999;
+                  selection = null;
+                  for (i = _l = 0, _len3 = estimates.length; _l < _len3; i = ++_l) {
+                    estimate = estimates[i];
+                    if (estimate.distance < lowest_distance) {
+                      selection = estimate;
+                      lowest_distance = estimate.distance;
+                    }
+                  }
+                  if (selection !== null) {
+                    _this._changePosition(_this.drag.child.id, selection.spot);
                     _this.render();
                   }
                   $child.css({
