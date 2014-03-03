@@ -314,6 +314,11 @@
         this._toggleResizing();
         return this._toggleResponsive();
       },
+      _getChildByElement: function($child) {
+        var id;
+        id = parseInt($child.attr("data-ssid"));
+        return this._getChildById(id);
+      },
       _toggleDraggable: function(enabled) {
         var child, _i, _len, _ref, _results;
         this.drag = null;
@@ -325,19 +330,17 @@
             _results.push(child.el.draggable({
               start: (function(_this) {
                 return function(e, ui) {
-                  var $child, id;
                   if ($(e.originalEvent.target).is(_this.state.resize.handle)) {
                     return false;
                   }
-                  $child = ui.helper;
-                  id = parseInt($child.attr("data-ssid"));
+                  child = _this._getChildByElement(ui.helper);
                   _this.drag = {
-                    child: _this._getChildById(id),
-                    offsetX: _this.$container.offset().left + _this.grid.padding.x,
-                    offsetY: _this.$container.offset().top + _this.grid.padding.y
+                    child: child,
+                    offsetX: -1 * (_this.$container.offset().left + _this.grid.padding.x),
+                    offsetY: -1 * (_this.$container.offset().top + _this.grid.padding.y)
                   };
-                  _this._toggleChildState(id, true, "dragging");
-                  return _this.drag.child.el.css({
+                  _this._toggleChildState(child.id, true, "dragging");
+                  return child.el.css({
                     transform: "none"
                   });
                 };
@@ -345,8 +348,9 @@
               drag: (function(_this) {
                 return function(e, ui) {
                   var distance, dx, dy, i, min_distance, spot, x, y, _j, _len1, _ref1;
-                  x = e.pageX + _this.drag.offsetX;
-                  y = e.pageY + _this.drag.offsetY;
+                  console.log("drag");
+                  x = _this.drag.child.el.offset().left + _this.drag.offsetX;
+                  y = _this.drag.child.el.offset().top + _this.drag.offsetY;
                   min_distance = 999999;
                   spot = null;
                   _ref1 = _this.children;
@@ -384,13 +388,10 @@
         }
       },
       _toggleResizing: function(enabled) {
-        var $el, has_snap_sizes, id, increment_sizes, increment_x, increment_y, min_height, min_width, mousedown, options, refresh_rate, render_on_move, resize, resizing, self, snap_sizes, start;
+        var has_snap_sizes, increment_sizes, increment_x, increment_y, min_height, min_width, options, refresh_rate, render_on_move, resize, self, snap_sizes;
         if (this.state.resize.enabled && enabled !== false) {
           self = this;
           options = this.state.resize;
-          start = {};
-          $el = id = null;
-          mousedown = resizing = false;
           min_width = options.min.w;
           min_height = options.min.h;
           refresh_rate = options.refreshRate;
@@ -400,43 +401,52 @@
           increment_y = this.state.resize.increment.y;
           increment_sizes = increment_x > 1 || increment_y > 1;
           render_on_move = options.renderOn === "mousemove";
-          this.$container.off('.ss-resize').on("mousedown.ss-resize", options.handle, function(e) {
-            $el = $(this).closest("*[data-ssid]");
-            id = parseInt($el.attr('data-ssid'));
-            mousedown = true;
-            start = {
-              h: $el.height(),
-              w: $el.outerWidth(),
-              x: e.pageX,
-              y: e.pageY
+          this.resize = {
+            mousedown: false
+          };
+          this.$container.off('.ss-resize').on("mousedown.ss-resize", options.handle, (function(_this) {
+            return function(e) {
+              var $el, child;
+              $el = $(e.target).closest("*[data-ssid]");
+              child = _this._getChildByElement($el);
+              _this.resize.child = child;
+              _this.resize.mousedown = true;
+              _this.resize.resizing = false;
+              _this.resize.start = {
+                h: $el.height(),
+                w: $el.outerWidth(),
+                x: e.pageX,
+                y: e.pageY
+              };
+              return _this._toggleChildState(child.id, true, "resizing");
             };
-            return self._toggleChildState(id, true, "resizing");
-          });
+          })(this));
           $(window).off('.ss-resize').on("mousemove.ss-resize mouseup.ss-resize", (function(_this) {
             return function(e) {
-              if (mousedown) {
-                if (e.type === "mousemove" && !resizing) {
+              if (_this.resize.mousedown) {
+                if (e.type === "mousemove" && !_this.resize.resizing) {
                   resize(e);
                   setTimeout(function() {
-                    return resizing = false;
+                    return _this.resize.resizing = false;
                   }, refresh_rate);
                 }
                 if (e.type === "mouseup") {
-                  _this._toggleChildState(id, false);
                   resize(e);
+                  _this.resize.mousedown = false;
+                  _this._toggleChildState(_this.resize.child.id, false);
                   if (!render_on_move) {
-                    _this.render();
+                    return _this.render();
                   }
-                  mousedown = resizing = false;
-                  return start = {};
                 }
               }
             };
           })(this));
           return resize = (function(_this) {
             return function(e) {
-              var closest, i, minDistance, new_height, new_width, offset_x, offset_y, size, _i, _len;
-              resizing = true;
+              var child, closest, i, minDistance, new_height, new_width, offset_x, offset_y, size, start, _i, _len;
+              _this.resize.resizing = true;
+              child = _this.resize.child;
+              start = _this.resize.start;
               offset_y = e.pageY - start.y;
               offset_x = e.pageX - start.x;
               if (has_snap_sizes) {
@@ -462,11 +472,11 @@
               if (new_height < min_height) {
                 new_height = min_height;
               }
-              $el.css({
+              child.el.css({
                 width: new_width,
                 height: new_height
               });
-              _this._parseChild(id);
+              _this._parseChild(child.id);
               if (render_on_move) {
                 return _this.render();
               }

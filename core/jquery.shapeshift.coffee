@@ -366,6 +366,11 @@
       @_toggleResizing()
       @_toggleResponsive()
 
+    _getChildByElement: ($child) ->
+      id = parseInt $child.attr "data-ssid"
+      return @_getChildById id
+
+
     # Creates or destroys the ability to have the children be draggable.
     #
     # @param [Boolean] enabled True to enable dragging of children
@@ -381,21 +386,21 @@
               return false if $(e.originalEvent.target).is @state.resize.handle
 
               # Determine the dragged child
-              $child = ui.helper
-              id = parseInt $child.attr "data-ssid"
+              child = @_getChildByElement ui.helper
 
               # Set the child to be dragging
               @drag =
-                child: @_getChildById id
-                offsetX: @$container.offset().left + @grid.padding.x
-                offsetY: @$container.offset().top + @grid.padding.y
+                child: child
+                offsetX: -1 * (@$container.offset().left + @grid.padding.x)
+                offsetY: -1 * (@$container.offset().top + @grid.padding.y)
 
-              @_toggleChildState id, true, "dragging"
-              @drag.child.el.css transform: "none"
+              @_toggleChildState child.id, true, "dragging"
+              child.el.css transform: "none"
 
             drag: (e, ui) =>
-              x = e.pageX + @drag.offsetX
-              y = e.pageY + @drag.offsetY
+              console.log "drag"
+              x = @drag.child.el.offset().left + @drag.offsetX
+              y = @drag.child.el.offset().top + @drag.offsetY
               min_distance = 999999
               spot = null
 
@@ -434,9 +439,6 @@
         self = @
         options = @state.resize
 
-        start = {}
-        $el = id = null
-        mousedown = resizing = false
         min_width = options.min.w
         min_height = options.min.h
         refresh_rate = options.refreshRate
@@ -447,37 +449,45 @@
         increment_sizes = increment_x > 1 or increment_y > 1
         render_on_move = options.renderOn is "mousemove"
 
-        @$container.off('.ss-resize').on "mousedown.ss-resize", options.handle, (e) ->
-          $el = $(this).closest("*[data-ssid]")
-          id = parseInt($el.attr('data-ssid'))
+        # --
+        @resize =
+          mousedown: false
 
-          mousedown = true
-          start =
+        @$container.off('.ss-resize').on "mousedown.ss-resize", options.handle, (e) =>
+          $el = $(e.target).closest("*[data-ssid]")
+          child = @_getChildByElement $el
+
+          @resize.child = child
+          @resize.mousedown = true
+          @resize.resizing = false
+          @resize.start =
             h: $el.height()
             w: $el.outerWidth()
             x: e.pageX
             y: e.pageY
 
-          self._toggleChildState id, true, "resizing"
+          @_toggleChildState child.id, true, "resizing"
 
         $(window).off('.ss-resize').on "mousemove.ss-resize mouseup.ss-resize", (e) =>
-          if mousedown
-            if e.type is "mousemove" && !resizing
+          if @resize.mousedown
+            if e.type is "mousemove" && !@resize.resizing
               resize(e)
               
               setTimeout( =>
-                resizing = false
+                @resize.resizing = false
               , refresh_rate)
 
             if e.type is "mouseup"
-              @_toggleChildState id, false
               resize(e)
+
+              @resize.mousedown = false
+              @_toggleChildState @resize.child.id, false
               @render() unless render_on_move
-              mousedown = resizing = false
-              start = {}
 
         resize = (e) =>
-          resizing = true
+          @resize.resizing = true
+          child = @resize.child
+          start = @resize.start
 
           offset_y = e.pageY - start.y
           offset_x = e.pageX - start.x
@@ -503,11 +513,11 @@
           new_width = min_width if new_width < min_width
           new_height = min_height if new_height < min_height
 
-          $el.css
+          child.el.css
             width: new_width
             height: new_height
 
-          @_parseChild(id)
+          @_parseChild(child.id)
           @render() if render_on_move
       else
         @$container.off '.ss-resize'
