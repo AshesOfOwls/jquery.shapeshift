@@ -21,9 +21,9 @@
           maxHeight: null
 
           align: "center"
-          sort: { x: "left", y: "top" }
+          origin: "nw"
           gutter: { x: 10, y: 10 }
-          padding: { x: 20, y: 20 }
+          padding: { x: 0, y: 0 }
 
         responsive:
           enabled: true
@@ -105,7 +105,8 @@
     # A full render of the grid
     #
     render: ->
-      @_pack()
+      positions = @_pack()
+      @children = $.extend(true, @children, positions)
       @_arrange()
     
     # Reverses the children
@@ -170,15 +171,14 @@
       @grid.innerWidth = inner_width
       @grid.width = width
 
-      if @grid.align is "center"
-        @grid.whiteSpace = (gutter_x / 2) + (inner_width - (columns * col_width)) / 2
+      @grid.whiteSpace = inner_width - (columns * col_width) + gutter_x
 
     # Moves a child to a different position in the @children array
     # @note see: http://stackoverflow.com/questions/5839134
     # TODO: Probably needs refactoring
     #
     # @param [Integer] id the id of the child to move
-    # @param [Integer] index the index position to move to
+    # @param [Integer] index the index position to move
     #
     _changePosition: (id, index) ->
       child = @_getChildById id
@@ -248,62 +248,83 @@
     # Iterates over all of the children and determines their
     # coordinates in the grid.
     #
-    _pack: ->
+    _pack: (include_stateful = true) ->
       children = @children
 
-      maxHeight = 0
+      columns = @grid.columns
+      col_width = @grid.colWidth
+      gutter_y = @grid.gutter.y
       padding_y = @grid.padding.y
       padding_x = @grid.padding.x
-      gutter_y = @grid.gutter.y
-      col_width = @grid.colWidth
-      columns = @grid.columns
+      maxHeight = 0
 
       # Stores the height value for each column
       colHeights = []
       colHeights.push padding_y for c in [0...columns]
+
+      positions = []
       
       for child in children
-        span = child.span
-        span = columns if span > columns
+        if include_stateful or child.state is null
+          span = child.span
+          span = columns if span > columns
 
-        if span > 1
-          # If the span is only one, then we just need to
-          # find the column with the lowest height
-          position = @_fitMinArea(colHeights, span)
-          col = position.col
-          y = position.height
-        else
-          # If the span is greater than one, we have to find 
-          # the position that the child can be placed which will 
-          # leave the least amount of unused space below it.
-          col = @_fitMinIndex(colHeights)
-          y = colHeights[col]
+          if span > 1
+            # If the span is only one, then we just need to
+            # find the column with the lowest height
+            position = @_fitMinArea(colHeights, span)
+            col = position.col
+            y = position.height
+          else
+            # If the span is greater than one, we have to find 
+            # the position that the child can be placed which will 
+            # leave the least amount of unused space below it.
+            col = @_fitMinIndex(colHeights)
+            y = colHeights[col]
 
-        # We can calculate the physical position
-        # based on the column data
-        x = padding_x + (col * col_width)
-        height = y + child.h + gutter_y
+          # We can calculate the physical position
+          # based on the column data
+          x = padding_x + (col * col_width)
+          height = y + child.h + gutter_y
 
-        # Custom alignment / sorting
-        x += @grid.whiteSpace if @grid.align is "center"
-        x = @grid.width - x - child.w if @grid.sort.x is "right"
+          # Set the position data on the child object
+          positions.push
+            x: x
+            y: y
 
-        # Set the position data on the child object
-        child.x = x
-        child.y = y
-
-        # Adjust the column heights to fit the child
-        for offset in [0...span]
-          colHeights[col + offset] = height
-          maxHeight = height if height > maxHeight
+          # Adjust the column heights to fit the child
+          for offset in [0...span]
+            colHeights[col + offset] = height
+            maxHeight = height if height > maxHeight
 
       # Set the max height for the container height
       @maxHeight = @state.grid.maxHeight || maxHeight - gutter_y + padding_y
 
-      # Custom alignment / sorting
-      if @grid.sort.y is "bottom"
-        for child in @children
-          child.y = @maxHeight - child.y - child.h
+
+      # Sort based on grid settings
+      align = @grid.align
+      origin = @grid.origin
+      origin_is_bottom = origin[0] is "s"
+      origin_is_right = origin[1] is "e"
+
+      if align is "left"
+        if origin_is_right
+          p.x += @grid.whiteSpace for p in positions
+      else if align is "center"
+        p.x += @grid.whiteSpace / 2 for p in positions
+      else if align is "right"
+        unless origin_is_right
+          p.x += @grid.whiteSpace for p in positions
+
+      if origin_is_bottom
+        for child, i in children
+          positions[i].y = @maxHeight - positions[i].y - child.h
+
+      if origin_is_right
+        for p, i in positions
+          p.x = @grid.innerWidth - @children[i].w - p.x
+
+      return positions
 
     # Calculates the dynamic properties of the child
     #
@@ -345,7 +366,7 @@
     # @param [Integer] id the id of the child
     # @param [Boolean] active true if the child is active
     #
-    _toggleChildState: (id, state, enabled) ->
+    _toggleChildState: (id, enabled, state) ->
       child = @_getChildById(id)
       $child = child.el
 
@@ -354,6 +375,9 @@
       $child.toggleClass "no-transitions", enabled
       $child.css
         zIndex: if enabled then @idCount + 1 else child.id
+
+      if enabled and state is "dragging"
+        child.el.css transform: "none"
 
     # Toggles extra features on and off
     # TODO: All the features need refactoring
@@ -384,15 +408,14 @@
 
               # Determine the dragged child
               child = @_getChildByElement ui.helper
+              @_toggleChildState child.id, true, "dragging"
 
               # Set the child to be dragging
               @drag =
                 child: child
                 offsetX: -1 * (@$container.offset().left + @grid.padding.x)
                 offsetY: -1 * (@$container.offset().top + @grid.padding.y)
-
-              @_toggleChildState child.id, true, "dragging"
-              child.el.css transform: "none"
+                positions: @_pack(false)
 
             drag: (e, ui) =>
               x = @drag.child.el.offset().left + @drag.offsetX
@@ -402,9 +425,9 @@
 
               # Iterate over the children and determine
               # which has the least distance to the cursor.
-              for child, i in @children
-                dx = x - child.x
-                dy = y - child.y
+              for position, i in @drag.positions
+                dx = x - position.x
+                dy = y - position.y
                 distance = Math.sqrt(dx * dx + dy * dy)
 
                 if distance < min_distance

@@ -13,17 +13,14 @@
             itemWidth: 30,
             maxHeight: null,
             align: "center",
-            sort: {
-              x: "left",
-              y: "top"
-            },
+            origin: "nw",
             gutter: {
               x: 10,
               y: 10
             },
             padding: {
-              x: 20,
-              y: 20
+              x: 0,
+              y: 0
             }
           },
           responsive: {
@@ -102,7 +99,9 @@
         }
       },
       render: function() {
-        this._pack();
+        var positions;
+        positions = this._pack();
+        this.children = $.extend(true, this.children, positions);
         return this._arrange();
       },
       reverse: function() {
@@ -161,9 +160,7 @@
         this.grid.columns = columns;
         this.grid.innerWidth = inner_width;
         this.grid.width = width;
-        if (this.grid.align === "center") {
-          return this.grid.whiteSpace = (gutter_x / 2) + (inner_width - (columns * col_width)) / 2;
-        }
+        return this.grid.whiteSpace = inner_width - (columns * col_width) + gutter_x;
       },
       _changePosition: function(id, index) {
         var child, new_index, prev_index;
@@ -216,60 +213,90 @@
           })(this), 0);
         }
       },
-      _pack: function() {
-        var c, child, children, col, colHeights, col_width, columns, gutter_y, height, maxHeight, offset, padding_x, padding_y, position, span, x, y, _i, _j, _k, _l, _len, _len1, _ref, _results;
+      _pack: function(include_stateful) {
+        var align, c, child, children, col, colHeights, col_width, columns, gutter_y, height, i, maxHeight, offset, origin, origin_is_bottom, origin_is_right, p, padding_x, padding_y, position, positions, span, x, y, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _m, _n, _o, _p;
+        if (include_stateful == null) {
+          include_stateful = true;
+        }
         children = this.children;
-        maxHeight = 0;
+        columns = this.grid.columns;
+        col_width = this.grid.colWidth;
+        gutter_y = this.grid.gutter.y;
         padding_y = this.grid.padding.y;
         padding_x = this.grid.padding.x;
-        gutter_y = this.grid.gutter.y;
-        col_width = this.grid.colWidth;
-        columns = this.grid.columns;
+        maxHeight = 0;
         colHeights = [];
         for (c = _i = 0; 0 <= columns ? _i < columns : _i > columns; c = 0 <= columns ? ++_i : --_i) {
           colHeights.push(padding_y);
         }
+        positions = [];
         for (_j = 0, _len = children.length; _j < _len; _j++) {
           child = children[_j];
-          span = child.span;
-          if (span > columns) {
-            span = columns;
-          }
-          if (span > 1) {
-            position = this._fitMinArea(colHeights, span);
-            col = position.col;
-            y = position.height;
-          } else {
-            col = this._fitMinIndex(colHeights);
-            y = colHeights[col];
-          }
-          x = padding_x + (col * col_width);
-          height = y + child.h + gutter_y;
-          if (this.grid.align === "center") {
-            x += this.grid.whiteSpace;
-          }
-          if (this.grid.sort.x === "right") {
-            x = this.grid.width - x - child.w;
-          }
-          child.x = x;
-          child.y = y;
-          for (offset = _k = 0; 0 <= span ? _k < span : _k > span; offset = 0 <= span ? ++_k : --_k) {
-            colHeights[col + offset] = height;
-            if (height > maxHeight) {
-              maxHeight = height;
+          if (include_stateful || child.state === null) {
+            span = child.span;
+            if (span > columns) {
+              span = columns;
+            }
+            if (span > 1) {
+              position = this._fitMinArea(colHeights, span);
+              col = position.col;
+              y = position.height;
+            } else {
+              col = this._fitMinIndex(colHeights);
+              y = colHeights[col];
+            }
+            x = padding_x + (col * col_width);
+            height = y + child.h + gutter_y;
+            positions.push({
+              x: x,
+              y: y
+            });
+            for (offset = _k = 0; 0 <= span ? _k < span : _k > span; offset = 0 <= span ? ++_k : --_k) {
+              colHeights[col + offset] = height;
+              if (height > maxHeight) {
+                maxHeight = height;
+              }
             }
           }
         }
         this.maxHeight = this.state.grid.maxHeight || maxHeight - gutter_y + padding_y;
-        if (this.grid.sort.y === "bottom") {
-          _ref = this.children;
-          _results = [];
-          for (_l = 0, _len1 = _ref.length; _l < _len1; _l++) {
-            child = _ref[_l];
-            _results.push(child.y = this.maxHeight - child.y - child.h);
+        align = this.grid.align;
+        origin = this.grid.origin;
+        origin_is_bottom = origin[0] === "s";
+        origin_is_right = origin[1] === "e";
+        if (align === "left") {
+          if (origin_is_right) {
+            for (_l = 0, _len1 = positions.length; _l < _len1; _l++) {
+              p = positions[_l];
+              p.x += this.grid.whiteSpace;
+            }
           }
-          return _results;
+        } else if (align === "center") {
+          for (_m = 0, _len2 = positions.length; _m < _len2; _m++) {
+            p = positions[_m];
+            p.x += this.grid.whiteSpace / 2;
+          }
+        } else if (align === "right") {
+          if (!origin_is_right) {
+            for (_n = 0, _len3 = positions.length; _n < _len3; _n++) {
+              p = positions[_n];
+              p.x += this.grid.whiteSpace;
+            }
+          }
         }
+        if (origin_is_bottom) {
+          for (i = _o = 0, _len4 = children.length; _o < _len4; i = ++_o) {
+            child = children[i];
+            positions[i].y = this.maxHeight - positions[i].y - child.h;
+          }
+        }
+        if (origin_is_right) {
+          for (i = _p = 0, _len5 = positions.length; _p < _len5; i = ++_p) {
+            p = positions[i];
+            p.x = this.grid.innerWidth - this.children[i].w - p.x;
+          }
+        }
+        return positions;
       },
       _parseChild: function(id) {
         var child, col_width, gutter_x, span, width;
@@ -294,15 +321,20 @@
           return this._toggleFeatures();
         }
       },
-      _toggleChildState: function(id, state, enabled) {
+      _toggleChildState: function(id, enabled, state) {
         var $child, child;
         child = this._getChildById(id);
         $child = child.el;
         child.state = state ? state : null;
         $child.toggleClass("no-transitions", enabled);
-        return $child.css({
+        $child.css({
           zIndex: enabled ? this.idCount + 1 : child.id
         });
+        if (enabled && state === "dragging") {
+          return child.el.css({
+            transform: "none"
+          });
+        }
       },
       _toggleFeatures: function() {
         this._toggleDraggable();
@@ -329,29 +361,27 @@
                     return false;
                   }
                   child = _this._getChildByElement(ui.helper);
-                  _this.drag = {
+                  _this._toggleChildState(child.id, true, "dragging");
+                  return _this.drag = {
                     child: child,
                     offsetX: -1 * (_this.$container.offset().left + _this.grid.padding.x),
-                    offsetY: -1 * (_this.$container.offset().top + _this.grid.padding.y)
+                    offsetY: -1 * (_this.$container.offset().top + _this.grid.padding.y),
+                    positions: _this._pack(false)
                   };
-                  _this._toggleChildState(child.id, true, "dragging");
-                  return child.el.css({
-                    transform: "none"
-                  });
                 };
               })(this),
               drag: (function(_this) {
                 return function(e, ui) {
-                  var distance, dx, dy, i, min_distance, spot, x, y, _j, _len1, _ref1;
+                  var distance, dx, dy, i, min_distance, position, spot, x, y, _j, _len1, _ref1;
                   x = _this.drag.child.el.offset().left + _this.drag.offsetX;
                   y = _this.drag.child.el.offset().top + _this.drag.offsetY;
                   min_distance = 999999;
                   spot = null;
-                  _ref1 = _this.children;
+                  _ref1 = _this.drag.positions;
                   for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
-                    child = _ref1[i];
-                    dx = x - child.x;
-                    dy = y - child.y;
+                    position = _ref1[i];
+                    dx = x - position.x;
+                    dy = y - position.y;
                     distance = Math.sqrt(dx * dx + dy * dy);
                     if (distance < min_distance) {
                       min_distance = distance;
