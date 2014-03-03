@@ -467,8 +467,9 @@
 
               # If a spot is found, change the position of the child
               if selection isnt null
-                @_changePosition @drag.child.id, selection.spot
-                @render()
+                if selection.spot isnt @drag.child.index
+                  @_changePosition @drag.child.id, selection.spot
+                  @render()
 
               # Manually set the jQuery ui drag position
               # so that we can use CSS3 translate

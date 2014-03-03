@@ -431,8 +431,10 @@
                     }
                   }
                   if (selection !== null) {
-                    _this._changePosition(_this.drag.child.id, selection.spot);
-                    _this.render();
+                    if (selection.spot !== _this.drag.child.index) {
+                      _this._changePosition(_this.drag.child.id, selection.spot);
+                      _this.render();
+                    }
                   }
                   $child.css({
                     transform: "translate(" + ui.position.left + "px, " + ui.position.top + "px)"
