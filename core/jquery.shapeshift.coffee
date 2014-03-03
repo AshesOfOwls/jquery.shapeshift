@@ -41,6 +41,9 @@
         draggable:
           enabled: true
 
+        extras:
+          indexDisplay: "span"
+
   Plugin = (element, options) ->
     @options = $.extend({}, defaults, options)
     @$container = $(element)
@@ -56,6 +59,7 @@
       @addChildren()
       @_calculateGrid()
       @_toggleFeatures()
+      @_setIndexes()
 
       @render()
       @loaded = true
@@ -94,6 +98,7 @@
 
         @children.push
           id: id
+          index: @children.length
           el: $child
           x: 0
           y: 0
@@ -185,6 +190,11 @@
       prev_index = @children.indexOf child
       new_index = index
       @children.splice(new_index, 0, @children.splice(prev_index, 1)[0])
+
+      # Set the new index positions for all of the children,
+      # starting with the lowest index position changes
+      lowest_index = if new_index < prev_index then new_index else prev_index
+      @_setIndexes(lowest_index)
 
     # Iterates over all the feasible locations for the child and creates
     # an array containing the amount of unused area if the child was positioned
@@ -343,6 +353,17 @@
       child.w = width
       child.span = span
 
+    _setIndexes: (start = 0) ->
+      indexDisplay = @state.extras.indexDisplay
+
+      for i in [start...@children.length]
+        child = @children[i]
+        child.index = i
+
+        if indexDisplay isnt null
+          child.el.find(indexDisplay).html(i)
+
+
     # Sets the grid to match the current state
     #
     _setGrid: ->
@@ -442,10 +463,11 @@
 
               # Manually set the jQuery ui drag position
               # so that we can use CSS3 translate
+              $child.css
+                transform: "translate(#{ui.position.left}px, #{ui.position.top}px)"
+
               ui.position.top = 0
               ui.position.left = 0
-              $child.css
-                transform: "translate(#{e.pageX}px, #{e.pageY}px)"
 
             stop: (e, ui) =>
               child = @drag.child

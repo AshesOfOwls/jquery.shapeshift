@@ -44,6 +44,9 @@
           },
           draggable: {
             enabled: true
+          },
+          extras: {
+            indexDisplay: "span"
           }
         }
       }
@@ -62,6 +65,7 @@
         this.addChildren();
         this._calculateGrid();
         this._toggleFeatures();
+        this._setIndexes();
         this.render();
         return this.loaded = true;
       },
@@ -89,6 +93,7 @@
           $child.attr('data-ssid', id);
           this.children.push({
             id: id,
+            index: this.children.length,
             el: $child,
             x: 0,
             y: 0,
@@ -163,11 +168,13 @@
         return this.grid.whiteSpace = inner_width - (columns * col_width) + gutter_x;
       },
       _changePosition: function(id, index) {
-        var child, new_index, prev_index;
+        var child, lowest_index, new_index, prev_index;
         child = this._getChildById(id);
         prev_index = this.children.indexOf(child);
         new_index = index;
-        return this.children.splice(new_index, 0, this.children.splice(prev_index, 1)[0]);
+        this.children.splice(new_index, 0, this.children.splice(prev_index, 1)[0]);
+        lowest_index = new_index < prev_index ? new_index : prev_index;
+        return this._setIndexes(lowest_index);
       },
       _fitMinArea: function(array, span) {
         var area, areas, col, columns, h, heights, max_heights, offset, positions, tallest, _i, _j, _len;
@@ -309,6 +316,24 @@
         child.w = width;
         return child.span = span;
       },
+      _setIndexes: function(start) {
+        var child, i, indexDisplay, _i, _ref, _results;
+        if (start == null) {
+          start = 0;
+        }
+        indexDisplay = this.state.extras.indexDisplay;
+        _results = [];
+        for (i = _i = start, _ref = this.children.length; start <= _ref ? _i < _ref : _i > _ref; i = start <= _ref ? ++_i : --_i) {
+          child = this.children[i];
+          child.index = i;
+          if (indexDisplay !== null) {
+            _results.push(child.el.find(indexDisplay).html(i));
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      },
       _setGrid: function() {
         this.grid = $.extend({}, this.state.grid);
         return this.grid.colWidth = this.grid.itemWidth + this.grid.gutter.x;
@@ -390,11 +415,11 @@
                     _this._changePosition(_this.drag.child.id, spot);
                     _this.render();
                   }
-                  ui.position.top = 0;
-                  ui.position.left = 0;
-                  return $child.css({
-                    transform: "translate(" + e.pageX + "px, " + e.pageY + "px)"
+                  $child.css({
+                    transform: "translate(" + ui.position.left + "px, " + ui.position.top + "px)"
                   });
+                  ui.position.top = 0;
+                  return ui.position.left = 0;
                 };
               })(this),
               stop: (function(_this) {

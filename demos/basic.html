@@ -49,9 +49,17 @@
     .container > div {
       background: blue;
       border: 1px solid black;
+      cursor: move;
       position: absolute;
       height: 30px;
       width: 30px;
+    }
+
+    .container > div span {
+      color: #FFF;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 5px;
     }
 
     .container .medium {
@@ -118,306 +126,21 @@
 </head>
 <body>
   <div class="container">
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="medium"></div>
-    <div class="large"></div>
-    <div><div class="resizeToggle"></div></div>
-    <div></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div class="large"></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div class="medium"><div class="resizeToggle"></div></div>
-    <div></div>
-    <div class="large"></div>
+    <div><span></span></div>
+    <div class="medium"><span></span></div>
+    <div class="large"><span></span></div>
+    <div><span></span><div class="resizeToggle"></div></div>
+    <div><span></span></div>
+    <div><span></span></div>
+    <div class="large"><span></span></div>
+    <div><span></span></div>
+    <div class="large"><span></span></div>
+    <div><span></span></div>
+    <div><span></span></div>
+    <div><span></span></div>
+    <div class="medium"><span></span><div class="resizeToggle"></div></div>
+    <div><span></span></div>
+    <div class="large"><span></span></div>
   </div>
 <!-- 
   <div class="container">
