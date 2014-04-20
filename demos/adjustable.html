@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Basic Demo</title>
+
+  <!-- jQuery / jQuery UI -->
+  <script src="../core/vendor/jquery.js"></script>
+  <script src="../core/vendor/jquery-ui-1.10.4.custom.min.js"></script>
+
+  <!-- jQuery Touch Punch - Enable Touch Drag and Drop -->
+  <script src="../core/vendor/jquery.touch-punch.min.js"></script>
+
+  <!-- jQuery.Shapeshift -->
+  <script src="../core/jquery.shapeshift.js"></script>
+
+  <!-- CSS -->
+  <style>
+    .container {
+      border: 1px dashed #CCC;
+      position: relative;
+      width: 80%;
+      left: 10%;
+      display: block;
+    }
+
+    .container > div {
+      position: absolute;
+      height: 200px;
+      width: 200px;
+    }
+    .container > div.span2 {
+      position: absolute;
+      height: 200px;
+      width: 400px;
+    }
+    .container > div:nth-child(odd) {
+      background: #CCC;
+    }
+    .container > div:nth-child(even) {
+      background: #DDD;
+    }
+
+    .container > .ss-placeholder-child {
+      background: transparent;
+      border: 1px dashed blue;
+    }
+
+    .resizeToggle {
+      background: black;
+      cursor: nwse-resize;
+      z-index: 10;
+      height: 20px;
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 20px;
+    }
+  </style>
+
+  <!-- Javascript -->
+  <script>
+     $(document).ready(function() {
+      $container = $(".container")
+      $container.hide()
+
+      params = {
+        grid: { grid: { itemWidth: 200 } },
+        grid_no_gutter: { grid: { itemWidth: 200, gutter: { x: 0, y: 0 } } },
+        columns: { grid: { itemWidth: 200, columns: 6 } },
+        columns_no_gutter: { grid: { itemWidth: 200, columns: 6, gutter: { x: 0, y: 0 }  } },
+        columns_responsive: { grid: { columns: 6, itemWidth: null } },
+        columns_responsive_no_gutter: { grid: { columns: 6, itemWidth: null, gutter: { x: 0, y: 0 } } },
+        adjustable: { adjustable: { enabled: true, maxColWidth: 150 } },
+        adjustable_no_gutter: { grid: { gutter: { x: 0, y: 0 } }, adjustable: { enabled: true, maxColWidth: 150 } }
+      }
+
+      $.each( params, function( key, value ) {
+        $('body').append('<br><br><h2>' + key + '</h2><h4>Params: ' + JSON.stringify(value) + ' <br><br>')
+        $new_container = $container.clone()
+        $('body').append($new_container)
+        $new_container.show();
+        $new_container.shapeshift(value);
+      });
+
+
+    })
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div></div>
+    <div></div>
+    <div class="span2" data-ss-span="2"><div class="resizeToggle"></div></div>
+    <div></div>
+    <div></div>
+    <div><div class="resizeToggle"></div></div>
+    <div></div>
+    <div></div>
+    <div><div class="resizeToggle"></div></div>
+    <div></div>
+    <div></div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Basic Demo</title>
+
+  <!-- jQuery / jQuery UI -->
+  <script src="../core/vendor/jquery.js"></script>
+  <script src="../core/vendor/jquery-ui-1.10.4.custom.min.js"></script>
+
+  <!-- jQuery Touch Punch - Enable Touch Drag and Drop -->
+  <script src="../core/vendor/jquery.touch-punch.min.js"></script>
+
+  <!-- jQuery.Shapeshift -->
+  <script src="../core/jquery.shapeshift.js"></script>
+
+ <!-- CSS -->
+  <style>
+    *, *:before, *:after {
+    -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+   }
+    body {
+      overflow: scroll;
+    }
+
+    .no-transitions {
+      transition: none !important;
+    }
+
+    .container {
+      border: 1px dashed #CCC;
+      position: relative;
+      /*float: left;*/
+      width: 50%;
+      transition: all .4s;
+    }
+
+    .resizeToggle {
+      background: red;
+      cursor: nwse-resize;
+      z-index: 10;
+      height: 10px;
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 10px;
+    }
+
+    .container > div {
+      background: blue;
+      border: 1px solid black;
+      cursor: move;
+      position: absolute;
+      height: 30px;
+      width: 30px;
+    }
+
+    .container > div span {
+      color: #FFF;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 5px;
+      height: 100%;
+      display:block;
+      text-align: center;
+      width: 100%;
+    }
+
+    .container .medium {
+      height: 30px;
+      width: 70px;
+    }
+
+    .container .large {
+      height: 30px;
+      width: 110px;
+    }
+
+    .container .extra-large {
+      height: 30px;
+      width: 150px;
+    }
+
+
+    .default {
+      background: #888;
+      opacity: 1;
+      -webkit-transform: rotateY(0deg);
+      transition: all .4s, width 0s, height 0s;
+    }
+
+    .init {
+      margin-top: -60px;
+      opacity: 0;
+      -webkit-transform: scale(0,0);
+      -webkit-transform: rotateZ(10deg);
+    }
+
+    .secondary {
+      background: blue;
+      opacity: 1;
+      transition: all .4s;
+    }
+
+    .container > .ss-placeholder-child {
+      background: transparent;
+      border: 1px dashed blue;
+    }
+  </style>
+
+  <!-- Javascript -->
+  <script>
+    $(document).ready(function() {
+      $container = $(".container")
+      $container.hide()
+
+      params = {
+        grid: {},
+        grid_no_gutter: { grid: { gutter: { x: 0, y: 0 } } },
+        columns: { grid: { columns: 6 } },
+        columns_no_gutter: { grid: { columns: 6, gutter: { x: 0, y: 0 }  } },
+        columns_responsive: { grid: { columns: 6, itemWidth: null } },
+        columns_responsive_no_gutter: { grid: { columns: 6, itemWidth: null, gutter: { x: 0, y: 0 } } },
+        adjustable: { adjustable: { enabled: true, maxColWidth: 150 } },
+        adjustable_no_gutter: { grid: { gutter: { x: 0, y: 0 } }, adjustable: { enabled: true, maxColWidth: 150 } }
+      }
+
+      $.each( params, function( key, value ) {
+        $('body').append('<br><br><h2>' + key + '</h2><h4>Params: ' + JSON.stringify(value) + ' <br><br>')
+        $new_container = $container.clone()
+        $('body').append($new_container)
+        $new_container.show();
+        $new_container.shapeshift(value);
+      });
+
+
+    })
+  </script>
+</head>
+<body>
+   <div class="container">
+    <div><span></span></div>
+    <div class="medium"><span></span></div>
+    <div class="large"><span></span></div>
+    <div><span></span><div class="resizeToggle"></div></div>
+    <div><span></span></div>
+    <div><span></span></div>
+    <div class="large"><span></span></div>
+    <div><span></span></div>
+    <div class="large"><span></span></div>
+    <div><span></span></div>
+    <div><span></span></div>
+    <div><span></span></div>
+    <div class="medium"><span></span><div class="resizeToggle"></div></div>
+    <div><span></span></div>
+    <div class="large"><span></span></div>
+    <div><span></span></div>
+    <div class="medium"><span></span></div>
+    <div class="large"><span></span></div>
+    <div><span></span><div class="resizeToggle"></div></div>
+    <div><span></span></div>
+    <div><span></span></div>
+    <div class="large"><span></span></div>
+    <div><span></span></div>
+    <div class="large"><span></span></div>
+    <div><span></span></div>
+    <div><span></span></div>
+    <div><span></span></div>
+    <div class="medium"><span></span><div class="resizeToggle"></div></div>
+    <div><span></span></div>
+    <div class="large"><span></span></div>
+  </div>
+
+</body>
+</html>
