@@ -44,6 +44,7 @@
     cutoffStart: null
     cutoffEnd: null
     handle: false
+    centerDragging: true
 
     # Customize CSS
     cloneClass: "ss-cloned-child"
@@ -517,8 +518,11 @@
               ), drag_rate
 
             # Manually center the element with respect to mouse position
-            ui.position.left = e.pageX - $selected.parent().offset().left - selected_offset_x;
-            ui.position.top = e.pageY - $selected.parent().offset().top - selected_offset_y;
+            if options.centerDragging
+              ui.position.left = e.pageX - $selected.parent().offset().left - selected_offset_x;
+              return ui.position.top = e.pageY - $selected.parent().offset().top - selected_offset_y;
+            else
+              return 1;
 
           stop: =>
             @globals.dragging = false
@@ -763,3 +767,4 @@
       $.data(@, "plugin_#{pluginName}", new Plugin(@, options))
 
 )(jQuery, window, document)
+
