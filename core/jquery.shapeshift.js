@@ -175,10 +175,14 @@
         gutter_x = this.options.gutterX;
         if (!(this.options.colWidth >= 1)) {
           first_child = this.parsedChildren[0];
-          fc_width = first_child.el.outerWidth();
-          fc_colspan = first_child.colspan;
-          single_width = (fc_width - ((fc_colspan - 1) * gutter_x)) / fc_colspan;
-          return this.globals.col_width = single_width + gutter_x;
+          if ( first_child !== null ) {
+            fc_width = first_child.el.outerWidth();
+            fc_colspan = first_child.colspan;
+            single_width = (fc_width - ((fc_colspan - 1) * gutter_x)) / fc_colspan;
+            return this.globals.col_width = single_width + gutter_x;
+          } else {
+            return this.globals.col_width = this.options.colWidth + gutter_x;
+          }
         } else {
           return this.globals.col_width = this.options.colWidth + gutter_x;
         }
