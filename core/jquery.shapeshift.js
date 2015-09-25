@@ -25,6 +25,8 @@
       animateOnInit: false,
       animationSpeed: 225,
       animationThreshold: 100,
+      axis: "x",
+      containment: "#containmentWrapper",
       dragClone: false,
       deleteClone: true,
       dragRate: 100,
@@ -411,8 +413,9 @@
         drag_timeout = false;
         if (options.enableDrag) {
           $container.children("." + active_class).filter(options.dragWhitelist).draggable({
+            axis: options.axis || 'x',
             addClasses: false,
-            containment: 'document',
+            containment: options.containment || 'document',
             handle: options.handle,
             zIndex: 9999,
             start: function(e, ui) {
@@ -438,8 +441,6 @@
                   return drag_timeout = false;
                 }), drag_rate);
               }
-              ui.position.left = e.pageX - $selected.parent().offset().left - selected_offset_x;
-              return ui.position.top = e.pageY - $selected.parent().offset().top - selected_offset_y;
             },
             stop: function() {
               var $current_container, $original_container, $previous_container;
