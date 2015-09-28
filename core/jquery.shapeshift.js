@@ -25,8 +25,8 @@
       animateOnInit: false,
       animationSpeed: 225,
       animationThreshold: 100,
-      axis: "x",
-      containment: "#containmentWrapper",
+      axis: null,
+      containment: null,
       dragClone: false,
       deleteClone: true,
       dragRate: 100,
@@ -413,7 +413,7 @@
         drag_timeout = false;
         if (options.enableDrag) {
           $container.children("." + active_class).filter(options.dragWhitelist).draggable({
-            axis: options.axis || 'x',
+            axis: options.axis,
             addClasses: false,
             containment: options.containment || 'document',
             handle: options.handle,
