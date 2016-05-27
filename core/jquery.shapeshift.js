@@ -46,8 +46,8 @@
           });
         } else {
           var is_public_function = typeof options === "string" &&
-              options[0] !== "_" &&
-              options !== "init";
+                  options[0] !== "_" &&
+                  options !== "init";
 
           if(!is_public_function) {
             return;
@@ -56,14 +56,19 @@
           // Call public functions on already-created instances.
           this.each(function() {
             var instance = $.data(this, scoped_name);
+            var is_function = instance instanceof Plugin &&
+                    typeof instance[options] === "function";
 
-            if(instance instanceof Plugin && typeof instance[options] === "function") {
-              returns = instance[options].apply(instance, Array.prototype.slice.call(arguments, 1));
+            if(is_function) {
+              instance[options].apply(instance,
+                  Array.prototype.slice.call(arguments, 1));
             }
 
             if (options === "destroy") {
               return $.data(this, scoped_name, null);
             }
+
+            return this;
           });
         }
     };
