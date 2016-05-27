@@ -17,19 +17,46 @@
 
     Plugin.prototype = {
         init: function() {
+          this.parseChildren();
+
           return this;
         },
 
-        publicFunction: function() {
-          console.log("public function called");
+        /**
+         * Resets the children collection and adds all the currently existing
+         * children to the collection.
+         *
+         * @method parseChildren
+         * @access private
+         */
+        _parseChildren: function() {
+          this.children = [];
+
+          $children = this.$element.children();
+          $children.each(function(n, el) {
+            this.addNewChild(el, n);
+          }.bind(this));
         },
 
-        _privateFunction: function() {
-          console.log("Private function called");
+        /**
+         * Adds a child that doesn't currently exist into the collection.
+         *
+         * @method addNewChild
+         * @param el      {Element}   The DOM node for that child
+         * @param index   {Integer}   The spot where the child will exist
+         * @access private
+         */
+        _addNewChild: function(el, index) {
+          this.children.push({
+            el: el,
+            index: index,
+            x: 0,
+            y: 0
+          });
         },
 
         destroy: function() {
-          console.log('We destroyed it');
+          console.log('Clean up, clean up. Everybody, everywhere.');
         }
     };
 
