@@ -1,0 +1,11 @@
+.container {
+  position: relative;
+}
+
+.container div {
+  background: #333;
+  height: 400px;
+  position: absolute;
+  opacity: .8;
+  width: 100px;
+}
