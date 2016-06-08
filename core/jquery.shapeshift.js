@@ -191,7 +191,7 @@
             column = this._fitMinIndex(this.colHeights);
 
             child.y = this.colHeights[column];
-            child.x = column * $(child.el).width();
+            child.x = column * child.$el.width();
 
             this.colHeights[column] += child.height;
           }
@@ -217,14 +217,21 @@
           var children = this.children;
 
           for(var i=0;i<children.length;i++) {
-            var child = children[i],
-                $child = $(child.el);
-
-            $child.css({
-              left: child.x,
-              top: child.y
-            })
+            this._positionChild(children[i]);
           }
+        },
+
+        /**
+         * Takes a child object and moves it to the correct position.
+         *
+         * @method _positionChild
+         * @param child   {Object}   The child object
+         */
+        _positionChild: function(child) {
+          child.$el.css({
+            left: child.x,
+            top: child.y
+          });
         },
 
         /**
