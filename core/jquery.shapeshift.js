@@ -18,6 +18,7 @@
     Plugin.prototype = {
         init: function() {
           this._setupGlobals();
+          this._setupResizeListener();
 
           this._parseChildren();
           this.update();
@@ -105,6 +106,7 @@
          */
         update: function() {
           this._pack();
+          this.render();
         },
 
         /**
@@ -177,6 +179,28 @@
               top: child.y
             })
           }
+        },
+
+        /**
+         * Creates the initial listener on the window for the resize event.
+         *
+         * @method _setupResizeListener
+         */
+        _setupResizeListener: function() {
+          $(window).on("resize", function() {
+            this.onResize();
+          }.bind(this));
+        },
+
+        /**
+         * Code that needs to run whenever a resize event takes place.
+         *
+         * @method onResize
+         */
+        onResize: function() {
+          this._setContainerWidth();
+          this._resetColHeights();
+          this.update();
         },
 
         /**
