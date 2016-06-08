@@ -18,13 +18,24 @@
     Plugin.prototype = {
         init: function() {
           this._setupGlobals();
-          this._setupResizeListener();
 
           this._parseChildren();
           this.update();
-          this.render();
+
+          this._setupResizeListener();
 
           return this;
+        },
+
+        /**
+         * Creates the initial listener on the window for the resize event.
+         *
+         * @method _setupResizeListener
+         */
+        _setupResizeListener: function() {
+          $(window).on("resize", function() {
+            this.onResize();
+          }.bind(this));
         },
 
         /**
@@ -79,6 +90,20 @@
         },
 
         /**
+         * Code that needs to run whenever a resize event takes place.
+         *
+         * @method onResize
+         */
+        onResize: function() {
+          this._setContainerWidth();
+
+          if(this._getColumnCount() != this.colCount) {
+            this._resetColHeights();
+            this.update();
+          }
+        },
+
+        /**
          * Adds a child that doesn't currently exist into the collection.
          *
          * @method addNewChild
@@ -118,13 +143,23 @@
          */
         _resetColHeights: function() {
           var colHeights = [],
-              columns = Math.floor(this.containerWidth / this.colWidth);
+              columns = this._getColumnCount();
 
           for(var i=0;i<columns;i++) {
             colHeights[i] = 0;
           }
 
           this.colHeights = colHeights;
+          this.colCount = colHeights.length;
+        },
+
+        /**
+         * Calculates how many columns could fit into the current
+         *
+         * @method _getColumnCount
+         */
+        _getColumnCount: function() {
+          return Math.floor(this.containerWidth / this.colWidth);
         },
 
         /**
@@ -179,28 +214,6 @@
               top: child.y
             })
           }
-        },
-
-        /**
-         * Creates the initial listener on the window for the resize event.
-         *
-         * @method _setupResizeListener
-         */
-        _setupResizeListener: function() {
-          $(window).on("resize", function() {
-            this.onResize();
-          }.bind(this));
-        },
-
-        /**
-         * Code that needs to run whenever a resize event takes place.
-         *
-         * @method onResize
-         */
-        onResize: function() {
-          this._setContainerWidth();
-          this._resetColHeights();
-          this.update();
         },
 
         /**
