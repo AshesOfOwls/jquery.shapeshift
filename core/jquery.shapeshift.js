@@ -22,7 +22,6 @@
           this._parseChildren();
           this.update();
           this.render();
-          this.refreshColHeights();
 
           return this;
         },
@@ -35,7 +34,19 @@
         _setupGlobals: function() {
           this.children = [];
 
+          this._setContainerWidth();
           this._setColumnWidth();
+          this._resetColHeights();
+        },
+
+        /**
+         * Cache the width of the container so that we do not have to keep
+         * looking it up.
+         *
+         * @method _setContainerWidth
+         */
+        _setContainerWidth: function() {
+          this.containerWidth = this.$element.width();
         },
 
         /**
@@ -101,13 +112,17 @@
          * existing column. This refreshes that array, which requires some
          * pre formatting of data.
          *
-         * @method refreshColHeights
+         * @method _resetColHeights
          */
-        refreshColHeights: function() {
+        _resetColHeights: function() {
           var colHeights = [],
-              width = this.$element.width();
+              columns = Math.floor(this.containerWidth / this.colWidth);
 
-          console.log("Whats the width", width);
+          for(var i=0;i<columns;i++) {
+            colHeights[i] = 0;
+          }
+
+          this.colHeights = colHeights;
         },
 
         /**
@@ -117,8 +132,7 @@
          * @method _pack
          */
         _pack: function() {
-          var children = this.children,
-              colHeights = [0, 0, 0];
+          var children = this.children;
 
           for(var i=0;i<children.length;i++) {
             var child = children[i],
@@ -126,12 +140,12 @@
                 y = 0,
                 x = 0;
 
-            column = this._fitMinIndex(colHeights);
+            column = this._fitMinIndex(this.colHeights);
 
-            child.y = colHeights[column];
+            child.y = this.colHeights[column];
             child.x = column * $(child.el).width();
 
-            colHeights[column] += child.height;
+            this.colHeights[column] += child.height;
           }
         },
 
