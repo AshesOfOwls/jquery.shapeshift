@@ -17,9 +17,37 @@
 
     Plugin.prototype = {
         init: function() {
-          this.parseChildren();
+          this._setupGlobals();
+
+          this._parseChildren();
+          this.update();
+          this.render();
+          this.refreshColHeights();
 
           return this;
+        },
+
+        /**
+         * Sets global variables to their proper initial states.
+         *
+         * @method _setupGlobals
+         */
+        _setupGlobals: function() {
+          this.children = [];
+
+          this._setColumnWidth();
+        },
+
+        /**
+         * The column width can be set via the options object when instantiating
+         * the plugin, or it can be dynamically set by finding the width of a
+         * single span element on load.
+         *
+         * @method _setColumnWidth
+         */
+        _setColumnWidth: function() {
+          $first_child = this.$element.children().first();
+          this.colWidth = $first_child.width();
         },
 
         /**
@@ -34,7 +62,7 @@
 
           $children = this.$element.children();
           $children.each(function(n, el) {
-            this.addNewChild(el, n);
+            this._addNewChild(el, n);
           }.bind(this));
         },
 
@@ -47,14 +75,101 @@
          * @access private
          */
         _addNewChild: function(el, index) {
+          var $el = $(el);
+
           this.children.push({
             el: el,
+            $el: $el,
             index: index,
+            height: $el.height(),
             x: 0,
             y: 0
           });
         },
 
+        /**
+         * Update gets run every time we need to have the elements shifted.
+         *
+         * @method update
+         */
+        update: function() {
+          this._pack();
+        },
+
+        /**
+         * The colHeights variable stores an array of the heights for every
+         * existing column. This refreshes that array, which requires some
+         * pre formatting of data.
+         *
+         * @method refreshColHeights
+         */
+        refreshColHeights: function() {
+          var colHeights = [],
+              width = this.$element.width();
+
+          console.log("Whats the width", width);
+        },
+
+        /**
+         * The pack function is what helps calculate the positioning for all
+         * of the child elements.
+         *
+         * @method _pack
+         */
+        _pack: function() {
+          var children = this.children,
+              colHeights = [0, 0, 0];
+
+          for(var i=0;i<children.length;i++) {
+            var child = children[i],
+                column = 0,
+                y = 0,
+                x = 0;
+
+            column = this._fitMinIndex(colHeights);
+
+            child.y = colHeights[column];
+            child.x = column * $(child.el).width();
+
+            colHeights[column] += child.height;
+          }
+        },
+
+        /**
+         * When given an array, determines which array position is the lowest
+         * value.
+         *
+         * @param array   {Array}   The array of values to compare against
+         */
+        _fitMinIndex: function(array) {
+          return array.indexOf(Math.min.apply(null, array));
+        },
+
+        /**
+         * Render is what physically moves the elements into their current
+         * positions.
+         *
+         * @method render
+         */
+        render: function() {
+          var children = this.children;
+
+          for(var i=0;i<children.length;i++) {
+            var child = children[i],
+                $child = $(child.el);
+
+            $child.css({
+              left: child.x,
+              top: child.y
+            })
+          }
+        },
+
+        /**
+         * Destroy garbage cleans.
+         *
+         * @method destroy
+         */
         destroy: function() {
           console.log('Clean up, clean up. Everybody, everywhere.');
         }
