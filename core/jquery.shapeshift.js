@@ -228,9 +228,10 @@
          * @param child   {Object}   The child object
          */
         _positionChild: function(child) {
+          var transform = "translate3d(" + child.x + "px," + child.y + "px,0)";
+
           child.$el.css({
-            left: child.x,
-            top: child.y
+            transform: transform
           });
         },
 
