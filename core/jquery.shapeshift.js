@@ -17,6 +17,7 @@
 
     Plugin.prototype = {
         init: function() {
+          this._setIdentifier();
           this._setupGlobals();
 
           this._parseChildren();
@@ -87,6 +88,16 @@
           $children.each(function(n, el) {
             this._addNewChild(el, n);
           }.bind(this));
+        },
+
+        /**
+         * Creates a unique identifier for this instantiation so that they
+         * can be referenced individually.
+         *
+         * @method _setIdentifier
+         */
+        _setIdentifier: function() {
+          this.identifier = "ss-" + Math.random().toString(36).substring(7);
         },
 
         /**
