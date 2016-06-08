@@ -244,7 +244,7 @@
         }
     };
 
-    $.fn[pluginName] = function ( options ) {
+    $.fn[pluginName] = function (options) {
         var scoped_name = "plugin_" + pluginName;
 
         // Shapeshift instantiation
@@ -275,7 +275,7 @@
                   Array.prototype.slice.call(arguments, 1));
             }
 
-            if (options === "destroy") {
+            if(options === "destroy") {
               return $.data(this, scoped_name, null);
             }
 
