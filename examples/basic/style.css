@@ -7,5 +7,6 @@
   height: 400px;
   position: absolute;
   opacity: .8;
+  transition: transform .2s ease-in-out;
   width: 100px;
 }
