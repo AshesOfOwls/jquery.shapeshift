@@ -63,7 +63,7 @@
           var container_width = this.$element.width();
 
           if(container_width != this.containerWidth) {
-            this.containerWidth = this.$element.width();
+            this.containerWidth = container_width;
 
             this._containerWidthChanged();
           }
@@ -198,7 +198,15 @@
          * @method _getColumnCount
          */
         _getColumnCount: function() {
-          return Math.floor(this.containerWidth / this.colWidth);
+          var available_width = this.containerWidth;
+
+          // Add one gutter width to the container width so that we can
+          // correctly calculate how many columns can be present when also
+          // considering that there are gutters.
+          available_width += this.gutterX;
+          adjusted_col_width = this.colWidth + this.gutterX;
+
+          return Math.floor(available_width / adjusted_col_width);
         },
 
         /**
