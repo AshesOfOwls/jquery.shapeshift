@@ -1,7 +1,7 @@
 ;(function ($, window, document, undefined) {
     var pluginName = "shapeshift",
         defaults = {
-          are: "useful"
+          gutter: [20, 10]
         };
 
     function Plugin(element, options) {
@@ -17,13 +17,11 @@
 
     Plugin.prototype = {
         init: function() {
-          this._setIdentifier();
           this._setupGlobals();
-
           this._parseChildren();
-          this.update();
-
           this._setupResizeListener();
+
+          this._updateContainerWidth();
 
           return this;
         },
@@ -45,21 +43,56 @@
          * @method _setupGlobals
          */
         _setupGlobals: function() {
-          this.children = [];
+          this._setIdentifier();
 
-          this._setContainerWidth();
+          this.children = [];
+          this.colHeights = [];
+          this.gutterX = this.options.gutter[0];
+          this.gutterY = this.options.gutter[1];
+
           this._setColumnWidth();
-          this._resetColHeights();
         },
 
         /**
          * Cache the width of the container so that we do not have to keep
          * looking it up.
          *
-         * @method _setContainerWidth
+         * @method _updateContainerWidth
          */
-        _setContainerWidth: function() {
-          this.containerWidth = this.$element.width();
+        _updateContainerWidth: function() {
+          var container_width = this.$element.width();
+
+          if(container_width != this.containerWidth) {
+            this.containerWidth = this.$element.width();
+
+            this._containerWidthChanged();
+          }
+        },
+
+        /**
+         * Whenever the container width has changed, we should run some logic
+         * to see if more updates have to be made.
+         *
+         * @method _containerWidthChanged
+         */
+        _containerWidthChanged: function() {
+          var column_count = this._getColumnCount();
+
+          if(column_count != this.colCount) {
+            this.colCount = column_count;
+            this._columnCountChanged();
+          }
+        },
+
+        /**
+         * Whenever the amount of columns have changed, we need to run some
+         * logic which occurs whenever columns have been added or lost.
+         *
+         * @method _columnCountChanged
+         */
+        _columnCountChanged: function() {
+          this._resetColHeights();
+          this.update();
         },
 
         /**
@@ -106,12 +139,7 @@
          * @method onResize
          */
         onResize: function() {
-          this._setContainerWidth();
-
-          if(this._getColumnCount() != this.colCount) {
-            this._resetColHeights();
-            this.update();
-          }
+          this._updateContainerWidth();
         },
 
         /**
@@ -183,18 +211,23 @@
           var children = this.children;
 
           for(var i=0;i<children.length;i++) {
-            var child = children[i],
-                column = 0,
-                y = 0,
-                x = 0;
-
-            column = this._fitMinIndex(this.colHeights);
-
-            child.y = this.colHeights[column];
-            child.x = column * child.$el.width();
-
-            this.colHeights[column] += child.height;
+            this._packChild(children[i]);
           }
+        },
+
+        /**
+         * Calculates and assigns the position of a child object.
+         *
+         * @method _packChild
+         */
+        _packChild: function(child) {
+          var column = this._fitMinIndex(this.colHeights),
+              padding_offset = column * this.gutterX;
+
+          child.y = this.colHeights[column];
+          child.x = (column * child.$el.width()) + padding_offset;
+
+          this.colHeights[column] += child.height + this.gutterY;
         },
 
         /**
