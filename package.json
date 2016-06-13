@@ -1,0 +1,32 @@
+{
+  "name": "jquery.shapeshift",
+  "version": "3.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "node_modules/.bin/karma start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/McPants/jquery.shapeshift.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/McPants/jquery.shapeshift/issues"
+  },
+  "homepage": "https://github.com/McPants/jquery.shapeshift#readme",
+  "devDependencies": {
+    "jasmine-core": "^2.4.1",
+    "karma": "^0.13.22",
+    "karma-jasmine": "^1.0.2",
+    "karma-phantomjs-launcher": "^1.0.0",
+    "phantomjs-prebuilt": "^2.1.7"
+  },
+  "dependencies": {
+    "jquery": "^3.0.0"
+  }
+}
