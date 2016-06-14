@@ -197,11 +197,7 @@
          * @method _pack
          */
         _pack: function() {
-          var children = this.children;
-
-          for(var i=0;i<children.length;i++) {
-            this._packChild(children[i]);
-          }
+          this.children.forEach(this._packChild.bind(this));
         },
 
         /**
@@ -236,11 +232,7 @@
          * @method render
          */
         render: function() {
-          var children = this.children;
-
-          for(var i=0;i<children.length;i++) {
-            this._positionChild(children[i]);
-          }
+          this.children.forEach(this._positionChild.bind(this));
         },
 
         /**
