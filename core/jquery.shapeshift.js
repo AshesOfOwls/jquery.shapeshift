@@ -32,9 +32,7 @@
          * @method _setupResizeListener
          */
         _setupResizeListener: function() {
-          $(window).on("resize", function() {
-            this.onResize();
-          }.bind(this));
+          $(window).on("resize", this._updateContainerWidth.bind(this));
         },
 
         /**
@@ -131,15 +129,6 @@
          */
         _setIdentifier: function() {
           this.identifier = "ss-" + Math.random().toString(36).substring(7);
-        },
-
-        /**
-         * Code that needs to run whenever a resize event takes place.
-         *
-         * @method onResize
-         */
-        onResize: function() {
-          this._updateContainerWidth();
         },
 
         /**
