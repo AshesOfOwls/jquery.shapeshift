@@ -32,9 +32,7 @@
          * @method _setupResizeListener
          */
         _setupResizeListener: function() {
-          $(window).on("resize", function() {
-            this.onResize();
-          }.bind(this));
+          $(window).on("resize", this._updateContainerWidth.bind(this));
         },
 
         /**
@@ -134,15 +132,6 @@
         },
 
         /**
-         * Code that needs to run whenever a resize event takes place.
-         *
-         * @method onResize
-         */
-        onResize: function() {
-          this._updateContainerWidth();
-        },
-
-        /**
          * Adds a child that doesn't currently exist into the collection.
          *
          * @method addNewChild
@@ -216,11 +205,7 @@
          * @method _pack
          */
         _pack: function() {
-          var children = this.children;
-
-          for(var i=0;i<children.length;i++) {
-            this._packChild(children[i]);
-          }
+          this.children.forEach(this._packChild.bind(this));
         },
 
         /**
@@ -255,11 +240,7 @@
          * @method render
          */
         render: function() {
-          var children = this.children;
-
-          for(var i=0;i<children.length;i++) {
-            this._positionChild(children[i]);
-          }
+          this.children.forEach(this._positionChild.bind(this));
         },
 
         /**
