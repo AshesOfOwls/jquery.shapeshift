@@ -20,6 +20,10 @@
   },
   "homepage": "https://github.com/McPants/jquery.shapeshift#readme",
   "devDependencies": {
+    "eslint": "^2.10.2",
+    "eslint-config-airbnb-base": "^3.0.1",
+    "eslint-plugin-import": "^1.8.1",
+    "eslint-plugin-jsdoc": "~2.3.0",
     "jasmine-core": "^2.4.1",
     "karma": "^0.13.22",
     "karma-jasmine": "^1.0.2",
