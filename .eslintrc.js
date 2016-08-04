@@ -5,10 +5,15 @@ module.exports = {
     "browser": true
   },
 
+  "globals": {
+    "jQuery": false
+  },
+
   "rules": {
-    "no-underscore-dangle": ["error", {
-      "allow": ["_name", "_defaults"]
-    }],
-    "comma-dangle": ["error", "never"]
+    "no-underscore-dangle": ["error", { "allowAfterThis": true }],
+    "comma-dangle": ["error", "never"],
+    "camelcase": 0,
+    "prefer-rest-params": 0,
+    "no-param-reassign": ["error", { "props": false }]
   }
 };
