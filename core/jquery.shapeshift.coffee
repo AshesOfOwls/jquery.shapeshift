@@ -207,10 +207,15 @@
       unless @options.colWidth >= 1
         # Determine single item / col width
         first_child = @parsedChildren[0]
-        fc_width = first_child.el.outerWidth()
-        fc_colspan = first_child.colspan
-        single_width = (fc_width - ((fc_colspan - 1) * gutter_x)) / fc_colspan
-        @globals.col_width = single_width + gutter_x
+        # Check if the children is undefined
+        if first_child != undefined
+          fc_width = first_child.el.outerWidth()
+          fc_colspan = first_child.colspan
+          single_width = (fc_width - ((fc_colspan - 1) * gutter_x)) / fc_colspan
+          @globals.col_width = single_width + gutter_x
+        else
+          # If there aren't any children, the width is calculated by the width of the container
+          @globals.col_width = ((@$container.outerWidth() - gutter_x * @options.columns)/ @options.columns) + gutter_x;
       else
         @globals.col_width = @options.colWidth + gutter_x
 
