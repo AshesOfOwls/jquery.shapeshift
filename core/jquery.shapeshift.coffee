@@ -58,7 +58,7 @@
     constructor: (@element, options) ->
       @options = $.extend {}, defaults, options
       @globals = {}
-      @$container = $(element)
+      @$container = $(@element)
 
       if @errorCheck()
         @init()
